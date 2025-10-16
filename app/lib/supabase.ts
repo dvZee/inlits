@@ -1,40 +1,66 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const isBrowser = typeof window !== 'undefined';
 
-const supabaseUrl = isBrowser
-  ? import.meta.env.VITE_SUPABASE_URL
-  : process.env.VITE_SUPABASE_URL;
+let supabaseInstance: SupabaseClient | null = null;
 
-const supabaseAnonKey = isBrowser
-  ? import.meta.env.VITE_SUPABASE_ANON_KEY
-  : process.env.VITE_SUPABASE_ANON_KEY;
+function getSupabaseClient() {
+  if (supabaseInstance) {
+    return supabaseInstance;
+  }
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  let supabaseUrl: string;
+  let supabaseAnonKey: string;
+
+  if (isBrowser) {
+    supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  } else {
+    // Server-side: Check both with and without VITE_ prefix for Netlify compatibility
+    supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+    supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+  }
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    const envVars = isBrowser
+      ? 'Client-side environment variables are missing'
+      : `Server-side environment variables missing. URL: ${!!process.env.VITE_SUPABASE_URL}, KEY: ${!!process.env.VITE_SUPABASE_ANON_KEY}`;
+
+    throw new Error(`Missing Supabase environment variables. ${envVars}`);
+  }
+
+  // Create Supabase client with enhanced configuration
+  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 2
+      }
+    },
+    global: {
+      headers: {
+        'x-client-info': 'inlits',
+        'Cache-Control': 'max-age=300' // 5 minutes cache for static content
+      }
+    },
+    db: {
+      schema: 'public'
+    }
+  });
+
+  return supabaseInstance;
 }
 
-// Create Supabase client with enhanced configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 2
-    }
-  },
-  global: {
-    headers: { 
-      'x-client-info': 'inlits',
-      'Cache-Control': 'max-age=300' // 5 minutes cache for static content
-    }
-  },
-  db: {
-    schema: 'public'
+// Export the client getter
+export const supabase = new Proxy({} as SupabaseClient, {
+  get: (target, prop) => {
+    const client = getSupabaseClient();
+    return client[prop as keyof SupabaseClient];
   }
 });
 
