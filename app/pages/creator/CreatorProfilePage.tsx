@@ -187,7 +187,7 @@ export function CreatorProfilePage({ usernameOverride, viewerId }: CreatorProfil
         console.log('Fetching creator profile data for username:', actualUsername);
         
         const { data: creatorData, error: creatorError } = await supabase
-          .rpc('get_creator_profile', { username: actualUsername });
+          .rpc('get_creator_profile_fast', { username: actualUsername });
 
         if (creatorError) {
           console.error('Creator data error:', creatorError);
