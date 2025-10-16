@@ -1,0 +1,778 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221 74% 40%;      /* #1f4ead */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 221 74% 45%;       /* #355fb5 */
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 74% 40%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 100%;
+    --content-background: 220 33% 98%;  /* #f8f9fc */
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 221 74% 40%;      /* #1f4ead */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 221 74% 45%;       /* #355fb5 */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 221 74% 40%;
+    --sidebar-background: 215 24% 12%;  /* #171C26 */
+    --content-background: 217 30% 8%;   /* #0E121B */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  .dark .custom-scrollbar {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+/* Global hover consistency - ensure text and icons are white when hovering over primary colored elements */
+.hover\:bg-primary:hover,
+.hover\:bg-primary\/90:hover,
+.hover\:border-primary:hover {
+  color: white !important;
+}
+
+.hover\:bg-primary:hover svg,
+.hover\:bg-primary\/90:hover svg,
+.hover\:border-primary:hover svg {
+  color: white !important;
+}
+
+/* Ensure all primary background elements have white text */
+.bg-primary,
+.bg-primary\/90 {
+  color: white !important;
+}
+
+.bg-primary svg,
+.bg-primary\/90 svg {
+  color: white !important;
+}
+
+/* Fix button hover states */
+button:hover.hover\:bg-primary,
+a:hover.hover\:bg-primary {
+  color: white !important;
+}
+
+button:hover.hover\:bg-primary svg,
+a:hover.hover\:bg-primary svg {
+  color: white !important;
+}
+
+/* Ensure dropdown items have proper hover states */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1 !important;
+}
+
+.group:hover .group-hover\:pointer-events-auto {
+  pointer-events: auto !important;
+}
+
+.group:hover .group-hover\:scale-100 {
+  transform: scale(1) !important;
+}
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Dialog Animation */
+  .dialog-overlay-enter {
+    opacity: 0;
+  }
+  .dialog-overlay-enter-active {
+    opacity: 1;
+    transition: opacity 200ms ease-out;
+  }
+  .dialog-overlay-exit {
+    opacity: 1;
+  }
+  .dialog-overlay-exit-active {
+    opacity: 0;
+    transition: opacity 150ms ease-in;
+  }
+
+  .dialog-content-enter {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  .dialog-content-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 200ms ease-out;
+  }
+  .dialog-content-exit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .dialog-content-exit-active {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 150ms ease-in;
+  }
+}
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
+
+  h1 {
+    font-size: 2em;
+    font-weight: bold;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  blockquote {
+    padding-left: 1rem;
+    border-left: 2px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  p.is-editor-empty:first-child::before {
+    color: hsl(var(--muted-foreground));
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+}
+
+/* Custom Audio Player Styles */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  cursor: pointer;
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  cursor: pointer;
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Audio Player Animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.playing-animation::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  animation: pulse-ring 2s infinite;
+  z-index: -1;
+}
+
+/* Article Reader Themes */
+.theme-light {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.theme-light h1,
+.theme-light h2,
+.theme-light h3,
+.theme-light h4,
+.theme-light h5,
+.theme-light h6 {
+  color: #1a1a1a;
+}
+
+.theme-light a {
+  color: hsl(var(--primary));
+}
+
+.theme-sepia {
+  background-color: #f4ecd8;
+  color: #5f4b32;
+}
+
+.theme-sepia h1,
+.theme-sepia h2,
+.theme-sepia h3,
+.theme-sepia h4,
+.theme-sepia h5,
+.theme-sepia h6 {
+  color: #5f4b32;
+}
+
+.theme-sepia a {
+  color: #8b4513;
+}
+
+.theme-dark {
+  background-color: #1a1a1a;
+  color: #e1e1e1;
+}
+
+.theme-dark h1,
+.theme-dark h2,
+.theme-dark h3,
+.theme-dark h4,
+.theme-dark h5,
+.theme-dark h6 {
+  color: #e1e1e1;
+}
+
+.theme-dark a {
+  color: #90caf9;
+}
+
+/* Article Reader Typography */
+.prose {
+  font-family: Georgia, serif;
+  line-height: 1.7;
+  max-width: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
+  text-align: justify;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.prose h2 {
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+  font-size: 1.5em;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  margin-bottom: 0.8em;
+  font-size: 1.25em;
+}
+
+.prose blockquote {
+  font-style: italic;
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1.5em;
+  margin: 2em 0;
+  font-size: 1.1em;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  margin: 2.5em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100% !important;
+  height: auto !important;
+  width: auto !important;
+  box-sizing: border-box;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.prose a:hover {
+  opacity: 0.8;
+}
+
+.prose code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.9em;
+  background-color: hsl(var(--muted));
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.prose pre {
+  background-color: hsl(var(--muted));
+  padding: 1.5em;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 2em 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.prose ul,
+.prose ol {
+  margin: 1.5em 0;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+}
+
+/* Urdu Typography */
+.urdu-content {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif;
+  text-align: right !important;
+  direction: rtl;
+  line-height: 2.0 !important;
+  font-size: 1.0em !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.urdu-content h1,
+.urdu-content h2,
+.urdu-content h3,
+.urdu-content h4,
+.urdu-content h5,
+.urdu-content h6 {
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif !important;
+  text-align: right !important;
+  direction: rtl !important;
+  line-height: 1.6 !important;
+}
+
+.urdu-content p {
+  text-align: right !important;
+  direction: rtl !important;
+  line-height: 2.0 !important;
+}
+
+.urdu-content blockquote {
+  border-left: none;
+  border-right: 4px solid hsl(var(--primary));
+  padding-left: 0;
+  padding-right: 1.5em;
+  text-align: right !important;
+  line-height: 2.0 !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.urdu-content ul,
+.urdu-content ol {
+  text-align: right !important;
+  direction: rtl !important;
+  line-height: 2.0 !important;
+}
+
+/* English Content Styling */
+.english-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: left !important;
+  direction: ltr !important;
+  line-height: 1.4 !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.english-content h1,
+.english-content h2,
+.english-content h3,
+.english-content h4,
+.english-content h5,
+.english-content h6 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+  direction: ltr !important;
+}
+
+.english-content p {
+  text-align: left !important;
+  direction: ltr !important;
+  line-height: 1.4 !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.english-content blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  border-right: none;
+  padding-left: 1.5em;
+  padding-right: 0;
+  text-align: left !important;
+  line-height: 1.5 !important;
+}
+
+.english-content ul,
+.english-content ol {
+  text-align: left !important;
+  direction: ltr !important;
+  line-height: 1.4 !important;
+}
+
+/* Content Card Specific Styling */
+.content-card-title.urdu-content {
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  direction: rtl !important;
+  text-align: right !important;
+  line-height: 1.8 !important;
+  font-size: 0.9em !important;
+}
+
+.content-card-title.english-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500 !important;
+  direction: ltr !important;
+  text-align: left !important;
+  line-height: 1.3 !important;
+}
+.content-card-description.urdu-content {
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  direction: rtl !important;
+  text-align: right !important;
+  line-height: 1.9 !important;
+  font-size: 0.9em !important;
+}
+
+.content-card-description.english-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  direction: ltr !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+}
+/* Reader Specific Styling */
+.reader-title.urdu-content {
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  direction: rtl !important;
+  text-align: right !important;
+  line-height: 1.8 !important;
+}
+
+.reader-title.english-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 600 !important;
+  direction: ltr !important;
+  text-align: left !important;
+  line-height: 1.2 !important;
+}
+.reader-content.urdu-content {
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  direction: rtl !important;
+  text-align: right !important;
+  line-height: 2.2 !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+.reader-content.english-content {
+  font-family: Georgia, serif !important;
+  direction: ltr !important;
+  text-align: left !important;
+  line-height: 1.7 !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .prose {
+    font-size: 1rem;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .urdu-content {
+    font-size: 1.1rem;
+    line-height: 2.1;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  
+  .content-card-title.urdu-content {
+    font-size: 0.85em !important;
+    line-height: 1.9 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .content-card-description.urdu-content {
+    font-size: 0.85em !important;
+    line-height: 2.0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .prose h2 {
+    font-size: 1.4em;
+    margin-top: 2em;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .urdu-content h2 {
+    font-size: 1.5em;
+    margin-top: 2em;
+    line-height: 1.7 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .prose h3 {
+    font-size: 1.2em;
+    margin-top: 1.5em;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .urdu-content h3 {
+    font-size: 1.3em;
+    margin-top: 1.5em;
+    line-height: 1.6 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Force all elements to respect container width */
+  .prose * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  /* Specific fixes for common overflow elements */
+  .prose table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    overflow-x: auto !important;
+    display: block !important;
+    white-space: nowrap !important;
+  }
+
+  .prose pre {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+  }
+
+  .prose code {
+    word-break: break-all !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Force break long words and URLs */
+  .prose p,
+  .prose div,
+  .prose span,
+  .prose a {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+  }
+
+  /* Fix images and media */
+  .prose img,
+  .prose video,
+  .prose iframe {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* Fix lists */
+  .prose ul,
+  .prose ol {
+    padding-left: 1rem !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .urdu-content ul,
+  .urdu-content ol {
+    padding-right: 1rem !important;
+    padding-left: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Fix blockquotes */
+  .prose blockquote {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .urdu-content blockquote {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-right: 1rem !important;
+    padding-left: 0 !important;
+    max-width: 100% !important;
+  }
+}
