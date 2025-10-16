@@ -113,10 +113,14 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
 
     if (followLoading) return;
 
-    try {
-      setFollowLoading(true);
+    setFollowLoading(true);
 
+    try {
       if (isFollowing) {
+        // Optimistically update UI
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+
         // Unfollow
         const { error } = await supabase
           .from('followers')
@@ -126,31 +130,32 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
 
         if (error) {
           console.error('Error unfollowing:', error);
-          throw error;
+          // Revert on error
+          setIsFollowing(true);
+          setFollowerCount(prev => prev + 1);
         }
-        setIsFollowing(false);
-        setFollowerCount(prev => Math.max(0, prev - 1));
       } else {
+        // Optimistically update UI
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+
         // Follow
-        const { error, data } = await supabase
+        const { error } = await supabase
           .from('followers')
           .insert({
             creator_id: profile.id,
             follower_id: user.id
-          })
-          .select();
+          });
 
         if (error) {
           console.error('Error following:', error);
-          throw error;
+          // Revert on error
+          setIsFollowing(false);
+          setFollowerCount(prev => Math.max(0, prev - 1));
         }
-        console.log('Follow successful:', data);
-        setIsFollowing(true);
-        setFollowerCount(prev => prev + 1);
       }
     } catch (error) {
       console.error('Error updating follow status:', error);
-      alert(`Failed to ${isFollowing ? 'unfollow' : 'follow'}. Please try again.`);
     } finally {
       setFollowLoading(false);
     }

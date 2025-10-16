@@ -154,58 +154,26 @@ export function CreatorProfilePage({ usernameOverride, viewerId }: CreatorProfil
 
         // Determine if the parameter is a UUID or username
         const isUserIdParam = isUUID(username);
-        console.log('Parameter type:', isUserIdParam ? 'UUID' : 'username', 'Value:', username);
 
-        // Query profile based on parameter type
-        let profileQuery = supabase.from('profiles').select('*');
-        
-        if (isUserIdParam) {
-          profileQuery = profileQuery.eq('id', username);
-        } else {
-          profileQuery = profileQuery.eq('username', username);
-        }
-
-        const { data: profileData, error: profileError } = await profileQuery.single();
-
-        if (profileError) {
-          console.error('Profile error:', profileError);
-          setDebugInfo({ type: 'profile_error', error: profileError, isUserIdParam });
-          throw new Error(`Profile not found: ${profileError.message}`);
-        }
-
-        if (!profileData) {
-          console.error('No profile data found');
-          setDebugInfo({ type: 'no_profile', isUserIdParam });
-          throw new Error('Profile not found');
-        }
-
-        console.log('Found profile:', profileData);
-        setDebugInfo(prev => ({ ...(prev ?? {}), profile: profileData, isUserIdParam }));
-
-        // Use the actual username for the RPC call, not the URL parameter
-        const actualUsername = profileData.username;
-        console.log('Fetching creator profile data for username:', actualUsername);
-        
+        // Use RPC function directly which handles everything in one call
         const { data: creatorData, error: creatorError } = await supabase
-          .rpc('get_creator_profile_fast', { username: actualUsername });
+          .rpc('get_creator_profile_fast', { username: username });
 
         if (creatorError) {
           console.error('Creator data error:', creatorError);
-          setDebugInfo(prev => ({ ...(prev ?? {}), creator_error: creatorError }));
+          setDebugInfo({ creator_error: creatorError });
           throw creatorError;
         }
 
         if (!creatorData?.[0]) {
           console.error('No creator data returned');
-          setDebugInfo(prev => ({ ...(prev ?? {}), creator_data: creatorData }));
+          setDebugInfo({ creator_data: creatorData });
           throw new Error('Failed to load creator data');
         }
 
-        console.log('Creator data loaded:', creatorData[0]);
-        setIsOwnProfile((viewerId ?? user?.id ?? null) === profileData.id);
-
         // Initialize empty arrays for content if they don't exist
         const data = creatorData[0] as CreatorData;
+        setIsOwnProfile((viewerId ?? user?.id ?? null) === data.profile.id);
         const normalizedProfile: CreatorProfile = {
           ...data.profile,
           role: ((data.profile.role ?? 'creator') as UserRole),
