@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { vitePlugin as remix } from '@remix-run/dev';
+import { netlifyPlugin } from '@netlify/remix-adapter/plugin';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -7,6 +8,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   plugins: [
     remix(),
+    netlifyPlugin(),
     tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
