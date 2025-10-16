@@ -182,17 +182,6 @@ export function CreatorProfilePage({ usernameOverride, viewerId }: CreatorProfil
         console.log('Found profile:', profileData);
         setDebugInfo(prev => ({ ...(prev ?? {}), profile: profileData, isUserIdParam }));
 
-        const profileRole = (profileData.role ?? 'consumer') as UserRole;
-
-        if (profileRole !== 'creator') {
-          console.error('Profile is not a creator:', profileRole);
-          setDebugInfo(prev => ({ ...(prev ?? {}), role: profileRole }));
-          setError('This profile is not a creator');
-          setCreatorData(null);
-          setLoading(false);
-          return;
-        }
-
         // Use the actual username for the RPC call, not the URL parameter
         const actualUsername = profileData.username;
         console.log('Fetching creator profile data for username:', actualUsername);
