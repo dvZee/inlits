@@ -1,75 +1,141 @@
-# Inlits - Stories, Ideas, and Communities Unite.
+# Inlits – Stories, Ideas, and Communities Unite
 
-Welcome to Inlits, a platform designed to connect readers, writers, and thinkers in a shared space of stories and ideas. This project is built using React, Tailwind CSS, and Supabase, offering a modern and engaging experience for users to discover, create, and discuss content.
+Inlits is a learning-and-storytelling platform that helps readers discover content, follow creators, and track progress across articles, e‑books, audiobooks, and podcasts. The app now runs on Remix (with Vite) and provides a unified `/user/:username` profile for both creators and consumers.
 
-## Key Features
+---
 
-*   **Content Discovery:** Explore a wide range of articles, e-books, audiobooks, and podcasts across various categories.
-*   **Creator Tools:** Empower writers and creators with tools to publish and manage their content.
-*   **Community Engagement:** Connect with like-minded individuals through book clubs, discussions, and learning challenges.
-*   **Personalized Experience:** Customize your reading preferences, track your learning goals, and build your personal library.
-*   **Offline Access:** Access cached content even without an internet connection, thanks to Service Worker implementation.
+## Features
 
-## Technologies Used
+- **Unified Profiles** – a single profile route for every member with creator insights (identity, contributions, circles, achievements) plus creator dashboards when applicable.
+- **Flexible Content Types** – articles, e-books, audiobooks, podcasts, and series rendered with rich layouts and offline caching.
+- **Creator Toolkit** – dashboards for publishing and managing content, analytics, appointments, and earnings.
+- **Community Engagement** – book clubs, discussions, study groups, and learning challenges.
+- **Personalized Experience** – saved shelves, learning goals, recommendations, and quick category filters.
+- **Resilient UX** – cached home feed, Supabase retry helpers, and graceful fallbacks for images and network blips.
 
-*   **Frontend:**
-    *   React: A JavaScript library for building user interfaces.
-    *   Tailwind CSS: A utility-first CSS framework for styling the application.
-    *   Lucide React: Beautifully simple icons for a polished UI.
-    *   Vite: A build tool that provides a fast and efficient development experience.
-*   **Backend:**
-    *   Supabase: A backend-as-a-service platform providing database, authentication, and storage solutions.
+---
+
+## Tech Stack
+
+| Layer        | Tools |
+|--------------|-------|
+| Web          | [Remix](https://remix.run/) + [Vite](https://vitejs.dev/), React 18, TypeScript, Zustand |
+| Styling      | Tailwind CSS, Tailwind Merge, Lucide Icons |
+| Backend      | Supabase (Auth, Postgres, Realtime, Edge Functions) |
+| DX & Quality | ESLint 9, TypeScript strict mode, Vite PWA plugin |
+
+---
+
+## Quick Start
+
+1. **Clone & Install**
+   ```bash
+   git clone <YOUR-REPO-URL>
+   cd inlits
+   npm install
+   ```
+
+2. **Environment**
+   Copy `.env.example` (if available) or create `.env` with the Supabase keys:
+   ```bash
+   VITE_SUPABASE_URL=<your-url>
+   VITE_SUPABASE_ANON_KEY=<your-anon-key>
+   ```
+
+3. **Run Dev Server**
+   ```bash
+   npm run dev
+   ```
+   Remix’s Vite dev server will start at `http://localhost:5173` (auto-picks a new port if occupied).
+
+4. **Type Check & Lint (optional)**
+   ```bash
+   npm run typecheck
+   npm run lint
+   ```
+
+5. **Production Build**
+   ```bash
+   npm run build
+   npm run preview      # optional local preview
+   ```
+
+---
+
+## Available Scripts
+
+| Script            | Description |
+|-------------------|-------------|
+| `npm run dev`     | Remix + Vite development server (with HMR). |
+| `npm run build`   | Production build (client + server bundles). |
+| `npm run preview` | Serve the production build locally. |
+| `npm run start`   | Run the built Remix server (after `build`). |
+| `npm run lint`    | ESLint with the project config. |
+| `npm run typecheck` | TypeScript project check. |
+
+---
 
 ## Project Structure
 
-├── .env                      # Environment variables  
-├── eslint.config.js          # ESLint configuration  
-├── index.html                # Main HTML file  
-├── netlify.toml              # Netlify configuration  
-├── package.json              # Project dependencies and scripts  
-├── postcss.config.js         # PostCSS configuration  
-├── public                    # Public assets served directly  
-│   ├── _redirects            # Netlify redirects  
-│   └── offline.html          # Offline page  
-├── src                       # Source code  
-│   ├── App.tsx               # Main application component  
-│   ├── components            # Reusable React components  
-│   ├── lib                   # Utility functions and hooks  
-│   └── pages                 # Application pages  
-├── tailwind.config.js        # Tailwind CSS configuration  
-├── tsconfig.app.json         # TypeScript configuration  
-└── vite.config.ts            # Vite configuration  
+```
+├── app/                   # Remix application (routes, loaders, components)
+│   ├── components/        # UI building blocks (shared)
+│   ├── lib/               # Auth, API helpers, hooks, store
+│   ├── routes/            # Remix route modules
+│   ├── pages/             # Legacy React pages bridged through Remix
+│   ├── root.tsx, entry.*  # Remix app shell & entry points
+├── public/                # Static assets (PWA, redirects)
+├── supabase/              # SQL, edge functions, migrations (if checked in)
+├── eslint.config.js
+├── tailwind.config.js
+├── vite.config.ts         # Remix+Vite integration & plugins
+├── remix.env.d.ts         # Remix environment types
+└── package.json
+```
 
+> **Note**: We keep some legacy React pages under `app/pages` and expose them through Remix routes for backwards compatibility. When migrating new routes, prefer Remix file-based routing in `app/routes`.
 
+---
 
-## Setting up the project
+## Deployment (Netlify Example)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <https://github.com/inlits/inlits.git>
-    cd inlits
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-    
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    This will start the Vite development server and open the application in your browser.
+1. Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured in Netlify’s dashboard.
+2. Push to GitHub.
+3. In Netlify, create a new site from that repo.
+4. Netlify auto-detects the build (`npm run build`) and publish directory (`build`).
+5. For manual deploys via CLI:
+   ```bash
+   npm install -g netlify-cli
+   netlify login
+   netlify init    # or netlify link
+   npm run build
+   netlify deploy --prod
+   ```
 
-## Deployment
+The generated PWA assets (`sw.js`, manifest) are emitted under `build/client` during the Remix+Vite build.
 
-This project is configured for deployment on Netlify. To deploy:
+---
 
-1.  Create a Netlify account (if you don't have one).
-2.  Install the Netlify CLI: `npm install -g netlify-cli`
-3.  Link your local project to Netlify: `netlify link`
-4.  Deploy your site: `netlify deploy --prod`
+## Suggested Checks Before Shipping
+
+- `npm run build` (verifies client + server bundles)
+- `npm run typecheck` and `npm run lint`
+- Smoke-test a creator vs consumer session (sign in/out, dashboard, `/user/:username`, `/dashboard/:username`)
+- Confirm Supabase keys / OAuth callbacks configured on the target environment
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
+Issues and PRs are welcome. When contributing:
 
+1. Fork & branch: `git checkout -b feature/my-change`
+2. Make changes + run `npm run lint` and `npm run typecheck`
+3. Commit with context
+4. Open a PR describing the change and any deployment considerations
+
+---
+
+## License
+
+Copyright © Inlits. All rights reserved.
