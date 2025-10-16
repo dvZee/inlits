@@ -130,8 +130,8 @@ export function DashboardLayout() {
     );
   }
 
-  // Redirect non-creators to home
-  if (!user || !profile || profile.role !== 'creator') {
+  // Redirect unauthenticated users to sign in
+  if (!user || !profile) {
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 

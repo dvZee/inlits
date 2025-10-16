@@ -189,7 +189,7 @@ export const useAuth = create<AuthState>((set, get) => ({
               .insert({
                 id: user.id,
                 username: email.split('@')[0],
-                role: 'consumer',
+                role: 'user',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
@@ -377,7 +377,7 @@ export const useAuth = create<AuthState>((set, get) => ({
                 id: user.id,
                 username: username,
                 name: displayName,
-                role: 'consumer',
+                role: 'user',
                 avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()

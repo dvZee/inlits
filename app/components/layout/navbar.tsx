@@ -27,7 +27,6 @@ export function Navbar() {
     user?.user_metadata?.username ||
     (user?.email ? user.email.split('@')[0] : undefined);
   const profileLink = user ? (resolvedUsername ? `/user/${resolvedUsername}` : '/profile') : '/signin';
-  const isCreator = profile?.role === 'creator';
 
   useEffect(() => {
     if (!isBrowser) {
@@ -61,7 +60,7 @@ export function Navbar() {
 
   const handleSettingsClick = () => {
     setShowUserDropdown(false);
-    if (isCreator && resolvedUsername) {
+    if (resolvedUsername) {
       navigate(`/dashboard/${resolvedUsername}/settings`);
     } else {
       navigate('/profile');
@@ -144,13 +143,13 @@ export function Navbar() {
                   >
                     Your Profile
                   </Link>
-                  {isCreator && resolvedUsername && (
+                  {resolvedUsername && (
                     <Link
                       to={`/dashboard/${resolvedUsername}`}
                       onClick={() => setShowUserDropdown(false)}
                       className="block px-2 py-1.5 text-sm rounded-md hover:bg-primary/5"
                     >
-                      Creator Dashboard
+                      Dashboard
                     </Link>
                   )}
                   <button

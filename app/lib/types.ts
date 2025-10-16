@@ -9,7 +9,7 @@ export type SearchSuggestion = {
 
 export type ContentType = 'article' | 'ebook' | 'book' | 'audiobook' | 'podcast' | 'summary';
 
-export type UserRole = 'creator' | 'consumer';
+export type UserRole = 'user' | 'creator' | 'consumer';
 
 export interface Profile {
   id: string;

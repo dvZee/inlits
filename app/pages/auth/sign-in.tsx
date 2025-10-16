@@ -20,7 +20,7 @@ export function SignInPage() {
 
   useEffect(() => {
     if (user && profile && !authLoading) {
-      if (profile.role === 'creator' && from === '/') {
+      if (from === '/') {
         navigate(`/dashboard/${profile.username}`, { replace: true });
       } else {
         navigate(from, { replace: true });
@@ -42,7 +42,7 @@ export function SignInPage() {
 
       const currentProfile = useAuth.getState().profile;
 
-      if (currentProfile?.role === 'creator' && from === '/') {
+      if (currentProfile && from === '/') {
         navigate(`/dashboard/${currentProfile.username}`, { replace: true });
       } else {
         navigate(from, { replace: true });

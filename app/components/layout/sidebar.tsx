@@ -118,7 +118,6 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
   const { user, profile } = useAuth();
   const resolvedUsername = profile?.username || user?.user_metadata?.username || (user?.email ? user.email.split('@')[0] : undefined);
   const profilePath = user ? (resolvedUsername ? `/user/${resolvedUsername}` : '/profile') : '/signin';
-  const isCreator = profile?.role === 'creator' || user?.user_metadata?.role === 'creator';
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [showMobileMore, setShowMobileMore] = useState(false);
   const isBrowser = typeof window !== 'undefined';
@@ -171,9 +170,9 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
     { id: 'profile', label: 'Profile', icon: User, path: profilePath },
     { id: "goals", label: "Learning Goals", icon: Target, path: user ? '/library?tab=goals' : '/signin' },
     { id: "history", label: "History", icon: History, path: user ? '/history' : '/signin' },
-    ...(user && isCreator && resolvedUsername ? [
-      { id: "dashboard", label: "Creator Dashboard", icon: CreditCard, path: `/dashboard/${resolvedUsername}` }
-    ] : user ? [] : []),
+    ...(user && resolvedUsername ? [
+      { id: "dashboard", label: "Dashboard", icon: CreditCard, path: `/dashboard/${resolvedUsername}` }
+    ] : []),
     { id: "bookmarks", label: "Book Clubs", icon: BookMarked, path: user ? '/community?tab=book-clubs' : '/signin' },
     { id: "discussions", label: "Discussions", icon: MessageSquare, path: user ? '/community?tab=discussions' : '/signin' },
     { id: "study-groups", label: "Study Groups", icon: Users2, path: user ? '/community?tab=study-groups' : '/signin' },

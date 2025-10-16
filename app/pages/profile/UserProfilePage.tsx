@@ -2,11 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
-import { ProfileHeader } from '@/components/profile/profile-header';
-import { IntellectualIdentity } from '@/components/profile/intellectual-identity';
-import { ProfileCircles } from '@/components/profile/profile-circles';
-import { ProfileContributions } from '@/components/profile/profile-contributions';
-import { ProfileAchievements } from '@/components/profile/profile-achievements';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Profile } from '@/lib/types';
 import { CreatorProfilePage } from '@/pages/creator/CreatorProfilePage';
@@ -18,7 +13,6 @@ export function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [userStats, setUserStats] = useState<any>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -47,18 +41,6 @@ export function UserProfilePage() {
         }
 
         setProfile(profileData as Profile);
-
-        if (profileData.role !== 'creator') {
-          const { data: userProfileData, error: userProfileError } = await supabase.rpc(
-            'get_user_profile',
-            { p_username: cleanUsername }
-          );
-
-          if (!userProfileError && userProfileData && userProfileData.length > 0) {
-            const userData = userProfileData[0];
-            setUserStats(userData.stats);
-          }
-        }
       } catch (err) {
         console.error('Error loading profile:', err);
         setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -94,30 +76,10 @@ export function UserProfilePage() {
     );
   }
 
-  if (profile.role === 'creator') {
-    return (
-      <CreatorProfilePage
-        usernameOverride={profile.username}
-        viewerId={user?.id ?? null}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-8">
-      <ProfileHeader profile={profile} isOwnProfile={false} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <IntellectualIdentity userId={profile.id} isOwnProfile={false} stats={userStats} />
-          <ProfileContributions userId={profile.id} isOwnProfile={false} />
-        </div>
-
-        <div className="space-y-8">
-          <ProfileCircles />
-          <ProfileAchievements stats={userStats} />
-        </div>
-      </div>
-    </div>
+    <CreatorProfilePage
+      usernameOverride={profile.username}
+      viewerId={user?.id ?? null}
+    />
   );
 }
