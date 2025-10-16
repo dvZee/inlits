@@ -309,10 +309,10 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
                 active={isProfileActive(resolvedUsername)}
                 collapsed={collapsed}
               />
-              {user && isCreator && resolvedUsername && (
+              {user && resolvedUsername && (
                 <SidebarItem
                   icon={CreditCard}
-                  label='Creator Dashboard'
+                  label='Dashboard'
                   to={`/dashboard/${resolvedUsername}`}
                   active={location.pathname.startsWith('/dashboard')}
                   collapsed={collapsed}
