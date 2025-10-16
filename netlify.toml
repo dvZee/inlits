@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
-  publish = "dist"
-  functions = "netlify/functions"
+  publish = "build/client"
+  functions = "build/server/netlify"
 
 [dev]
   command = "npm run dev"
@@ -10,7 +10,7 @@
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
 
 [build.environment]
