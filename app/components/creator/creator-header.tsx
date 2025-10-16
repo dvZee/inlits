@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  MessageSquare, 
-  Bell, 
+import {
+  MessageSquare,
+  Bell,
   Share2,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { CreatorMessageDialog } from './creator-message-dialog';
+import { EditProfileDialog } from '@/components/profile/edit-profile-dialog';
 
 interface CreatorHeaderProps {
   profile: {
@@ -40,7 +42,9 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
   const [shareTooltipText, setShareTooltipText] = useState('Copy link');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [followerCount, setFollowerCount] = useState(stats.total_followers);
+  const isOwnProfile = user?.id === profile.id;
 
   // Refs for stats scrolling
   const statsRef = useRef<HTMLDivElement>(null);
@@ -256,47 +260,57 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
               <p className="text-muted-foreground">@{profile.username}</p>
 
               {/* Social Actions */}
-              {(!user || user.id !== profile.id) && (
-                <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-2 mt-3">
+                {isOwnProfile ? (
                   <button
-                    onClick={handleFollow}
-                    disabled={followLoading}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isFollowing
-                        ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
-                        : 'bg-primary text-white hover:bg-primary/90'
-                    }`}
+                    onClick={() => setShowEditDialog(true)}
+                    className="px-3 py-1.5 rounded-full text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap flex items-center gap-1"
                   >
-                    {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
                   </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleFollow}
+                      disabled={followLoading}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed ${
+                        isFollowing
+                          ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
+                          : 'bg-primary text-white hover:bg-primary/90'
+                      }`}
+                    >
+                      {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+                    </button>
 
-                  <button
-                    onClick={handleMessage}
-                    className="p-1.5 rounded-full hover:bg-primary hover:text-white transition-colors"
-                    title="Send message"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                  </button>
+                    <button
+                      onClick={handleMessage}
+                      className="p-1.5 rounded-full hover:bg-primary hover:text-white transition-colors"
+                      title="Send message"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                    </button>
 
-                  <button
-                    onClick={handleNotifications}
-                    className={`p-1.5 rounded-full transition-colors hover:bg-primary hover:text-white ${
-                      notificationsEnabled ? 'text-primary hover:text-white' : ''
-                    }`}
-                    title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}
-                  >
-                    <Bell className="w-4 h-4" />
-                  </button>
+                    <button
+                      onClick={handleNotifications}
+                      className={`p-1.5 rounded-full transition-colors hover:bg-primary hover:text-white ${
+                        notificationsEnabled ? 'text-primary hover:text-white' : ''
+                      }`}
+                      title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}
+                    >
+                      <Bell className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
 
-                  <button
-                    onClick={handleShare}
-                    className="p-1.5 rounded-full hover:bg-primary hover:text-white transition-colors relative"
-                    title="Share profile"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+                <button
+                  onClick={handleShare}
+                  className="p-1.5 rounded-full hover:bg-primary hover:text-white transition-colors relative"
+                  title="Share profile"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -335,54 +349,64 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
                 </div>
 
                 {/* Desktop Action Buttons */}
-                {(!user || user.id !== profile.id) && (
-                  <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2 mt-2">
+                  {isOwnProfile ? (
                     <button
-                      onClick={handleFollow}
-                      disabled={followLoading}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
-                        isFollowing
-                          ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
-                          : 'bg-primary text-white hover:bg-primary/90'
-                      } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => setShowEditDialog(true)}
+                      className="px-4 py-2 rounded-full text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors whitespace-nowrap flex items-center gap-1"
                     >
-                      {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+                      <Edit className="w-4 h-4" />
+                      Edit Profile
                     </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleFollow}
+                        disabled={followLoading}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                          isFollowing
+                            ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
+                            : 'bg-primary text-white hover:bg-primary/90'
+                        } ${followLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+                      </button>
 
-                    <button
-                      onClick={handleMessage}
-                      className="p-2 rounded-full hover:bg-primary hover:text-white transition-colors"
-                      title="Send message"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                    </button>
+                      <button
+                        onClick={handleMessage}
+                        className="p-2 rounded-full hover:bg-primary hover:text-white transition-colors"
+                        title="Send message"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </button>
 
-                    <button
-                      onClick={handleNotifications}
-                      className={`p-2 rounded-full transition-colors hover:bg-primary hover:text-white ${
-                        notificationsEnabled ? 'text-primary hover:text-white' : ''
-                      }`}
-                      title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}
-                    >
-                      <Bell className="w-4 h-4" />
-                    </button>
+                      <button
+                        onClick={handleNotifications}
+                        className={`p-2 rounded-full transition-colors hover:bg-primary hover:text-white ${
+                          notificationsEnabled ? 'text-primary hover:text-white' : ''
+                        }`}
+                        title={notificationsEnabled ? 'Notifications on' : 'Notifications off'}
+                      >
+                        <Bell className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
 
-                    <button
-                      onClick={handleShare}
-                      className="p-2 rounded-full hover:bg-primary hover:text-white transition-colors relative"
-                      title="Share profile"
-                      onMouseEnter={() => setShowShareTooltip(true)}
-                      onMouseLeave={() => setShowShareTooltip(false)}
-                    >
-                      <Share2 className="w-4 h-4" />
-                      {showShareTooltip && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-black/90 rounded whitespace-nowrap">
-                          {shareTooltipText}
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={handleShare}
+                    className="p-2 rounded-full hover:bg-primary hover:text-white transition-colors relative"
+                    title="Share profile"
+                    onMouseEnter={() => setShowShareTooltip(true)}
+                    onMouseLeave={() => setShowShareTooltip(false)}
+                  >
+                    <Share2 className="w-4 h-4" />
+                    {showShareTooltip && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-black/90 rounded whitespace-nowrap">
+                        {shareTooltipText}
+                      </div>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Bio and Stats */}
@@ -540,6 +564,11 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
           recipientAvatar={profile.avatar_url}
           onClose={() => setShowMessageDialog(false)}
         />
+      )}
+
+      {/* Edit Profile Dialog */}
+      {showEditDialog && (
+        <EditProfileDialog onClose={() => setShowEditDialog(false)} />
       )}
     </div>
   );
