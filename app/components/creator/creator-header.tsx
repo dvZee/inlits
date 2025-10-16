@@ -111,7 +111,7 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
 
     try {
       setFollowLoading(true);
-      
+
       if (isFollowing) {
         // Unfollow
         const { error } = await supabase
@@ -120,25 +120,33 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
           .eq('creator_id', profile.id)
           .eq('follower_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error unfollowing:', error);
+          throw error;
+        }
         setIsFollowing(false);
         setFollowerCount(prev => Math.max(0, prev - 1));
       } else {
         // Follow
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('followers')
           .insert({
             creator_id: profile.id,
             follower_id: user.id
-          });
+          })
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error following:', error);
+          throw error;
+        }
+        console.log('Follow successful:', data);
         setIsFollowing(true);
         setFollowerCount(prev => prev + 1);
       }
     } catch (error) {
       console.error('Error updating follow status:', error);
-      // You could add a toast notification here for better UX
+      alert(`Failed to ${isFollowing ? 'unfollow' : 'follow'}. Please try again.`);
     } finally {
       setFollowLoading(false);
     }
@@ -252,13 +260,14 @@ export function CreatorHeader({ profile, stats }: CreatorHeaderProps) {
                 <div className="flex items-center gap-2 mt-3">
                   <button
                     onClick={handleFollow}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                    disabled={followLoading}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed ${
                       isFollowing
                         ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
                         : 'bg-primary text-white hover:bg-primary/90'
                     }`}
                   >
-                    {isFollowing ? 'Following' : 'Follow'}
+                    {followLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
                   </button>
 
                   <button

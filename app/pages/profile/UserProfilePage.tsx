@@ -35,11 +35,6 @@ export function UserProfilePage() {
           throw new Error('Profile not found');
         }
 
-        if (user && profileData.id === user.id) {
-          navigate('/profile', { replace: true });
-          return;
-        }
-
         setProfile(profileData as Profile);
       } catch (err) {
         console.error('Error loading profile:', err);

@@ -132,9 +132,6 @@ export function Navbar() {
                     <p className="px-2 text-sm font-medium">
                       {resolvedUsername}
                     </p>
-                    <p className="px-2 text-xs capitalize text-muted-foreground">
-                      {profile?.role}
-                    </p>
                   </div>
                   <Link
                     to={profileLink}
