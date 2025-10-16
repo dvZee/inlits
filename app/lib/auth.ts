@@ -160,15 +160,17 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   signIn: async (email: string, password: string) => {
     try {
+      set({ loading: true });
+
       const { data: { user, session }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (signInError) throw signInError;
       if (!user) throw new Error('No user returned from sign in');
 
-      set({ user, loading: true });
+      set({ user });
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -518,38 +520,42 @@ async function createProfileManually(userId: string, username: string, role: Use
 
 const initAuth = async () => {
   try {
+    useAuth.setState({ loading: true });
+
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
       console.error('Error getting initial session:', error);
-      useAuth.getState().setUser(null);
+      useAuth.setState({ user: null, profile: null, loading: false });
       return;
     }
 
     if (session?.user) {
       await useAuth.getState().setUser(session.user);
     } else {
-      useAuth.getState().setUser(null);
+      useAuth.setState({ user: null, profile: null, loading: false });
     }
   } catch (error) {
     console.error('Error initializing auth:', error);
-    useAuth.getState().setUser(null);
+    useAuth.setState({ user: null, profile: null, loading: false });
   }
 };
 
 if (isBrowser) {
   initAuth();
 
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     console.log('Auth state change:', event, session?.user?.email);
-    
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-      if (session?.user) {
-        console.log('User signed in, setting user state');
-        await useAuth.getState().setUser(session.user);
+
+    (async () => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+          console.log('User signed in, setting user state');
+          await useAuth.getState().setUser(session.user);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+        useAuth.setState({ user: null, profile: null, loading: false });
       }
-    } else if (event === 'SIGNED_OUT') {
-      console.log('User signed out');
-      useAuth.getState().setUser(null);
-    }
+    })();
   });
 }

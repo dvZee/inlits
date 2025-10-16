@@ -16,13 +16,17 @@ export function SignInPage() {
 
   const message = location.state?.message;
   const from = location.state?.from?.pathname || '/';
+  const { profile } = useAuth();
 
-  // Only redirect if user is already authenticated and not loading
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate(from, { replace: true });
+    if (user && profile && !authLoading) {
+      if (profile.role === 'creator' && from === '/') {
+        navigate(`/dashboard/${profile.username}`, { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     }
-  }, [user, authLoading, navigate, from]);
+  }, [user, profile, authLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +39,14 @@ export function SignInPage() {
 
     try {
       await signIn(email, password);
-      // Navigate is handled by the useEffect above
+
+      const currentProfile = useAuth.getState().profile;
+
+      if (currentProfile?.role === 'creator' && from === '/') {
+        navigate(`/dashboard/${currentProfile.username}`, { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);

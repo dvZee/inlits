@@ -1,19 +1,30 @@
 import { useEffect, useState } from 'react';
 import App from '@/App';
+import { useAuth } from '@/lib/auth';
+import { Loader2 } from 'lucide-react';
 
-/**
- * Bridges the existing client-side router in App.tsx into Remix by
- * delaying rendering until we're firmly in the browser.
- */
 export function ClientOnlyApp() {
   const [isClient, setIsClient] = useState(false);
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   if (!isClient) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return <App />;

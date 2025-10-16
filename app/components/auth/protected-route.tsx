@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import { Loader2 } from 'lucide-react';
 import type { UserRole } from '@/lib/types';
 
 interface ProtectedRouteProps {
@@ -9,30 +10,30 @@ interface ProtectedRouteProps {
   requireEmailVerification?: boolean;
 }
 
-export function ProtectedRoute({ 
-  children, 
-  roles, 
-  requireEmailVerification = true 
+export function ProtectedRoute({
+  children,
+  roles,
+  requireEmailVerification = true
 }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth();
   const location = useLocation();
 
-  // Show nothing while checking auth status
   if (loading) {
-    return null;
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
-  // Redirect to sign in if not authenticated
   if (!user) {
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
-  // Check email verification if required
   if (requireEmailVerification && !user.email_confirmed_at) {
     return <Navigate to="/verify-email" state={{ from: location }} replace />;
   }
 
-  // Check role-based access if roles are specified
   if (roles && (!profile || !roles.includes(profile.role))) {
     return <Navigate to="/" replace />;
   }
