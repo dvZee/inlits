@@ -4,18 +4,23 @@ const isBrowser = typeof window !== 'undefined';
 
 const supabaseUrl = isBrowser
   ? import.meta.env.VITE_SUPABASE_URL
-  : process.env.VITE_SUPABASE_URL;
+  : process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
 
 const supabaseAnonKey = isBrowser
   ? import.meta.env.VITE_SUPABASE_ANON_KEY
-  : process.env.VITE_SUPABASE_ANON_KEY;
+  : process.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// Use placeholder values if environment variables are missing (for build time)
+const url = supabaseUrl || 'https://placeholder.supabase.co';
+const key = supabaseAnonKey || 'placeholder-key';
+
+// Warn if using placeholder values in browser
+if (isBrowser && (!supabaseUrl || !supabaseAnonKey)) {
+  console.error('Missing Supabase environment variables. Please check your configuration.');
 }
 
 // Create Supabase client with enhanced configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(url, key, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
