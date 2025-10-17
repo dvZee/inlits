@@ -51,73 +51,7 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
-  // Initialize connection check on mount
-  useEffect(() => {
-    const cleanup = startConnectionCheck(5000); // Check every 5 seconds
-    
-    // Initial connection check
-    const initialCheck = async () => {
-      try {
-        await supabase.auth.getSession();
-        console.log('Initial connection check successful');
-        setIsConnected(true);
-        setShowBanner(false);
-      } catch (error) {
-        console.warn('Initial connection check failed');
-        setIsConnected(false);
-        setShowBanner(true);
-      }
-    };
-    
-    initialCheck();
-    
-    return () => {
-      cleanup();
-    };
-  }, []);
-
-  // Check connection status periodically
-  useEffect(() => {
-    const checkInterval = setInterval(() => {
-      const connected = checkConnection();
-      
-      if (connected !== isConnected) {
-        console.log(`Connection status changed: ${connected ? 'connected' : 'disconnected'}`);
-        setIsConnected(connected);
-      }
-      
-      // Only show banner if we're disconnected
-      if (!connected) {
-        setShowBanner(true);
-      }
-    }, 2000); // Check every 2 seconds
-
-    return () => clearInterval(checkInterval);
-  }, [isConnected]);
-
-  // Auto retry with exponential backoff
-  useEffect(() => {
-    if (!isConnected && !isRetrying) {
-      const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000); // Max 30 seconds
-      console.log(`Scheduling auto-retry in ${backoffTime}ms (attempt ${retryCount + 1})`);
-      
-      const retryTimer = setTimeout(() => {
-        reconnect().then(success => {
-          if (success) {
-            console.log('Auto-reconnection successful');
-            setIsConnected(true);
-            setShowBanner(false);
-            setRetryCount(0);
-          } else {
-            console.log('Auto-reconnection failed');
-            setRetryCount(prev => prev + 1);
-          }
-        });
-      }, backoffTime);
-      
-      return () => clearTimeout(retryTimer);
-    }
-  }, [isConnected, retryCount, isRetrying]);
+  // Remove aggressive connection checking - only listen to network events
 
   // Listen for online/offline events
   useEffect(() => {

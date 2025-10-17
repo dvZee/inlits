@@ -2,24 +2,28 @@ import { createClient } from '@supabase/supabase-js';
 
 const isBrowser = typeof window !== 'undefined';
 
-const supabaseUrl = isBrowser
-  ? import.meta.env.VITE_SUPABASE_URL
-  : process.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+// Get environment variables with proper fallbacks
+const getEnvVar = (key: string): string => {
+  if (isBrowser) {
+    return import.meta.env[key] || '';
+  }
+  // Server-side: try both process.env and import.meta.env
+  return process.env[key] || import.meta.env[key] || '';
+};
 
-const supabaseAnonKey = isBrowser
-  ? import.meta.env.VITE_SUPABASE_ANON_KEY
-  : process.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
-// Use placeholder values if environment variables are missing (for build time)
+// Warn if missing credentials in browser
+if (isBrowser && (!supabaseUrl || !supabaseAnonKey)) {
+  console.error('Missing Supabase environment variables');
+}
+
+// Use actual credentials or placeholders for build
 const url = supabaseUrl || 'https://placeholder.supabase.co';
 const key = supabaseAnonKey || 'placeholder-key';
 
-// Warn if using placeholder values in browser
-if (isBrowser && (!supabaseUrl || !supabaseAnonKey)) {
-  console.error('Missing Supabase environment variables. Please check your configuration.');
-}
-
-// Create Supabase client with enhanced configuration
+// Create Supabase client
 export const supabase = createClient(url, key, {
   auth: {
     persistSession: true,
@@ -171,8 +175,8 @@ export const checkConnection = () => isConnected;
 // Export connection attempts checker
 export const getConnectionAttempts = () => connectionAttempts;
 
-// Start periodic connection check
-export const startConnectionCheck = (interval = 10000) => {
+// Start periodic connection check - disabled by default, too aggressive
+export const startConnectionCheck = (interval = 60000) => {
   if (!isBrowser) {
     return () => {};
   }
@@ -180,22 +184,14 @@ export const startConnectionCheck = (interval = 10000) => {
   if (connectionCheckInterval) {
     clearInterval(connectionCheckInterval);
   }
-  
+
+  // Only check if we're already disconnected
   connectionCheckInterval = setInterval(() => {
     if (!isConnected) {
       reconnect();
-    } else {
-      // Periodically test connection even if we think we're connected
-      supabase.from('profiles').select('id').limit(1).then(({ error }) => {
-        if (error) {
-          console.warn('Connection check failed:', error);
-          isConnected = false;
-          reconnect();
-        }
-      });
     }
   }, interval);
-  
+
   return () => {
     if (connectionCheckInterval) {
       clearInterval(connectionCheckInterval);
@@ -220,24 +216,5 @@ if (isBrowser) {
   });
 }
 
-if (hasDocument) {
-  // Add visibility change handler
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      console.log('Document visible, checking connection');
-      // Test connection when tab becomes visible
-      supabase.from('profiles').select('id').limit(1).then(({ error }) => {
-        if (error) {
-          console.warn('Connection test on visibility change failed:', error);
-          isConnected = false;
-          reconnect();
-        }
-      });
-    }
-  });
-}
-
-// Initialize connection check
-if (isBrowser) {
-  startConnectionCheck();
-}
+// Removed aggressive visibility change handler - it was causing false positives
+// Connection check is now only active when explicitly needed

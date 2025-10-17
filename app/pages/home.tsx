@@ -225,18 +225,20 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             .order('created_at', { ascending: false })
         ]);
 
-        // Check for errors
+        // Check for errors - log to console but continue with partial data
         if (audiobooksResult.error) {
           console.error('Audiobooks error:', audiobooksResult.error);
-          throw new Error(`Failed to load audiobooks: ${audiobooksResult.error.message}`);
         }
         if (booksResult.error) {
           console.error('Books error:', booksResult.error);
-          throw new Error(`Failed to load books: ${booksResult.error.message}`);
         }
         if (podcastsResult.error) {
           console.error('Podcasts error:', podcastsResult.error);
-          throw new Error(`Failed to load podcasts: ${podcastsResult.error.message}`);
+        }
+
+        // If all queries failed, throw an error
+        if (audiobooksResult.error && booksResult.error && podcastsResult.error) {
+          throw new Error('Unable to load content. Please check your connection and try again.');
         }
 
         console.log('Raw data loaded:', {
@@ -647,17 +649,20 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
   if (error) {
     return (
       <div className="min-h-[400px] flex items-center justify-center text-center">
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-md mx-auto px-4">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
           <div>
-            <h3 className="text-lg font-medium">Something went wrong</h3>
-            <p className="text-muted-foreground">{error}</p>
+            <h3 className="text-lg font-medium">Unable to Load Content</h3>
+            <p className="text-muted-foreground mt-2">
+              We're having trouble connecting to the server. Please check your internet connection and try again.
+            </p>
           </div>
           <button
             onClick={() => {
               contentCache.clear();
               setInitialLoadComplete(false);
               setError(null);
+              window.location.reload();
             }}
             className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >

@@ -26,50 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     };
   }
 
-  componentDidMount() {
-    window.addEventListener('supabase:connection-failed', this.handleConnectionFailed);
-    window.addEventListener('error', this.handleGlobalError);
-    window.addEventListener('unhandledrejection', this.handlePromiseRejection);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('supabase:connection-failed', this.handleConnectionFailed);
-    window.removeEventListener('error', this.handleGlobalError);
-    window.removeEventListener('unhandledrejection', this.handlePromiseRejection);
-  }
-
-  handleConnectionFailed = () => {
-    this.setState({ connectionFailed: true });
-  };
-
-  handleGlobalError = (event: ErrorEvent) => {
-    // Only handle network-related errors
-    if (event.message.includes('network') || 
-        event.message.includes('connection') ||
-        event.message.includes('fetch') ||
-        event.message.includes('xhr')) {
-      this.setState({ 
-        hasError: true, 
-        error: new Error(`Network error: ${event.message}`)
-      });
-      event.preventDefault();
-    }
-  };
-
-  handlePromiseRejection = (event: PromiseRejectionEvent) => {
-    // Only handle network-related promise rejections
-    const message = event.reason?.message || String(event.reason);
-    if (message.includes('network') || 
-        message.includes('connection') ||
-        message.includes('fetch') ||
-        message.includes('xhr')) {
-      this.setState({ 
-        hasError: true, 
-        error: new Error(`Network error: ${message}`)
-      });
-      event.preventDefault();
-    }
-  };
+  // Removed aggressive global error handlers - let components handle their own errors
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
