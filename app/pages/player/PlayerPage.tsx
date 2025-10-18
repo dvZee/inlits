@@ -32,19 +32,14 @@ interface AudioContent {
 export function PlayerPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setCurrentAudio, setPlayerVisible, setIsMainPlayerPage } = useAudio();
+  const { setCurrentAudio, setPlayerVisible } = useAudio();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<AudioContent | null>(null);
 
   useEffect(() => {
-    setIsMainPlayerPage(true);
     setPlayerVisible(true);
-
-    return () => {
-      setIsMainPlayerPage(false);
-    };
-  }, [setIsMainPlayerPage, setPlayerVisible]);
+  }, [setPlayerVisible]);
 
   useEffect(() => {
     const loadContent = async () => {
