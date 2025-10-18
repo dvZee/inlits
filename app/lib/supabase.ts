@@ -2,26 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 
 const isBrowser = typeof window !== 'undefined';
 
-// Get environment variables with proper fallbacks
-const getEnvVar = (key: string): string => {
-  if (isBrowser) {
-    return import.meta.env[key] || '';
-  }
-  // Server-side: try both process.env and import.meta.env
-  return process.env[key] || import.meta.env[key] || '';
-};
+// Hardcode credentials directly to ensure they're available
+const supabaseUrl = 'https://yvjrakgbqqazedjltflw.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2anJha2dicXFhemVkamx0Zmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMjIyNTIsImV4cCI6MjA1MjY5ODI1Mn0.tFpht9qLcCeilgnd9vmbF4abiJi96FvzmGZCOXL2DiU';
 
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
-
-// Warn if missing credentials in browser
-if (isBrowser && (!supabaseUrl || !supabaseAnonKey)) {
-  console.error('Missing Supabase environment variables');
-}
-
-// Use actual credentials or placeholders for build
-const url = supabaseUrl || 'https://placeholder.supabase.co';
-const key = supabaseAnonKey || 'placeholder-key';
+const url = supabaseUrl;
+const key = supabaseAnonKey;
 
 // Create Supabase client
 export const supabase = createClient(url, key, {
