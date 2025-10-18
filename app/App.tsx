@@ -27,9 +27,7 @@ const FollowedPage = React.lazy(() => import('./pages/followed').then(module => 
 const LibraryPage = React.lazy(() => import('./pages/library').then(module => ({ default: module.LibraryPage })));
 const CommunityPage = React.lazy(() => import('./pages/community').then(module => ({ default: module.CommunityPage })));
 const HistoryPage = React.lazy(() => import('./pages/history').then(module => ({ default: module.HistoryPage })));
-const ProfilePage = React.lazy(() => import('./pages/profile/index'));
-const UserProfilePage = React.lazy(() => import('./pages/profile/UserProfilePage').then(module => ({ default: module.UserProfilePage })));
-const SearchProfilesPage = React.lazy(() => import('./pages/profile/search').then(module => ({ default: module.SearchProfilesPage })));
+const CreatorProfilePage = React.lazy(() => import('./pages/creator/CreatorProfilePage').then(module => ({ default: module.CreatorProfilePage })));
 
 const DashboardLayout = React.lazy(() => import('./pages/dashboard').then(module => ({ default: module.DashboardLayout })));
 const DashboardOverviewPage = React.lazy(() => import('./pages/dashboard/overview').then(module => ({ default: module.DashboardOverviewPage })));
@@ -43,7 +41,6 @@ const AppointmentsPage = React.lazy(() => import('./pages/dashboard/appointments
 const AnalyticsPage = React.lazy(() => import('./pages/dashboard/analytics').then(module => ({ default: module.AnalyticsPage })));
 const SettingsPage = React.lazy(() => import('./pages/dashboard/settings').then(module => ({ default: module.SettingsPage })));
 const ReaderPage = React.lazy(() => import('./pages/reader/ReaderPage').then(module => ({ default: module.ReaderPage })));
-const PlayerPage = React.lazy(() => import('./pages/player/[id]').then(module => ({ default: module.PlayerPage })));
 const SearchPage = React.lazy(() => import('./pages/search').then(module => ({ default: module.default })));
 const ContactPage = React.lazy(() => import('./pages/contact').then(module => ({ default: module.default })));
 const PrivacyPage = React.lazy(() => import('./pages/privacy').then(module => ({ default: module.PrivacyPage })));
@@ -51,9 +48,6 @@ const TermsPage = React.lazy(() => import('./pages/terms').then(module => ({ def
 const RefundPolicyPage = React.lazy(() => import('./pages/refund-policy').then(module => ({ default: module.RefundPolicyPage })));
 const CopyrightPage = React.lazy(() => import('./pages/copyright').then(module => ({ default: module.default })));
 const AboutPage = React.lazy(() => import('./pages/about').then(module => ({ default: module.AboutPage })));
-const CheckoutPage = React.lazy(() => import('./pages/payment/checkout').then(module => ({ default: module.CheckoutPage })));
-const PaymentSuccessPage = React.lazy(() => import('./pages/payment/success').then(module => ({ default: module.PaymentSuccessPage })));
-const PaymentCancelPage = React.lazy(() => import('./pages/payment/cancel').then(module => ({ default: module.PaymentCancelPage })));
 const SubscriptionPage = React.lazy(() => import('./pages/subscription/index').then(module => ({ default: module.SubscriptionPage })));
 const SubscriptionPaymentPage = React.lazy(() => import('./pages/subscription/payment').then(module => ({ default: module.SubscriptionPaymentPage })));
 const SubscriptionVerifyPage = React.lazy(() => import('./pages/subscription/verify').then(module => ({ default: module.SubscriptionVerifyPage })));
@@ -240,16 +234,6 @@ function App() {
                     <Route path="settings" element={<SettingsPage />} />
                   </Route>
 
-                  {/* Content Player Routes */}
-                  <Route
-                    path="/player/:id"
-                    element={
-                      <MainLayout>
-                        <PlayerPage />
-                      </MainLayout>
-                    }
-                  />
-
                   {/* Reader Routes */}
                   <Route
                     path="/reader/:id"
@@ -320,11 +304,6 @@ function App() {
                     }
                   />
 
-                  {/* Payment Routes */}
-                  <Route path="/payment/checkout" element={<CheckoutPage />} />
-                  <Route path="/payment/success" element={<PaymentSuccessPage />} />
-                  <Route path="/payment/cancel" element={<PaymentCancelPage />} />
-
                   {/* Subscription Routes */}
                   <Route path="/subscription" element={<SubscriptionPage />} />
                   <Route path="/subscription/payment" element={<SubscriptionPaymentPage />} />
@@ -391,28 +370,10 @@ function App() {
                     }
                   />
                   <Route
-                    path="/profile"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <ProfilePage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/profile/search"
-                    element={
-                      <MainLayout>
-                        <SearchProfilesPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
                     path="/@:username"
                     element={
                       <MainLayout>
-                        <UserProfilePage />
+                        <CreatorProfilePage />
                       </MainLayout>
                     }
                   />
@@ -420,7 +381,7 @@ function App() {
                     path="/user/:username"
                     element={
                       <MainLayout>
-                        <UserProfilePage />
+                        <CreatorProfilePage />
                       </MainLayout>
                     }
                   />
