@@ -4,11 +4,20 @@ import { supabase } from '@/lib/supabase';
 import { useAudio } from '@/lib/audio-context';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
+interface Chapter {
+  id: string;
+  title: string;
+  audio_url: string;
+  duration: string;
+  order: number;
+}
+
 interface AudioContent {
   id: string;
   title: string;
   description?: string;
   cover_url?: string;
+  file_url?: string;
   audio_url?: string;
   duration?: string;
   author: {
@@ -17,6 +26,7 @@ interface AudioContent {
     username: string;
     avatar_url?: string;
   };
+  chapters?: Chapter[];
 }
 
 export function PlayerPage() {
@@ -60,8 +70,7 @@ export function PlayerPage() {
               title,
               description,
               cover_url,
-              audio_url,
-              duration,
+              file_url,
               author:profiles!audiobooks_author_id_fkey (
                 id,
                 name,
@@ -75,6 +84,18 @@ export function PlayerPage() {
 
           data = result.data;
           error = result.error;
+
+          if (!error && data) {
+            const chaptersResult = await supabase
+              .from('audiobook_chapters')
+              .select('id, title, audio_url, duration, order')
+              .eq('audiobook_id', contentId)
+              .order('order', { ascending: true });
+
+            if (chaptersResult.data) {
+              data.chapters = chaptersResult.data;
+            }
+          }
         } else if (contentType === 'podcast') {
           const result = await supabase
             .from('podcast_episodes')
@@ -108,20 +129,35 @@ export function PlayerPage() {
 
         const author = Array.isArray(data.author) ? data.author[0] : data.author;
 
-        setContent({
+        const contentData = {
           ...data,
           author: author || { id: '', name: 'Unknown', username: 'unknown' }
-        });
+        };
+
+        setContent(contentData);
+
+        const audioUrl = contentType === 'audiobook'
+          ? (data.chapters && data.chapters.length > 0 ? data.chapters[0].audio_url : data.file_url || '')
+          : data.audio_url || '';
+
+        const chapters = contentType === 'audiobook' && data.chapters
+          ? data.chapters.map((ch: any) => ({
+              id: ch.id,
+              title: ch.title,
+              audio_url: ch.audio_url,
+              duration: ch.duration
+            }))
+          : [];
 
         setCurrentAudio({
           id: data.id,
           title: data.title,
           author: author?.name || 'Unknown',
           thumbnail: data.cover_url || 'https://placehold.co/600x600?text=Audio',
-          audioUrl: data.audio_url || '',
+          audioUrl,
           type: contentType as 'audiobook' | 'podcast',
           contentUrl: `/player/${id}`,
-          chapters: []
+          chapters
         });
       } catch (err) {
         console.error('Error loading content:', err);
@@ -197,9 +233,25 @@ export function PlayerPage() {
                 </div>
               )}
 
-              {content.duration && (
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>Duration: {content.duration}</span>
+              {content.chapters && content.chapters.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-3">Chapters</h2>
+                  <div className="space-y-2">
+                    {content.chapters.map((chapter, index) => (
+                      <div
+                        key={chapter.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-muted-foreground w-8">
+                            {index + 1}
+                          </span>
+                          <span className="text-sm font-medium">{chapter.title}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{chapter.duration}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
