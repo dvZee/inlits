@@ -41,6 +41,7 @@ const AppointmentsPage = React.lazy(() => import('./pages/dashboard/appointments
 const AnalyticsPage = React.lazy(() => import('./pages/dashboard/analytics').then(module => ({ default: module.AnalyticsPage })));
 const SettingsPage = React.lazy(() => import('./pages/dashboard/settings').then(module => ({ default: module.SettingsPage })));
 const ReaderPage = React.lazy(() => import('./pages/reader/ReaderPage').then(module => ({ default: module.ReaderPage })));
+const PlayerPage = React.lazy(() => import('./pages/player/PlayerPage').then(module => ({ default: module.PlayerPage })));
 const SearchPage = React.lazy(() => import('./pages/search').then(module => ({ default: module.default })));
 const ContactPage = React.lazy(() => import('./pages/contact').then(module => ({ default: module.default })));
 const PrivacyPage = React.lazy(() => import('./pages/privacy').then(module => ({ default: module.PrivacyPage })));
@@ -233,6 +234,16 @@ function App() {
                     <Route path="analytics" element={<AnalyticsPage />} />
                     <Route path="settings" element={<SettingsPage />} />
                   </Route>
+
+                  {/* Player Routes */}
+                  <Route
+                    path="/player/:id"
+                    element={
+                      <MainLayout>
+                        <PlayerPage />
+                      </MainLayout>
+                    }
+                  />
 
                   {/* Reader Routes */}
                   <Route
