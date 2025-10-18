@@ -23,7 +23,9 @@ export const meta: MetaFunction = () => [
 ];
 
 export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: styles }
+  { rel: 'stylesheet', href: styles },
+  { rel: 'preconnect', href: 'https://placehold.co' },
+  { rel: 'dns-prefetch', href: 'https://placehold.co' }
 ];
 
 function Document({
@@ -34,11 +36,26 @@ function Document({
   title?: string;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         {title ? <title>{title}</title> : null}
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('inlits-theme');
+                if (theme) {
+                  document.documentElement.classList.add(theme);
+                } else {
+                  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  document.documentElement.classList.add(isDark ? 'dark' : 'light');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
       </head>
       <body className="min-h-full bg-background text-foreground">
         {children}
