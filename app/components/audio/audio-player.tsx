@@ -108,8 +108,28 @@ export function AudioPlayer({
         : currentAudio.audioUrl;
 
       if (audioRef.current && source) {
-        const previousSrc = audioRef.current.src;
-        const isSameSource = previousSrc === source;
+        const normalizeUrl = (url: string) => {
+          try {
+            return new URL(url).href;
+          } catch {
+            return url;
+          }
+        };
+
+        const currentSrc = audioRef.current.src ? normalizeUrl(audioRef.current.src) : '';
+        const newSrc = normalizeUrl(source);
+        const isSameSource = currentSrc === newSrc;
+
+        if (isSameSource) {
+          if (currentAudio.currentTime && currentAudio.currentTime > 0 && Math.abs(audioRef.current.currentTime - currentAudio.currentTime) > 2) {
+            audioRef.current.currentTime = currentAudio.currentTime;
+          }
+
+          if (!audioRef.current.paused && !isPlaying) {
+            setIsPlaying(true);
+          }
+          return;
+        }
 
         audioRef.current.src = source;
         audioRef.current.load();
@@ -144,7 +164,7 @@ export function AudioPlayer({
       console.error('Error setting audio source:', err);
       setError('Failed to load audio source');
     }
-  }, [currentAudio, currentChapter]);
+  }, [currentAudio, currentChapter, isPlaying]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -513,68 +533,48 @@ export function AudioPlayer({
           </Link>
 
           <div className="flex items-center gap-1">
-            {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-              <button
-                onClick={previousChapter}
-                disabled={currentChapter === 0 || isLoading}
-                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all disabled:opacity-50"
-                title="Previous Chapter"
-              >
-                <PreviousChapter className="w-3 h-3" />
-              </button>
-            )}
             <button
               onClick={() => skipTime(-15)}
-              className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               disabled={isLoading}
               title="Skip back 15s"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-5 h-5" />
             </button>
             <button
               onClick={togglePlay}
               disabled={isLoading || (!currentAudio?.audioUrl && !(currentAudio?.chapters && currentAudio.chapters.length > 0))}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
             >
               {isLoading ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : isPlaying ? (
-                <Pause className="w-3 h-3" />
+                <Pause className="w-5 h-5" />
               ) : (
-                <Play className="w-3 h-3 ml-0.5" />
+                <Play className="w-5 h-5 ml-0.5" />
               )}
             </button>
             <button
               onClick={() => skipTime(30)}
-              className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               disabled={isLoading}
               title="Skip forward 30s"
             >
-              <RotateCw className="w-3 h-3" />
+              <RotateCw className="w-5 h-5" />
             </button>
-            {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-              <button
-                onClick={nextChapter}
-                disabled={currentChapter === currentAudio.chapters.length - 1 || isLoading}
-                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all disabled:opacity-50"
-                title="Next Chapter"
-              >
-                <NextChapter className="w-3 h-3" />
-              </button>
-            )}
           </div>
 
           <div className="flex items-center gap-1">
             <div className="relative">
               <button
                 onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
-                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                 title="Volume"
               >
-                {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
               {showVolumeSlider && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-popover border rounded-lg shadow-xl">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-popover border rounded-lg shadow-xl">
                   <input
                     type="range"
                     min="0"
@@ -582,7 +582,7 @@ export function AudioPlayer({
                     step="0.01"
                     value={volume}
                     onChange={handleVolumeChange}
-                    className="w-20 h-1 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+                    className="h-24 w-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-lg"
                     style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical' }}
                   />
                 </div>
@@ -590,27 +590,27 @@ export function AudioPlayer({
             </div>
             <button
               onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
-              className={`p-1 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+              className={`p-1.5 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
               title={`${listeningMode.charAt(0).toUpperCase() + listeningMode.slice(1)} Mode`}
             >
               {getModeIcon(listeningMode)}
             </button>
             <button
               onClick={() => { closeAllExcept('settings'); setShowSettings(!showSettings); }}
-              className={`p-1 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+              className={`p-1.5 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
               disabled={isLoading}
               title="Player Settings"
             >
-              <Settings className="w-3 h-3" />
+              <Settings className="w-5 h-5" />
             </button>
             {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
               <button
                 onClick={() => { closeAllExcept('playlist'); setShowPlaylist(!showPlaylist); }}
-                className={`p-1 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+                className={`p-1.5 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
                 disabled={isLoading}
                 title="Chapters"
               >
-                <List className="w-3 h-3" />
+                <List className="w-5 h-5" />
               </button>
             )}
             {!isMainPlayerPage && (
@@ -658,23 +658,13 @@ export function AudioPlayer({
             </div>
 
             <div className="flex items-center justify-center gap-4 flex-1">
-              {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-                <button
-                  onClick={previousChapter}
-                  disabled={currentChapter === 0 || isLoading}
-                  className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-current"
-                  title="Previous Chapter"
-                >
-                  <PreviousChapter className="w-5 h-5" />
-                </button>
-              )}
               <button
                 onClick={() => skipTime(-15)}
                 className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                 disabled={isLoading}
                 title="Skip back 15s"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-6 h-6" />
               </button>
               <button
                 onClick={togglePlay}
@@ -682,11 +672,11 @@ export function AudioPlayer({
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-6 h-6 animate-spin" />
                 ) : isPlaying ? (
-                  <Pause className="w-5 h-5" />
+                  <Pause className="w-6 h-6" />
                 ) : (
-                  <Play className="w-5 h-5 ml-0.5" />
+                  <Play className="w-6 h-6 ml-0.5" />
                 )}
               </button>
               <button
@@ -695,18 +685,8 @@ export function AudioPlayer({
                 disabled={isLoading}
                 title="Skip forward 30s"
               >
-                <RotateCw className="w-5 h-5" />
+                <RotateCw className="w-6 h-6" />
               </button>
-              {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-                <button
-                  onClick={nextChapter}
-                  disabled={currentChapter === currentAudio.chapters.length - 1 || isLoading}
-                  className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-current"
-                  title="Next Chapter"
-                >
-                  <NextChapter className="w-5 h-5" />
-                </button>
-              )}
             </div>
 
             <div className="flex items-center gap-3 flex-shrink-0 justify-end w-80">
@@ -724,6 +704,29 @@ export function AudioPlayer({
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
+                    className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                    title="Volume"
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </button>
+                  {showVolumeSlider && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-popover border rounded-lg shadow-xl">
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        className="h-24 w-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-lg"
+                        style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical' }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <div className="relative">
                   <button
                     onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
