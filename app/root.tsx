@@ -41,6 +41,10 @@ function Document({
         {title ? <title>{title}</title> : null}
         <Meta />
         <Links />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

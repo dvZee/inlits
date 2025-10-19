@@ -108,11 +108,18 @@ export function AudioPlayer({
         : currentAudio.audioUrl;
 
       if (audioRef.current && source) {
+        const previousSrc = audioRef.current.src;
+        const isSameSource = previousSrc === source;
+
         audioRef.current.src = source;
         audioRef.current.load();
-        
+
         const handleCanPlayThrough = () => {
           if (audioRef.current) {
+            if (currentAudio.currentTime && currentAudio.currentTime > 0) {
+              audioRef.current.currentTime = currentAudio.currentTime;
+            }
+
             audioRef.current.play()
               .then(() => {
                 setIsPlaying(true);
@@ -124,9 +131,9 @@ export function AudioPlayer({
               });
           }
         };
-        
+
         audioRef.current.addEventListener('canplaythrough', handleCanPlayThrough, { once: true });
-        
+
         return () => {
           if (audioRef.current) {
             audioRef.current.removeEventListener('canplaythrough', handleCanPlayThrough);
@@ -149,7 +156,20 @@ export function AudioPlayer({
     const handleLoadStart = () => { setIsLoading(true); setError(null); };
     const handleCanPlay = () => { setIsLoading(false); };
     const handleLoadedMetadata = () => { setDuration(audio.duration); };
-    const handleTimeUpdate = () => { setCurrentTime(audio.currentTime); };
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+      if (currentAudio) {
+        try {
+          const savedState = JSON.parse(localStorage.getItem('audioState') || '{}');
+          if (savedState.currentAudio) {
+            savedState.currentAudio.currentTime = audio.currentTime;
+            localStorage.setItem('audioState', JSON.stringify(savedState));
+          }
+        } catch (e) {
+          console.error('Error saving playback position:', e);
+        }
+      }
+    };
     const handleEnded = () => {
       if (currentAudio?.chapters && currentChapter < currentAudio.chapters.length - 1) {
         if (settings.autoplay || settings.repeat === 'all') {
@@ -545,6 +565,29 @@ export function AudioPlayer({
           </div>
 
           <div className="flex items-center gap-1">
+            <div className="relative">
+              <button
+                onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
+                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                title="Volume"
+              >
+                {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+              </button>
+              {showVolumeSlider && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-popover border rounded-lg shadow-xl">
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    className="w-20 h-1 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
+                    style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical' }}
+                  />
+                </div>
+              )}
+            </div>
             <button
               onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
               className={`p-1 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
@@ -552,7 +595,7 @@ export function AudioPlayer({
             >
               {getModeIcon(listeningMode)}
             </button>
-            <button 
+            <button
               onClick={() => { closeAllExcept('settings'); setShowSettings(!showSettings); }}
               className={`p-1 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
               disabled={isLoading}

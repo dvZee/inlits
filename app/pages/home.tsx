@@ -638,9 +638,17 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
   if (loading && !initialLoadComplete) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading content...</p>
+        <div className="flex flex-col items-center gap-6 max-w-2xl px-6">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p
+            className="text-center text-xl leading-relaxed text-foreground"
+            style={{
+              fontFamily: "'Noto Nastaliq Urdu', serif",
+              direction: 'rtl'
+            }}
+          >
+            انلٹس میں خوش آمدید! ہمارے کتاب دوستی کے مشن کا حصہ بن کر ہمیں خوشی ہوگی۔ براہ کرم سبسکرائب کریں اور اپنی رائے سے ضرور آگاہ کریں کہ ہم اس پلیٹ فارم کو مزید بہتر کیسے بنا سکتے ہیں۔
+          </p>
         </div>
       </div>
     );
