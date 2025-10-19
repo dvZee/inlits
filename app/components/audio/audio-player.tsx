@@ -99,8 +99,21 @@ export function AudioPlayer({
   const [hoverTime, setHoverTime] = React.useState<number | null>(null);
   const [sleepTimerRemaining, setSleepTimerRemaining] = React.useState(0);
 
+  const hasInitialized = React.useRef(false);
+
   React.useEffect(() => {
     if (!currentAudio) return;
+
+    const isChapterLocked = !user && currentChapter > 0 && currentAudio.chapters && currentAudio.chapters.length > 0;
+
+    if (isChapterLocked) {
+      setError('Please sign in to access this chapter');
+      setIsPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      return;
+    }
 
     try {
       const source = currentAudio.chapters && currentAudio.chapters.length > 0 && currentAudio.chapters[currentChapter]
@@ -127,10 +140,18 @@ export function AudioPlayer({
 
           if (!audioRef.current.paused && !isPlaying) {
             setIsPlaying(true);
+          } else if (audioRef.current.paused && isPlaying) {
+            audioRef.current.play().catch(err => console.error('Error resuming:', err));
           }
+
+          if (hasInitialized.current) {
+            return;
+          }
+          hasInitialized.current = true;
           return;
         }
 
+        hasInitialized.current = false;
         audioRef.current.src = source;
         audioRef.current.load();
 
@@ -144,6 +165,7 @@ export function AudioPlayer({
               .then(() => {
                 setIsPlaying(true);
                 setError(null);
+                hasInitialized.current = true;
               })
               .catch(err => {
                 console.error('Error auto-playing:', err);
@@ -192,8 +214,16 @@ export function AudioPlayer({
     };
     const handleEnded = () => {
       if (currentAudio?.chapters && currentChapter < currentAudio.chapters.length - 1) {
+        const nextChapterIndex = currentChapter + 1;
+        const isNextChapterLocked = !user && nextChapterIndex > 0;
+
+        if (isNextChapterLocked) {
+          setIsPlaying(false);
+          return;
+        }
+
         if (settings.autoplay || settings.repeat === 'all') {
-          setCurrentChapter(currentChapter + 1);
+          setCurrentChapter(nextChapterIndex);
         } else {
           setIsPlaying(false);
         }
