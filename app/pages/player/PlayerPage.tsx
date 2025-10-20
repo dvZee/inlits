@@ -299,6 +299,8 @@ export function PlayerPage() {
         setCurrentAudio({
           title: contentData.title,
           author: contentData.author.name,
+          authorId: contentData.author.id,
+          authorUsername: contentData.author.username,
           thumbnail: contentData.cover_url || `https://source.unsplash.com/random/800x800?${contentType}&sig=${contentId}`,
           contentUrl: `/player/${contentType}-${contentId}`,
           chapters: contentData.chapters,
@@ -779,8 +781,7 @@ export function PlayerPage() {
   };
 
   const handleProfileClick = (userId: string, username: string) => {
-   // Navigate to creator profile - check if user is a creator or consumer
-    navigate(`/creator/${username}`);
+    navigate(`/user/${username}`);
   };
 
   if (!contentType || !contentId) {
