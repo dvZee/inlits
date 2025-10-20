@@ -112,8 +112,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     { id: "17", name: "Travel", slug: "travel" },
     { id: "19", name: "Science", slug: "science" },
     { id: "20", name: "Health", slug: "health" },
-    { id: "12", name: "Science Fiction", slug: "science-fiction" },
-    
+    { id: "12", name: "Science Fiction", slug: "science-fiction" }
   ];
 
   // Check if the current page is a static page that should show the footer
