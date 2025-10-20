@@ -111,7 +111,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     { id: "15", name: "Religion", slug: "religion" },
     { id: "16", name: "Spirituality", slug: "spirituality" },
     { id: "17", name: "Travel", slug: "travel" },
-    { id: "18", name: "Mathematics", slug: "mathematics" },
     { id: "19", name: "Science", slug: "science" },
     { id: "20", name: "Health", slug: "health" },
   ];
