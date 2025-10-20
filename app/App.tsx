@@ -105,7 +105,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     { id: "9", name: "Philosophy", slug: "philosophy" },
     { id: "10", name: "History", slug: "history" },
     { id: "11", name: "Politics", slug: "politics" },
-    { id: "12", name: "Science Fiction", slug: "science-fiction" },
     { id: "13", name: "Technology", slug: "technology" },
     { id: "14", name: "Biographies", slug: "biographies" },
     { id: "15", name: "Religion", slug: "religion" },
@@ -113,6 +112,8 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     { id: "17", name: "Travel", slug: "travel" },
     { id: "19", name: "Science", slug: "science" },
     { id: "20", name: "Health", slug: "health" },
+    { id: "12", name: "Science Fiction", slug: "science-fiction" },
+    
   ];
 
   // Check if the current page is a static page that should show the footer
