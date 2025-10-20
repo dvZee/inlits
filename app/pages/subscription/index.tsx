@@ -23,9 +23,9 @@ const plans: SubscriptionPlan[] = [
     period: 'weekly',
     description: 'Perfect for trying out premium features',
     features: [
-      'Unlimited entertainment and live sports',
-      'HD Video Quality',
-      'Stream on up to 2 devices',
+      'Unlimited audiobooks and podcasts',
+      'High-quality audio streaming',
+      'Listen on up to 2 devices',
       'Ad-free experience',
       'Premium content library'
     ]
@@ -38,9 +38,9 @@ const plans: SubscriptionPlan[] = [
     description: 'Most popular choice for regular users',
     popular: true,
     features: [
-      'Unlimited entertainment and live sports',
-      'HD Video Quality',
-      'Stream on up to 5 devices',
+      'Unlimited audiobooks and podcasts',
+      'High-quality audio streaming',
+      'Listen on up to 5 devices',
       'Ad-free experience',
       'Premium content library',
       'Offline downloads',
@@ -56,9 +56,9 @@ const plans: SubscriptionPlan[] = [
     period: 'annual',
     description: 'Best value with maximum savings',
     features: [
-      'Unlimited entertainment and live sports',
-      'HD Video Quality',
-      'Stream on up to 5 devices',
+      'Unlimited audiobooks and podcasts',
+      'High-quality audio streaming',
+      'Listen on up to 5 devices',
       'Ad-free experience',
       'Premium content library',
       'Offline downloads',
@@ -168,7 +168,7 @@ export function SubscriptionPage() {
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full z-10">
                   Most Popular
                 </div>
               )}
@@ -214,71 +214,6 @@ export function SubscriptionPage() {
           ))}
         </div>
 
-        {/* Features Comparison */}
-        <div className="bg-card border rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6 text-center">Unlocking All Content</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Premium Features */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Crown className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Premium</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Ad-free & Unlimited Content</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">HD Video Quality</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Stream on up to 5 devices</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Includes Casting & PIP</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Offline downloads</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Priority support</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Free Features */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-5 h-5 text-muted-foreground" />
-                <h3 className="font-semibold">Free</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Limited Content Access</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Standard Video Quality</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Include Advertisements</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Limited Features</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Continue Button */}
         <div className="text-center">
