@@ -6,7 +6,8 @@ import {
   ChevronDown,
   X,
   BookOpen,
-  User
+  User,
+  Crown
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/lib/auth";
@@ -87,7 +88,16 @@ export function Navbar() {
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
-
+          {/* Upgrade Button - Only show for logged-in users */}
+          {user && (
+            <Link
+              to="/subscription"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors rounded-md bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm"
+            >
+              <Crown className="w-4 h-4" />
+              Upgrade
+            </Link>
+          )}
 
           {/* Theme Toggle */}
           <button
@@ -149,6 +159,14 @@ export function Navbar() {
                       Dashboard
                     </Link>
                   )}
+                  <Link
+                    to="/subscription"
+                    onClick={() => setShowUserDropdown(false)}
+                    className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                  >
+                    <Crown className="w-4 h-4" />
+                    Upgrade to Premium
+                  </Link>
                   <button
                     onClick={handleSettingsClick}
                     className="w-full px-2 py-1.5 text-left text-sm rounded-md hover:bg-primary/5"

@@ -40,6 +40,8 @@ interface AudioPlayerProps {
   thumbnail: string;
   type: 'audiobook' | 'podcast';
   isMobile?: boolean;
+  authorId?: string;
+  authorUsername?: string;
 }
 
 interface Settings {
@@ -53,12 +55,14 @@ interface Settings {
 
 type ListeningMode = 'normal' | 'driving' | 'walking' | 'sleep' | 'workout';
 
-export function AudioPlayer({ 
-  title, 
-  author, 
+export function AudioPlayer({
+  title,
+  author,
   thumbnail,
   type,
-  isMobile = false
+  isMobile = false,
+  authorId,
+  authorUsername
 }: AudioPlayerProps) {
   const { user } = useAuth();
   const { 
@@ -539,28 +543,41 @@ export function AudioPlayer({
 
       {isMobile ? (
         <div className="px-2 py-1 flex items-center justify-between">
-          <Link 
-            to={currentAudio?.contentUrl || '/'}
-            className="flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <div className="w-6 h-6 rounded overflow-hidden bg-muted flex-shrink-0">
-              <ImageLoader
-                src={thumbnail}
-                alt={title}
-                className="w-full h-full object-cover"
-                lowQualityUrl={`${thumbnail}?w=50`}
-                fallback={
-                  <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                    <Play className="w-2 h-2 text-primary" />
-                  </div>
-                }
-              />
-            </div>
+          <div className="flex items-center gap-1 min-w-0 flex-1">
+            <Link
+              to={currentAudio?.contentUrl || '/'}
+              className="flex items-center gap-1 hover:text-primary transition-colors flex-shrink-0"
+            >
+              <div className="w-6 h-6 rounded overflow-hidden bg-muted">
+                <ImageLoader
+                  src={thumbnail}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                  lowQualityUrl={`${thumbnail}?w=50`}
+                  fallback={
+                    <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                      <Play className="w-2 h-2 text-primary" />
+                    </div>
+                  }
+                />
+              </div>
+            </Link>
             <div className="min-w-0 flex-1">
-              <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
-              <p className="text-xs text-muted-foreground line-clamp-1">{author}</p>
+              <Link
+                to={currentAudio?.contentUrl || '/'}
+                className="block hover:text-primary transition-colors"
+              >
+                <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
+              </Link>
+              <Link
+                to={authorUsername ? `/user/${authorUsername}` : '#'}
+                className="text-xs text-muted-foreground line-clamp-1 hover:text-primary transition-colors"
+                onClick={(e) => !authorUsername && e.preventDefault()}
+              >
+                {author}
+              </Link>
             </div>
-          </Link>
+          </div>
 
           <div className="flex items-center gap-1">
             <button
@@ -658,11 +675,11 @@ export function AudioPlayer({
         <div className="container mx-auto px-4 py-4 h-full">
           <div className="flex items-center h-full">
             <div className="flex items-center gap-3 min-w-0 w-80 flex-shrink-0">
-              <Link 
+              <Link
                 to={currentAudio?.contentUrl || '/'}
-                className="flex items-center gap-3 hover:text-primary transition-colors min-w-0"
+                className="flex items-center gap-3 hover:text-primary transition-colors flex-shrink-0"
               >
-                <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0 shadow-md">
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted shadow-md">
                   <ImageLoader
                     src={thumbnail}
                     alt={title}
@@ -675,16 +692,27 @@ export function AudioPlayer({
                     }
                   />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold line-clamp-1 text-sm">{title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{author}</p>
-                  {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-                    <p className="text-xs text-primary">
-                      Chapter {currentChapter + 1} of {currentAudio.chapters.length}
-                    </p>
-                  )}
-                </div>
               </Link>
+              <div className="min-w-0 flex-1">
+                <Link
+                  to={currentAudio?.contentUrl || '/'}
+                  className="block hover:text-primary transition-colors"
+                >
+                  <h3 className="font-semibold line-clamp-1 text-sm">{title}</h3>
+                </Link>
+                <Link
+                  to={authorUsername ? `/user/${authorUsername}` : '#'}
+                  className="text-xs text-muted-foreground line-clamp-1 hover:text-primary transition-colors block"
+                  onClick={(e) => !authorUsername && e.preventDefault()}
+                >
+                  {author}
+                </Link>
+                {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
+                  <p className="text-xs text-primary">
+                    Chapter {currentChapter + 1} of {currentAudio.chapters.length}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-4 flex-1">

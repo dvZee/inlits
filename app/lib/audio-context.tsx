@@ -6,6 +6,8 @@ interface AudioContextType {
   currentAudio: {
     title: string;
     author: string;
+    authorId?: string;
+    authorUsername?: string;
     thumbnail: string;
     contentUrl: string;
     audioUrl?: string;
@@ -16,13 +18,13 @@ interface AudioContextType {
       duration: string;
     }>;
     type: 'audiobook' | 'podcast';
-    currentTime?: number; // Store current playback position
+    currentTime?: number;
   } | null;
   setCurrentAudio: (audio: AudioContextType['currentAudio']) => void;
   isMainPlayerPage: boolean;
   currentChapter: number;
   setCurrentChapter: (index: number) => void;
-  updateCurrentTime: (time: number) => void; // New function to update current time
+  updateCurrentTime: (time: number) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);

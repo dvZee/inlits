@@ -189,6 +189,8 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         <AudioPlayer
           title={currentAudio.title}
           author={currentAudio.author}
+          authorId={currentAudio.authorId}
+          authorUsername={currentAudio.authorUsername}
           thumbnail={currentAudio.thumbnail}
           type={currentAudio.type}
           isMobile={isMobile}
