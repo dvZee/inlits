@@ -27,11 +27,39 @@ interface PaymentMethod {
 
 const paymentMethods: PaymentMethod[] = [
   {
-    id: 'safepay',
-    name: 'Safepay',
+    id: 'card',
+    name: 'Credit/Debit Card',
     icon: <CreditCard className="w-6 h-6" />,
     type: 'card',
-    description: 'Secure checkout with Safepay - Cards, Wallets & More'
+    description: 'Visa, Mastercard, and local bank cards'
+  },
+  {
+    id: 'easypaisa',
+    name: 'Easypaisa',
+    icon: <Smartphone className="w-6 h-6" />,
+    type: 'wallet',
+    description: 'Pay with your Easypaisa mobile wallet'
+  },
+  {
+    id: 'jazzcash',
+    name: 'JazzCash',
+    icon: <Smartphone className="w-6 h-6" />,
+    type: 'wallet',
+    description: 'Pay with your JazzCash mobile wallet'
+  },
+  {
+    id: 'zindigi',
+    name: 'Zindigi',
+    icon: <Wallet className="w-6 h-6" />,
+    type: 'wallet',
+    description: 'Pay with your Zindigi digital wallet'
+  },
+  {
+    id: 'upaisa',
+    name: 'UPaisa',
+    icon: <Smartphone className="w-6 h-6" />,
+    type: 'wallet',
+    description: 'Pay with your UPaisa mobile wallet'
   }
 ];
 
@@ -84,8 +112,41 @@ export function SubscriptionPaymentPage() {
   };
 
 
+  const validatePaymentData = () => {
+    if (!selectedMethod) {
+      setError('Please select a payment method');
+      return false;
+    }
+
+    if (selectedMethod.type === 'wallet') {
+      if (!paymentData.mobileNumber) {
+        setError('Mobile number is required');
+        return false;
+      }
+      if (!/^03\d{9}$/.test(paymentData.mobileNumber)) {
+        setError('Please enter a valid Pakistani mobile number (03XXXXXXXXX)');
+        return false;
+      }
+    }
+
+    if (selectedMethod.type === 'card') {
+      if (!paymentData.cardNumber || !paymentData.expiryMonth || !paymentData.expiryYear || !paymentData.cvv) {
+        setError('Please fill in all card details');
+        return false;
+      }
+      if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
+        setError('Please enter a valid card number');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handlePayment = async () => {
     if (!user || !selectedPlan || !selectedMethod) return;
+
+    if (!validatePaymentData()) return;
 
     setLoading(true);
     setError(null);
@@ -127,7 +188,7 @@ export function SubscriptionPaymentPage() {
           user_id: user.id,
           plan_id: planId,
           amount: selectedPlan.price,
-          payment_method: 'safepay',
+          payment_method: selectedMethod.id,
           status: 'pending',
           transaction_id: result.tracker
         });
@@ -229,10 +290,121 @@ export function SubscriptionPaymentPage() {
 
             {selectedMethod && (
               <div className="bg-card border rounded-lg p-6">
-                <h3 className="font-semibold mb-4">Safepay Checkout</h3>
-                <p className="text-sm text-muted-foreground">
-                  You'll be redirected to Safepay's secure checkout page where you can pay using credit/debit cards, mobile wallets, or bank transfers.
-                </p>
+                <h3 className="font-semibold mb-4">Payment Details</h3>
+
+                {selectedMethod.type === 'wallet' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="mobile">Mobile Number</Label>
+                      <Input
+                        id="mobile"
+                        type="tel"
+                        value={paymentData.mobileNumber}
+                        onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
+                        placeholder="03001234567"
+                        maxLength={11}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter your {selectedMethod.name} registered mobile number
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedMethod.type === 'card' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Input
+                        id="cardNumber"
+                        value={paymentData.cardNumber}
+                        onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
+                        placeholder="1234 5678 9012 3456"
+                        maxLength={19}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiryMonth">Month</Label>
+                        <select
+                          id="expiryMonth"
+                          value={paymentData.expiryMonth}
+                          onChange={(e) => handleInputChange('expiryMonth', e.target.value)}
+                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">MM</option>
+                          {Array.from({ length: 12 }, (_, i) => (
+                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                              {String(i + 1).padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="expiryYear">Year</Label>
+                        <select
+                          id="expiryYear"
+                          value={paymentData.expiryYear}
+                          onChange={(e) => handleInputChange('expiryYear', e.target.value)}
+                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">YY</option>
+                          {Array.from({ length: 10 }, (_, i) => {
+                            const year = new Date().getFullYear() + i;
+                            return (
+                              <option key={year} value={year.toString().slice(-2)}>
+                                {year.toString().slice(-2)}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="cvv">CVV</Label>
+                        <Input
+                          id="cvv"
+                          value={paymentData.cvv}
+                          onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
+                          placeholder="123"
+                          maxLength={4}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cardHolderName">Card Holder Name</Label>
+                      <Input
+                        id="cardHolderName"
+                        value={paymentData.cardHolderName}
+                        onChange={(e) => handleInputChange('cardHolderName', e.target.value)}
+                        placeholder="John Doe"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cnic">CNIC Number (Optional)</Label>
+                      <Input
+                        id="cnic"
+                        value={paymentData.cnicNumber}
+                        onChange={(e) => handleInputChange('cnicNumber', e.target.value.replace(/\D/g, ''))}
+                        placeholder="1234567890123"
+                        maxLength={13}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        May be required for verification purposes
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 p-3 bg-primary/5 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    Your payment will be processed securely through Safepay
+                  </p>
+                </div>
               </div>
             )}
 
