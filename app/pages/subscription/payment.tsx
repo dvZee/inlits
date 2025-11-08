@@ -27,6 +27,13 @@ interface PaymentMethod {
 
 const paymentMethods: PaymentMethod[] = [
   {
+    id: 'safepay',
+    name: 'Safepay',
+    icon: <CreditCard className="w-6 h-6" />,
+    type: 'card',
+    description: 'Secure checkout with Safepay - Cards, Wallets & More'
+  },
+  {
     id: 'easypaisa',
     name: 'Easypaisa',
     icon: <Smartphone className="w-6 h-6" />,
@@ -144,18 +151,78 @@ export function SubscriptionPaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!validatePaymentData() || !user || !selectedPlan || !selectedMethod) return;
+    if (!user || !selectedPlan || !selectedMethod) return;
 
     const method = selectedMethod;
+
+    if (method.id === 'safepay') {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const orderId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const safepayRequest = {
+          amount: selectedPlan.price * 100,
+          currency: "PKR",
+          order_id: orderId,
+          customer_email: user.email || 'customer@example.com',
+          customer_name: user.user_metadata?.full_name || 'Customer',
+          source: 'custom'
+        };
+
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/initiate-safepay-payment`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify(safepayRequest)
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Payment initiation failed');
+        }
+
+        await supabase
+          .from('payment_transactions')
+          .insert({
+            order_id: orderId,
+            user_id: user.id,
+            plan_id: planId,
+            amount: selectedPlan.price,
+            payment_method: 'safepay',
+            status: 'pending',
+            transaction_id: result.tracker
+          });
+
+        if (result.checkout_url) {
+          window.location.href = result.checkout_url;
+        } else {
+          throw new Error('No checkout URL received');
+        }
+
+      } catch (err) {
+        console.error('Safepay error:', err);
+        setError(err instanceof Error ? err.message : 'Payment failed');
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (!validatePaymentData()) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      // Generate unique order ID
       const orderId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Prepare payment data for PayFast
+
       const paymentRequest = {
         basket_id: orderId,
         txnamt: selectedPlan.price,
@@ -163,9 +230,8 @@ export function SubscriptionPaymentPage() {
         customer_mobile_no: paymentData.mobileNumber || '03001234567',
         order_date: new Date().toISOString().split('T')[0],
         transaction_id: orderId,
-        // Add payment method specific data
         ...(method.type === 'card' && {
-          account_type_id: '1', // Card payment type
+          account_type_id: '1',
           card_number: paymentData.cardNumber.replace(/\s/g, ''),
           expiry_month: paymentData.expiryMonth,
           expiry_year: paymentData.expiryYear,
@@ -173,12 +239,11 @@ export function SubscriptionPaymentPage() {
           cnic_number: paymentData.cnicNumber
         }),
         ...(method.type === 'wallet' && {
-          account_type_id: method.id === 'easypaisa' ? '2' : '3', // Different IDs for different wallets
+          account_type_id: method.id === 'easypaisa' ? '2' : '3',
           account_number: paymentData.mobileNumber
         })
       };
 
-      // Call the Edge Function
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/initiate-payfast-payment`,
         {
@@ -197,7 +262,6 @@ export function SubscriptionPaymentPage() {
         throw new Error(result.error || 'Payment initiation failed');
       }
 
-      // Store payment attempt in database
       await supabase
         .from('payment_transactions')
         .insert({
@@ -209,7 +273,6 @@ export function SubscriptionPaymentPage() {
           status: 'pending'
         });
 
-      // Navigate to verification page
       navigate(`/subscription/verify?order=${orderId}&method=${method.id}`);
 
     } catch (err) {
@@ -302,10 +365,10 @@ export function SubscriptionPaymentPage() {
             </div>
 
             {/* Payment Details Form */}
-            {selectedMethod && (
+            {selectedMethod && selectedMethod.id !== 'safepay' && (
               <div className="bg-card border rounded-lg p-6">
                 <h3 className="font-semibold mb-4">Payment Details</h3>
-                
+
                 {selectedMethod.type === 'wallet' && (
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -500,7 +563,7 @@ export function SubscriptionPaymentPage() {
             <button
               onClick={handlePayment}
               disabled={!selectedMethod || loading}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
