@@ -32,41 +32,6 @@ const paymentMethods: PaymentMethod[] = [
     icon: <CreditCard className="w-6 h-6" />,
     type: 'card',
     description: 'Secure checkout with Safepay - Cards, Wallets & More'
-  },
-  {
-    id: 'easypaisa',
-    name: 'Easypaisa',
-    icon: <Smartphone className="w-6 h-6" />,
-    type: 'wallet',
-    description: 'Pay with your Easypaisa mobile wallet'
-  },
-  {
-    id: 'jazzcash',
-    name: 'JazzCash',
-    icon: <Smartphone className="w-6 h-6" />,
-    type: 'wallet',
-    description: 'Pay with your JazzCash mobile wallet'
-  },
-  {
-    id: 'card',
-    name: 'Credit/Debit Card',
-    icon: <CreditCard className="w-6 h-6" />,
-    type: 'card',
-    description: 'Visa, Mastercard, and local bank cards'
-  },
-  {
-    id: 'zindigi',
-    name: 'Zindigi',
-    icon: <Wallet className="w-6 h-6" />,
-    type: 'wallet',
-    description: 'Pay with your Zindigi digital wallet'
-  },
-  {
-    id: 'upaisa',
-    name: 'UPaisa',
-    icon: <Smartphone className="w-6 h-6" />,
-    type: 'wallet',
-    description: 'Pay with your UPaisa mobile wallet'
   }
 ];
 
@@ -118,104 +83,9 @@ export function SubscriptionPaymentPage() {
     setPaymentData(prev => ({ ...prev, [field]: value }));
   };
 
-  const validatePaymentData = () => {
-    const method = selectedMethod;
-    if (!method) {
-      setError('Please select a payment method');
-      return false;
-    }
-
-    if (method.type === 'wallet') {
-      if (!paymentData.mobileNumber) {
-        setError('Mobile number is required');
-        return false;
-      }
-      if (!/^03\d{9}$/.test(paymentData.mobileNumber)) {
-        setError('Please enter a valid Pakistani mobile number (03XXXXXXXXX)');
-        return false;
-      }
-    }
-
-    if (method.type === 'card') {
-      if (!paymentData.cardNumber || !paymentData.expiryMonth || !paymentData.expiryYear || !paymentData.cvv) {
-        setError('Please fill in all card details');
-        return false;
-      }
-      if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
-        setError('Please enter a valid card number');
-        return false;
-      }
-    }
-
-    return true;
-  };
 
   const handlePayment = async () => {
     if (!user || !selectedPlan || !selectedMethod) return;
-
-    const method = selectedMethod;
-
-    if (method.id === 'safepay') {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const orderId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-        const safepayRequest = {
-          amount: selectedPlan.price * 100,
-          currency: "PKR",
-          order_id: orderId,
-          customer_email: user.email || 'customer@example.com',
-          customer_name: user.user_metadata?.full_name || 'Customer',
-          source: 'custom'
-        };
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/initiate-safepay-payment`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify(safepayRequest)
-          }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Payment initiation failed');
-        }
-
-        await supabase
-          .from('payment_transactions')
-          .insert({
-            order_id: orderId,
-            user_id: user.id,
-            plan_id: planId,
-            amount: selectedPlan.price,
-            payment_method: 'safepay',
-            status: 'pending',
-            transaction_id: result.tracker
-          });
-
-        if (result.checkout_url) {
-          window.location.href = result.checkout_url;
-        } else {
-          throw new Error('No checkout URL received');
-        }
-
-      } catch (err) {
-        console.error('Safepay error:', err);
-        setError(err instanceof Error ? err.message : 'Payment failed');
-        setLoading(false);
-      }
-      return;
-    }
-
-    if (!validatePaymentData()) return;
 
     setLoading(true);
     setError(null);
@@ -223,42 +93,30 @@ export function SubscriptionPaymentPage() {
     try {
       const orderId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      const paymentRequest = {
-        basket_id: orderId,
-        txnamt: selectedPlan.price,
-        customer_email_address: user.email,
-        customer_mobile_no: paymentData.mobileNumber || '03001234567',
-        order_date: new Date().toISOString().split('T')[0],
-        transaction_id: orderId,
-        ...(method.type === 'card' && {
-          account_type_id: '1',
-          card_number: paymentData.cardNumber.replace(/\s/g, ''),
-          expiry_month: paymentData.expiryMonth,
-          expiry_year: paymentData.expiryYear,
-          cvv: paymentData.cvv,
-          cnic_number: paymentData.cnicNumber
-        }),
-        ...(method.type === 'wallet' && {
-          account_type_id: method.id === 'easypaisa' ? '2' : '3',
-          account_number: paymentData.mobileNumber
-        })
+      const safepayRequest = {
+        amount: selectedPlan.price * 100,
+        currency: "PKR",
+        order_id: orderId,
+        customer_email: user.email || 'customer@example.com',
+        customer_name: user.user_metadata?.full_name || 'Customer',
+        source: 'custom'
       };
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/initiate-payfast-payment`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/initiate-safepay-payment`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
           },
-          body: JSON.stringify(paymentRequest)
+          body: JSON.stringify(safepayRequest)
         }
       );
 
       const result = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !result.success) {
         throw new Error(result.error || 'Payment initiation failed');
       }
 
@@ -269,14 +127,19 @@ export function SubscriptionPaymentPage() {
           user_id: user.id,
           plan_id: planId,
           amount: selectedPlan.price,
-          payment_method: method.id,
-          status: 'pending'
+          payment_method: 'safepay',
+          status: 'pending',
+          transaction_id: result.tracker
         });
 
-      navigate(`/subscription/verify?order=${orderId}&method=${method.id}`);
+      if (result.checkout_url) {
+        window.location.href = result.checkout_url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
 
     } catch (err) {
-      console.error('Payment error:', err);
+      console.error('Safepay error:', err);
       setError(err instanceof Error ? err.message : 'Payment failed');
     } finally {
       setLoading(false);
@@ -364,136 +227,15 @@ export function SubscriptionPaymentPage() {
               ))}
             </div>
 
-            {/* Payment Details Form */}
-            {selectedMethod && selectedMethod.id !== 'safepay' && (
+            {selectedMethod && (
               <div className="bg-card border rounded-lg p-6">
-                <h3 className="font-semibold mb-4">Payment Details</h3>
-
-                {selectedMethod.type === 'wallet' && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile">Mobile Number</Label>
-                      <Input
-                        id="mobile"
-                        type="tel"
-                        value={paymentData.mobileNumber}
-                        onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
-                        placeholder="03001234567"
-                        maxLength={11}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Enter your {selectedMethod.name} registered mobile number
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {selectedMethod.type === 'card' && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
-                        id="cardNumber"
-                        value={paymentData.cardNumber}
-                        onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
-                        placeholder="1234 5678 9012 3456"
-                        maxLength={19}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="expiryMonth">Month</Label>
-                        <select
-                          id="expiryMonth"
-                          value={paymentData.expiryMonth}
-                          onChange={(e) => handleInputChange('expiryMonth', e.target.value)}
-                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                        >
-                          <option value="">MM</option>
-                          {Array.from({ length: 12 }, (_, i) => (
-                            <option key={i + 1} value={String(i + 1).padStart(2, '0')}>
-                              {String(i + 1).padStart(2, '0')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="expiryYear">Year</Label>
-                        <select
-                          id="expiryYear"
-                          value={paymentData.expiryYear}
-                          onChange={(e) => handleInputChange('expiryYear', e.target.value)}
-                          className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                        >
-                          <option value="">YY</option>
-                          {Array.from({ length: 10 }, (_, i) => {
-                            const year = new Date().getFullYear() + i;
-                            return (
-                              <option key={year} value={year.toString().slice(-2)}>
-                                {year.toString().slice(-2)}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          value={paymentData.cvv}
-                          onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, ''))}
-                          placeholder="123"
-                          maxLength={4}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="cardHolderName">Card Holder Name</Label>
-                      <Input
-                        id="cardHolderName"
-                        value={paymentData.cardHolderName}
-                        onChange={(e) => handleInputChange('cardHolderName', e.target.value)}
-                        placeholder="John Doe"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="cnic">CNIC Number</Label>
-                      <Input
-                        id="cnic"
-                        value={paymentData.cnicNumber}
-                        onChange={(e) => handleInputChange('cnicNumber', e.target.value.replace(/\D/g, ''))}
-                        placeholder="1234567890123"
-                        maxLength={13}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Required for verification purposes
-                      </p>
-                    </div>
-                  </div>
-                )}
+                <h3 className="font-semibold mb-4">Safepay Checkout</h3>
+                <p className="text-sm text-muted-foreground">
+                  You'll be redirected to Safepay's secure checkout page where you can pay using credit/debit cards, mobile wallets, or bank transfers.
+                </p>
               </div>
             )}
 
-            {/* Bank Card Discount Banner */}
-            <div className="bg-gradient-to-r from-blue-500/10 to-green-500/10 border border-blue-500/20 rounded-lg p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-                  <CreditCard className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Exclusive Discounts On Bank Cards</h3>
-                  <p className="text-sm text-muted-foreground">UPTO 70% Off</p>
-                  <button className="text-sm text-primary hover:underline mt-1">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </div>
 
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-center gap-2">
@@ -553,7 +295,7 @@ export function SubscriptionPaymentPage() {
                 <div>
                   <h4 className="font-medium text-sm">Secure Payment</h4>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your payment information is encrypted and processed securely by PayFast.
+                    Your payment information is encrypted and processed securely by Safepay.
                   </p>
                 </div>
               </div>
