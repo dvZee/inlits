@@ -1,1 +1,0 @@
-import{j as t}from"./supabase-CK9k-UJW.js";import{C as o}from"./client-only-app-DvO93iNq.js";import"./audio-context-B3V87ldH.js";import"./query-cache-C18JZZse.js";function e(){return t.jsx(o,{})}export{e as default};
