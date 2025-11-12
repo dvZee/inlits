@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@remix-run/react';
 import { supabase } from '@/lib/supabase';
 import { Play, ChevronLeft, ChevronRight, Shuffle, Repeat } from 'lucide-react';
 import { ImageLoader } from '@/components/image-loader';

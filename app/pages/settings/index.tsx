@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from '@remix-run/react';
 import { Settings, User, Bell, Shield, Palette, Globe, CreditCard } from 'lucide-react';
 
 const settingsSections = [

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Link, Outlet, useLocation, useParams } from 'react-router-dom';
+import { Navigate, Link, Outlet, useLocation, useParams } from '@remix-run/react';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/components/theme-provider';
 import { 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@remix-run/react';
 import { supabase } from '@/lib/supabase';
 import { ContentLayout } from '@/components/content/content-layout';
 import { HeroBanner } from '@/components/content/hero-banner';

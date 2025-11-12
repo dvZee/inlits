@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@remix-run/react';
 import { Search as SearchIcon, Loader2, History, TrendingUp, User, X } from 'lucide-react';
 import { searchSuggestions, getRecentSearches, addRecentSearch, removeRecentSearch } from '@/lib/search';
 import { useDebounce } from '@/lib/hooks/use-debounce';

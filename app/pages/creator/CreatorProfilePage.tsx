@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@remix-run/react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { CreatorHeader } from '@/components/creator/creator-header';

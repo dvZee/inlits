@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from '@remix-run/react';
 import { ReadingStatusDialog } from '@/components/library/reading-status-dialog';
 import type { ContentItem } from '@/lib/types';
 

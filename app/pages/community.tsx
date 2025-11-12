@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@remix-run/react';
 import { CommunityTabs } from '@/components/community/community-tabs';
 
 export function CommunityPage() {

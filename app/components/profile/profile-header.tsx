@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@remix-run/react';
 import { Settings, Edit } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { EditProfileDialog } from './edit-profile-dialog';

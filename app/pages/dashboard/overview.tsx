@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@remix-run/react';
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { 

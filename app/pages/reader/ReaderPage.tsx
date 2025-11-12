@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from '@remix-run/react';
 import { supabase } from '@/lib/supabase';
 import { EReader } from '@/components/reader/e-reader';
 import { ArticleReader } from '@/components/reader/article-reader';

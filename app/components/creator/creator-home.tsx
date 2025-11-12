@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@remix-run/react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTextLanguageClass } from '@/lib/utils';
 import { IntellectualIdentity } from '@/components/profile/intellectual-identity';

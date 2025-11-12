@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@remix-run/react';
 import { Play, Pause, Clock, Minus, AlertCircle } from 'lucide-react';
 import { ContentTypeIcon } from '../content/content-type-icon';
 import { supabase } from '@/lib/supabase';

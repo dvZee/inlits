@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from '@remix-run/react';
 import { searchContent } from '@/lib/search';
 import { ContentGrid } from '@/components/content/content-grid';
 import { Loader2, AlertCircle, Filter, ChevronLeft, ChevronRight, X } from 'lucide-react';

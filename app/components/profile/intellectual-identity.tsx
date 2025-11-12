@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Target, Clock, BookOpen, Pause } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@remix-run/react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 

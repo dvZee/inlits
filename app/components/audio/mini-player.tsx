@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@remix-run/react';
 import { useAudio } from '@/lib/audio-context';
 import { Play, Pause, SkipForward, SkipBack, X, Maximize2 } from 'lucide-react';
 import { getTextLanguageClass } from '@/lib/utils';

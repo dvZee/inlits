@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@remix-run/react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { MessageSquare, ThumbsUp, Eye, MessageCircle, Plus, Loader2, AlertCircle } from 'lucide-react';

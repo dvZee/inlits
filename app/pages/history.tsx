@@ -4,7 +4,7 @@ import { Clock, Trash2, AlertCircle, Loader2, Play } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { ContentTypeIcon } from '@/components/content/content-type-icon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@remix-run/react';
 import type { ContentItem } from '@/lib/types';
 
 export function HistoryPage() {
