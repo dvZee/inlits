@@ -1,5 +1,5 @@
 // Service Worker for Inlits
-const CACHE_NAME = 'inlits-cache-v1';
+const CACHE_NAME = 'inlits-cache-v1.0.4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,16 +9,18 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and force update
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -26,7 +28,20 @@ self.addEventListener('activate', (event) => {
         cacheNames.filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      // Force immediate control of all clients
+      return self.clients.claim();
+    }).then(() => {
+      // Notify all clients to reload for the new version
+      return self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'CACHE_UPDATED',
+            version: '1.0.4'
+          });
+        });
+      });
+    })
   );
 });
 

@@ -42,6 +42,17 @@ if (typeof window !== 'undefined') {
       );
     }
   });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'CACHE_UPDATED') {
+        console.log('New version available:', event.data.version);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    });
+  }
 }
 
 startTransition(() => {
