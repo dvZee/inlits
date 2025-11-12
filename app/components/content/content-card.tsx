@@ -157,7 +157,7 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
   return (
     <div
       onClick={handleClick}
-      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-2xl hover:ring-2 hover:ring-primary/20 transition-all duration-300 cursor-pointer hover:scale-[1.05] hover:-translate-y-1 active:scale-[0.98]"
+      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-2xl hover:ring-2 hover:ring-primary/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] active:scale-[0.98] hover:z-10"
     >
       {/* Thumbnail with fixed aspect ratio */}
       <div className={`relative ${getAspectRatio()}`}>
