@@ -9,6 +9,12 @@ import type { ContentItem } from '@/lib/types';
 
 interface HomeProps {
   selectedCategory?: string;
+  initialData?: {
+    audiobooks: any[];
+    books: any[];
+    podcasts: any[];
+    articles: any[];
+  };
 }
 
 // Cache for content data
@@ -57,7 +63,7 @@ const getPlaceholderThumbnail = (type: 'audiobook' | 'ebook' | 'podcast') => {
 const getPlaceholderAvatar = (initial: string) =>
   `https://placehold.co/80x80?text=${encodeURIComponent(initial || 'U')}`;
 
-export function Home({ selectedCategory = 'all' }: HomeProps) {
+export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [allContent, setAllContent] = useState<{
@@ -65,15 +71,25 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
     ebooks: ContentItem[];
     articles: ContentItem[];
     podcasts: ContentItem[];
-  }>({
-    audiobooks: [],
-    ebooks: [],
-    articles: [],
-    podcasts: []
+  }>(() => {
+    if (initialData) {
+      return {
+        audiobooks: initialData.audiobooks || [],
+        ebooks: initialData.books || [],
+        articles: initialData.articles || [],
+        podcasts: initialData.podcasts || []
+      };
+    }
+    return {
+      audiobooks: [],
+      ebooks: [],
+      articles: [],
+      podcasts: []
+    };
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(!!initialData);
 
   // Get shelf parameter from URL
   const shelfParam = searchParams.get('shelf');
@@ -147,6 +163,11 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
 
   // Load content once mounted and refresh cache on user changes
   useEffect(() => {
+    // Skip client-side fetch if we have SSR data
+    if (initialData && initialLoadComplete) {
+      return;
+    }
+
     let isMounted = true;
 
     const loadAllContent = async () => {
@@ -178,8 +199,7 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             `)
             .eq('status', 'published')
             .order('featured', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(20),
+            .order('created_at', { ascending: false }),
 
           supabase
             .from('books')
@@ -200,8 +220,7 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             `)
             .eq('status', 'published')
             .order('featured', { ascending: false })
-            .order('created_at', { ascending: false })
-            .limit(20),
+            .order('created_at', { ascending: false }),
 
           supabase
             .from('podcast_episodes')
@@ -454,7 +473,7 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
     return () => {
       isMounted = false;
     };
-  }, [user, initialLoadComplete]);
+  }, [user, initialLoadComplete, initialData]);
 
   // Filter content based on selected category (client-side filtering for instant response)
   const filteredContent = useMemo(() => {
