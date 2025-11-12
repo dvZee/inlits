@@ -2,6 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { ContentLayout } from '@/components/content/content-layout';
+import { HeroBanner } from '@/components/content/hero-banner';
+import { ContinueContent } from '@/components/content/continue-content';
+import { ContentCarousel } from '@/components/content/content-carousel';
+import { Recommendations } from '@/components/content/recommendations';
+import { HeroBannerSkeleton, ContentRowSkeleton } from '@/components/content/skeleton-loader';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { AddToShelfBanner } from '@/components/library/add-to-shelf-banner';
@@ -646,23 +651,14 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
     }
   };
 
-  // Show loading only on initial load
+  // Show skeleton loading on initial load
   if (loading && !initialLoadComplete) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6 max-w-2xl px-6">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p
-            className="text-center text-xl leading-relaxed text-foreground"
-            style={{
-              fontFamily: "'Noto Nastaliq Urdu', serif",
-              direction: 'rtl'
-            }}
-          >
-             انلٹس میں خوش آمدید۔۔۔ ایک ایسی دنیا جہاں پڑھنا، سننا اور سمجھنا ایک نیا احساس بن جائے۔
-ہمیں اپنی رائے سے ضرور آگاہ کریں کہ ہم اس پلیٹ فارم کو مزید بہتر کیسے بنا سکتے ہیں۔"
-          </p>
-        </div>
+      <div className="space-y-8">
+        <HeroBannerSkeleton />
+        <ContentRowSkeleton />
+        <ContentRowSkeleton />
+        <ContentRowSkeleton />
       </div>
     );
   }
@@ -724,10 +720,20 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
     );
   }
 
+  const allContentItems = [...filteredContent.audiobooks, ...filteredContent.ebooks, ...filteredContent.podcasts];
+
+  const trendingItems = allContentItems
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 15);
+
+  const newReleases = allContentItems
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 15);
+
   return (
     <>
       {activeShelf && (
-        <AddToShelfBanner 
+        <AddToShelfBanner
           shelfName={shelfName}
           onClose={() => {
             const newSearchParams = new URLSearchParams(searchParams);
@@ -741,15 +747,57 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
           }}
         />
       )}
-      <div className="mt-2">
-        <ContentLayout
-          audiobooks={filteredContent.audiobooks}
-          ebooks={filteredContent.ebooks}
-          articles={filteredContent.articles}
-          podcasts={filteredContent.podcasts}
-          activeShelf={activeShelf}
-          onAddToShelf={handleAddToShelf}
-        />
+      <div className="space-y-8">
+        <HeroBanner items={allContentItems} />
+
+        <ContinueContent />
+
+        {trendingItems.length > 0 && (
+          <ContentCarousel
+            title="Trending Now"
+            items={trendingItems}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {filteredContent.audiobooks.length > 0 && (
+          <ContentCarousel
+            title="Popular Audiobooks"
+            items={filteredContent.audiobooks.slice(0, 15)}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {filteredContent.podcasts.length > 0 && (
+          <ContentCarousel
+            title="Top Podcasts"
+            items={filteredContent.podcasts.slice(0, 15)}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {filteredContent.ebooks.length > 0 && (
+          <ContentCarousel
+            title="Must-Read Books"
+            items={filteredContent.ebooks.slice(0, 15)}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {newReleases.length > 0 && (
+          <ContentCarousel
+            title="New Releases"
+            items={newReleases}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        <Recommendations />
       </div>
     </>
   );

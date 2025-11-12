@@ -69,14 +69,14 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <span className="hidden text-xl font-bold md:inline">Inlits</span>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <BookOpen className="h-7 w-7 text-primary transition-transform group-hover:scale-110" />
+            <span className="hidden text-2xl font-bold md:inline bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Inlits</span>
           </Link>
         
         </div>

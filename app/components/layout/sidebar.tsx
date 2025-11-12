@@ -272,10 +272,10 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
 
   return (
     <>
-      <aside 
+      <aside
         className={`${
           collapsed ? 'w-16' : 'w-64'
-        } fixed left-0 top-[3.5rem] h-[calc(100vh-3.5rem)] border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex flex-col transition-all duration-300 z-40`}
+        } fixed left-0 top-[4rem] h-[calc(100vh-4rem)] border-r bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 flex flex-col transition-all duration-300 z-40 shadow-sm`}
       >
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <nav className="p-3 space-y-6">

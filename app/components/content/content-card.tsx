@@ -136,7 +136,7 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
   return (
     <div
       onClick={handleClick}
-      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-2xl hover:ring-2 hover:ring-primary/20 transition-all duration-300 cursor-pointer hover:scale-[1.05] hover:-translate-y-1 active:scale-[0.98]"
     >
       {/* Thumbnail with fixed aspect ratio */}
       <div className={`relative ${getAspectRatio()}`}>
@@ -160,9 +160,9 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
 
         {/* Play button for audio content */}
         {(item.type === 'audiobook' || item.type === 'podcast') && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Play className="w-6 h-6 text-primary-foreground ml-1" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/50 transition-all duration-300">
+            <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 shadow-lg">
+              <Play className="w-7 h-7 text-black ml-1 fill-current" />
             </div>
           </div>
         )}
@@ -217,7 +217,7 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
       {/* Bookmark Button */}
       <button
         onClick={handleBookmarkClick}
-        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-background/90 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-primary-foreground"
+        className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-primary hover:text-primary-foreground hover:scale-110"
       >
         <Bookmark className={`w-4 h-4 ${isBookmarked || (activeShelf && item.bookmarked) ? 'fill-current' : ''}`} />
       </button>
