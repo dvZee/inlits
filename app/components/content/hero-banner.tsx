@@ -15,20 +15,21 @@ export function HeroBanner({ items }: HeroBannerProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const featuredItems = items.filter(item => item.featured).slice(0, 5);
-
-  if (featuredItems.length === 0) {
-    return null;
-  }
-
   const currentItem = featuredItems[currentIndex];
 
   useEffect(() => {
+    if (featuredItems.length === 0) return;
+
     const interval = setInterval(() => {
       goToNext();
     }, 7000);
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, featuredItems.length]);
+
+  if (featuredItems.length === 0) {
+    return null;
+  }
 
   const goToNext = () => {
     if (isTransitioning) return;
