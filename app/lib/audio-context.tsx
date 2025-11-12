@@ -28,6 +28,30 @@ interface AudioContextType {
   audioRef: React.RefObject<HTMLAudioElement>;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
+  playlist: Array<{
+    id: string;
+    title: string;
+    author: string;
+    authorId?: string;
+    authorUsername?: string;
+    thumbnail: string;
+    type: 'audiobook' | 'podcast' | 'ebook';
+    contentUrl: string;
+  }>;
+  setPlaylist: (playlist: AudioContextType['playlist']) => void;
+  currentTrackIndex: number;
+  setCurrentTrackIndex: (index: number) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  playAudio: (audio: {
+    id: string;
+    title: string;
+    author: string;
+    authorId?: string;
+    authorUsername?: string;
+    thumbnail: string;
+    type: 'audiobook' | 'podcast';
+  }) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -45,6 +69,8 @@ export function AudioProvider({
   const [currentAudio, setCurrentAudio] = useState<AudioContextType['currentAudio']>(null);
   const [currentChapter, setCurrentChapter] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playlist, setPlaylist] = useState<AudioContextType['playlist']>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Check if current page is the main player page
@@ -63,6 +89,42 @@ export function AudioProvider({
     }
   };
 
+  // Play next track in playlist
+  const playNext = () => {
+    if (playlist.length === 0) return;
+    const nextIndex = (currentTrackIndex + 1) % playlist.length;
+    const nextTrack = playlist[nextIndex];
+    if (nextTrack) {
+      setCurrentTrackIndex(nextIndex);
+      playAudio(nextTrack);
+    }
+  };
+
+  // Play previous track in playlist
+  const playPrevious = () => {
+    if (playlist.length === 0) return;
+    const prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    const prevTrack = playlist[prevIndex];
+    if (prevTrack) {
+      setCurrentTrackIndex(prevIndex);
+      playAudio(prevTrack);
+    }
+  };
+
+  // Play audio function
+  const playAudio = (audio: {
+    id: string;
+    title: string;
+    author: string;
+    authorId?: string;
+    authorUsername?: string;
+    thumbnail: string;
+    type: 'audiobook' | 'podcast';
+  }) => {
+    if (typeof window === 'undefined') return;
+    window.location.href = `/player/${audio.type}-${audio.id}`;
+  };
+
   // Restore state from localStorage on mount
   useEffect(() => {
     try {
@@ -73,6 +135,8 @@ export function AudioProvider({
         setPlayerVisible(state.isPlayerVisible);
         setCurrentChapter(state.currentChapter || 0);
         setIsPlaying(state.isPlaying || false);
+        setPlaylist(state.playlist || []);
+        setCurrentTrackIndex(state.currentTrackIndex || 0);
       }
     } catch (error) {
       console.error('Error restoring audio state:', error);
@@ -88,13 +152,15 @@ export function AudioProvider({
           currentAudio,
           isPlayerVisible,
           currentChapter,
-          isPlaying
+          isPlaying,
+          playlist,
+          currentTrackIndex
         }));
       } catch (error) {
         console.error('Error saving audio state:', error);
       }
     }
-  }, [currentAudio, isPlayerVisible, currentChapter, isPlaying]);
+  }, [currentAudio, isPlayerVisible, currentChapter, isPlaying, playlist, currentTrackIndex]);
 
   return (
     <AudioContext.Provider value={{
@@ -108,7 +174,14 @@ export function AudioProvider({
       updateCurrentTime,
       audioRef,
       isPlaying,
-      setIsPlaying
+      setIsPlaying,
+      playlist,
+      setPlaylist,
+      currentTrackIndex,
+      setCurrentTrackIndex,
+      playNext,
+      playPrevious,
+      playAudio
     }}>
       {children}
     </AudioContext.Provider>

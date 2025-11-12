@@ -65,12 +65,16 @@ export function AudioPlayer({
   authorUsername
 }: AudioPlayerProps) {
   const { user } = useAuth();
-  const { 
+  const {
     setPlayerVisible,
-    isMainPlayerPage, 
+    isMainPlayerPage,
     currentAudio,
     currentChapter,
-    setCurrentChapter 
+    setCurrentChapter,
+    playlist,
+    currentTrackIndex,
+    playNext,
+    playPrevious
   } = useAudio();
 
   const audioRef = React.useRef<HTMLAudioElement>(null);
@@ -580,6 +584,16 @@ export function AudioPlayer({
           </div>
 
           <div className="flex items-center gap-1">
+            {playlist.length > 1 && (
+              <button
+                onClick={playPrevious}
+                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                disabled={isLoading}
+                title="Previous track"
+              >
+                <SkipBack className="w-5 h-5" />
+              </button>
+            )}
             <button
               onClick={() => skipTime(-15)}
               className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
@@ -609,6 +623,16 @@ export function AudioPlayer({
             >
               <RotateCw className="w-5 h-5" />
             </button>
+            {playlist.length > 1 && (
+              <button
+                onClick={playNext}
+                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                disabled={isLoading}
+                title="Next track"
+              >
+                <SkipForward className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-1">
@@ -650,12 +674,12 @@ export function AudioPlayer({
             >
               <Settings className="w-5 h-5" />
             </button>
-            {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
+            {(playlist.length > 1 || (currentAudio?.chapters && currentAudio.chapters.length > 1)) && (
               <button
                 onClick={() => { closeAllExcept('playlist'); setShowPlaylist(!showPlaylist); }}
                 className={`p-1.5 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
                 disabled={isLoading}
-                title="Chapters"
+                title={playlist.length > 1 ? "Playlist" : "Chapters"}
               >
                 <List className="w-5 h-5" />
               </button>
@@ -975,7 +999,7 @@ export function AudioPlayer({
                       <div className="absolute bottom-full right-0 mb-2 w-72 bg-popover border rounded-lg shadow-xl max-h-80 overflow-hidden">
                         <div className="p-3 border-b">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-medium text-sm">Chapters</h3>
+                            <h3 className="font-medium text-sm">{playlist.length > 1 ? `Playlist (${currentTrackIndex + 1}/${playlist.length})` : 'Chapters'}</h3>
                             <button
                               onClick={() => setShowPlaylist(false)}
                               className="p-1 hover:bg-accent rounded transition-colors"
@@ -985,6 +1009,44 @@ export function AudioPlayer({
                           </div>
                         </div>
                         <div className="overflow-y-auto max-h-64">
+                          {playlist.length > 1 ? (
+                            <div className="p-2 space-y-1">
+                              {playlist.map((track, index) => {
+                                const isCurrent = currentTrackIndex === index;
+
+                                return (
+                                  <button
+                                    key={track.id}
+                                    onClick={() => {
+                                      playNext(); // This will be replaced with direct track selection
+                                      setShowPlaylist(false);
+                                    }}
+                                    className={`w-full flex items-center gap-2 p-2 rounded text-sm transition-all ${
+                                      isCurrent
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'hover:bg-primary hover:text-primary-foreground'
+                                    }`}
+                                    disabled={isLoading}
+                                  >
+                                    <div className="w-10 h-10 rounded flex-shrink-0 overflow-hidden">
+                                      <ImageLoader
+                                        src={track.thumbnail}
+                                        alt={track.title}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0 text-left">
+                                      <div className="font-medium line-clamp-1">{track.title}</div>
+                                      <div className="text-xs opacity-80 line-clamp-1">{track.author}</div>
+                                    </div>
+                                    {isCurrent && isPlaying && (
+                                      <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
                           <div className="p-2 space-y-1">
                             {currentAudio.chapters.map((chapter, index) => {
                               const isLocked = !user && index > 0;
@@ -1031,6 +1093,7 @@ export function AudioPlayer({
                               );
                             })}
                           </div>
+                          )}
                         </div>
                       </div>
                     )}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Play, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { ImageLoader } from '../image-loader';
+import { useAudio } from '@/lib/audio-context';
 
 interface Collection {
   id: string;
@@ -16,6 +17,7 @@ interface Collection {
 export function CinematicCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
+  const { setPlaylist, setCurrentTrackIndex, playAudio } = useAudio();
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -107,9 +109,98 @@ export function CinematicCollections() {
     return null;
   }
 
-  const handleCollectionClick = (collection: Collection) => {
-    // Navigate to collection player page to play as playlist
-    window.location.href = `/collection/${collection.slug}`;
+  const handleCollectionClick = async (collection: Collection) => {
+    // Load all items from this collection as a playlist
+    try {
+      const categoryName = collection.name;
+
+      const [audiobooksResult, podcastsResult] = await Promise.all([
+        supabase
+          .from('audiobooks')
+          .select(`
+            id,
+            title,
+            cover_url,
+            author:profiles!audiobooks_author_id_fkey (
+              id,
+              name,
+              avatar_url,
+              username
+            )
+          `)
+          .eq('status', 'published')
+          .contains('categories', [categoryName])
+          .order('created_at', { ascending: false }),
+
+        supabase
+          .from('podcast_episodes')
+          .select(`
+            id,
+            title,
+            cover_url,
+            author:profiles!podcast_episodes_author_id_fkey (
+              id,
+              name,
+              avatar_url,
+              username
+            )
+          `)
+          .eq('status', 'published')
+          .contains('categories', [categoryName])
+          .order('created_at', { ascending: false })
+      ]);
+
+      const normalizeAuthor = (author: any) => {
+        const data = Array.isArray(author) ? author[0] : author;
+        return {
+          id: data?.id || '',
+          name: data?.name || data?.username || 'Unknown Creator',
+          avatar: data?.avatar_url || '',
+          username: data?.username || 'creator'
+        };
+      };
+
+      const audiobooks = (audiobooksResult.data || []).map(item => {
+        const author = normalizeAuthor(item.author);
+        return {
+          id: item.id,
+          title: item.title,
+          author: author.name,
+          authorId: author.id,
+          authorUsername: author.username,
+          thumbnail: item.cover_url || '',
+          type: 'audiobook' as const,
+          contentUrl: `/player/audiobook-${item.id}`
+        };
+      });
+
+      const podcasts = (podcastsResult.data || []).map(item => {
+        const author = normalizeAuthor(item.author);
+        return {
+          id: item.id,
+          title: item.title,
+          author: author.name,
+          authorId: author.id,
+          authorUsername: author.username,
+          thumbnail: item.cover_url || '',
+          type: 'podcast' as const,
+          contentUrl: `/player/podcast-${item.id}`
+        };
+      });
+
+      const playlistItems = [...audiobooks, ...podcasts];
+
+      if (playlistItems.length > 0) {
+        // Set the playlist
+        setPlaylist(playlistItems);
+        setCurrentTrackIndex(0);
+
+        // Play the first item
+        playAudio(playlistItems[0]);
+      }
+    } catch (error) {
+      console.error('Error loading collection playlist:', error);
+    }
   };
 
   return (
