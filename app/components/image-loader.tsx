@@ -8,14 +8,14 @@ interface ImageLoaderProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   loadingStrategy?: 'lazy' | 'eager';
 }
 
-export function ImageLoader({ 
-  src, 
-  alt, 
-  className, 
-  fallback, 
+export function ImageLoader({
+  src,
+  alt,
+  className,
+  fallback,
   lowQualityUrl,
   loadingStrategy = 'lazy',
-  ...props 
+  ...props
 }: ImageLoaderProps) {
   const PLACEHOLDER_IMAGE = 'https://placehold.co/600x400?text=Inlits';
   const isBrowser = typeof window !== 'undefined';
@@ -27,6 +27,8 @@ export function ImageLoader({
     loadingStrategy === 'eager' || !supportsIntersectionObserver
   );
   const [hardError, setHardError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [imgKey, setImgKey] = useState(0);
 
   useEffect(() => {
     if (loadingStrategy === 'lazy') {
@@ -66,21 +68,31 @@ export function ImageLoader({
     return currentSrc || src || PLACEHOLDER_IMAGE;
   })();
 
+  const handleImageError = () => {
+    if (retryCount < 3) {
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        setImgKey(prev => prev + 1);
+      }, 1000 * (retryCount + 1));
+    } else {
+      setHardError(true);
+    }
+  };
+
   return (
     <div ref={containerRef} className="relative">
       <img
+        key={imgKey}
         src={displayedSrc}
         alt={alt}
         className={`${className} ${shouldLoad && !isLoaded ? 'blur-sm' : 'blur-0'} transition-all duration-300`}
         loading={loadingStrategy}
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
-        onError={() => {
-          setHardError(true);
-        }}
+        onError={handleImageError}
         {...props}
       />
-      {shouldLoad && !isLoaded && (
+      {shouldLoad && !isLoaded && !hardError && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/50">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
