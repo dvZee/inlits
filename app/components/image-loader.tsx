@@ -8,14 +8,14 @@ interface ImageLoaderProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   loadingStrategy?: 'lazy' | 'eager';
 }
 
-export function ImageLoader({ 
-  src, 
-  alt, 
-  className, 
-  fallback, 
+export function ImageLoader({
+  src,
+  alt,
+  className,
+  fallback,
   lowQualityUrl,
-  loadingStrategy = 'lazy',
-  ...props 
+  loadingStrategy = 'eager',
+  ...props
 }: ImageLoaderProps) {
   const PLACEHOLDER_IMAGE = 'https://placehold.co/600x400?text=Inlits';
   const isBrowser = typeof window !== 'undefined';
@@ -23,9 +23,7 @@ export function ImageLoader({
     isBrowser && typeof window.IntersectionObserver !== 'undefined';
   const containerRef = useRef<HTMLDivElement>(null);
   const { currentSrc, isLoaded, error } = useLazyImage(src || '', lowQualityUrl);
-  const [shouldLoad, setShouldLoad] = useState(
-    loadingStrategy === 'eager' || !supportsIntersectionObserver
-  );
+  const [shouldLoad, setShouldLoad] = useState(true);
   const [hardError, setHardError] = useState(false);
 
   useEffect(() => {

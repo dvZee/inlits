@@ -52,6 +52,7 @@ const SubscriptionPage = React.lazy(() => import('./pages/subscription/index').t
 const SubscriptionPaymentPage = React.lazy(() => import('./pages/subscription/payment').then(module => ({ default: module.SubscriptionPaymentPage })));
 const SubscriptionVerifyPage = React.lazy(() => import('./pages/subscription/verify').then(module => ({ default: module.SubscriptionVerifyPage })));
 const SubscriptionConfirmPage = React.lazy(() => import('./pages/subscription/confirm').then(module => ({ default: module.SubscriptionConfirmPage })));
+const CollectionPlayerPage = React.lazy(() => import('./pages/collection/CollectionPlayerPage').then(module => ({ default: module.CollectionPlayerPage })));
 
 function LoadingFallback() {
   return (
@@ -62,9 +63,13 @@ function LoadingFallback() {
 }
 
 function MainLayout({ children }: { children: React.ReactNode }) {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Get category from URL params
+  const urlParams = new URLSearchParams(location.search);
+  const categoryFromUrl = urlParams.get('category') || 'all';
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const { currentAudio, isPlayerVisible } = useAudio();
   const isBrowser = typeof window !== "undefined";
   const [isMobile, setIsMobile] = useState(
@@ -81,6 +86,13 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [isBrowser]);
+
+  // Update selected category when URL changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get('category') || 'all';
+    setSelectedCategory(category);
+  }, [location.search]);
 
   // Only show categories on home page
   const isHomePage = location.pathname === '/';
@@ -149,7 +161,18 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         <CategoriesScroll
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          onSelectCategory={(category) => {
+            setSelectedCategory(category);
+            // Update URL when category is selected
+            const params = new URLSearchParams(window.location.search);
+            if (category === 'all') {
+              params.delete('category');
+            } else {
+              params.set('category', category);
+            }
+            const newUrl = params.toString() ? `/?${params.toString()}` : '/';
+            window.history.pushState({}, '', newUrl);
+          }}
           collapsed={isMobile ? true : sidebarCollapsed}
         />
       )}
@@ -251,6 +274,16 @@ function App() {
                     element={
                       <MainLayout>
                         <SearchPage />
+                      </MainLayout>
+                    }
+                  />
+
+                  {/* Collection Player Route */}
+                  <Route
+                    path="/collection/:category"
+                    element={
+                      <MainLayout>
+                        <CollectionPlayerPage />
                       </MainLayout>
                     }
                   />

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Play, ChevronRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { ImageLoader } from '../image-loader';
@@ -17,7 +16,6 @@ interface Collection {
 export function CinematicCollections() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -65,9 +63,17 @@ export function CinematicCollections() {
               ...(podcastsResult.data || [])
             ].filter(item => item.cover_url);
 
-            const uniqueCovers = Array.from(
-              new Map(allItems.map(item => [item.cover_url, item])).values()
-            ).slice(0, 4);
+            // Get unique items by both ID and cover URL to ensure truly unique content
+            const seenIds = new Set<string>();
+            const seenCovers = new Set<string>();
+            const uniqueCovers = allItems.filter(item => {
+              if (seenIds.has(item.id) || seenCovers.has(item.cover_url)) {
+                return false;
+              }
+              seenIds.add(item.id);
+              seenCovers.add(item.cover_url);
+              return true;
+            }).slice(0, 4);
 
             const totalCount =
               (audiobooksResult.data?.length || 0) +
@@ -102,7 +108,8 @@ export function CinematicCollections() {
   }
 
   const handleCollectionClick = (collection: Collection) => {
-    window.location.href = `/?category=${collection.slug}`;
+    // Navigate to collection player page to play as playlist
+    window.location.href = `/collection/${collection.slug}`;
   };
 
   return (
