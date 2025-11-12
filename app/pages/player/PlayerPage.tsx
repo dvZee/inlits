@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { formatTimeAgo, formatDate } from '@/lib/utils';
 import { getTextLanguageClass } from '@/lib/utils';
-import { AudioPlayer } from '@/components/audio/audio-player';
 
 interface AudioContent {
   id: string;
@@ -73,7 +72,7 @@ export function PlayerPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { setCurrentAudio, setPlayerVisible, playlist, currentTrackIndex, playNext, playPrevious } = useAudio();
+  const { setCurrentAudio, setPlayerVisible, setIsPlaying, playlist, currentTrackIndex, playNext, playPrevious } = useAudio();
   const [content, setContent] = useState<AudioContent | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -305,9 +304,12 @@ export function PlayerPage() {
           thumbnail: contentData.cover_url || `https://source.unsplash.com/random/800x800?${contentType}&sig=${contentId}`,
           contentUrl: `/player/${contentType}-${contentId}`,
           chapters: contentData.chapters,
-          type: contentType as 'audiobook' | 'podcast'
+          type: contentType as 'audiobook' | 'podcast',
+          audioUrl: contentData.chapters?.[0]?.audio_url,
+          currentTime: 0
         });
         setPlayerVisible(true);
+        setIsPlaying(true);
 
       } catch (err) {
         console.error('Error loading content:', err);
@@ -959,18 +961,6 @@ export function PlayerPage() {
               <p className={`text-sm sm:text-base text-muted-foreground leading-relaxed reader-content ${getTextLanguageClass(content.description)}`}>
                 {content.description}
               </p>
-            </div>
-
-            {/* Audio Player */}
-            <div className="px-4 lg:px-0">
-              <AudioPlayer
-                title={content.title}
-                author={content.author.name}
-                thumbnail={content.cover_url}
-                type={contentType as 'audiobook' | 'podcast'}
-                authorId={content.author.id}
-                authorUsername={content.author.username}
-              />
             </div>
           </div>
 

@@ -14,8 +14,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ConnectionProvider } from '@/lib/connection-context';
 import { AudioProvider } from '@/lib/audio-context';
 import { ErrorBoundary as NetworkErrorBoundary } from '@/components/error-boundary';
-import { MiniPlayer } from '@/components/audio/mini-player';
+import { AudioPlayer } from '@/components/audio/audio-player';
 import { GlobalAudioPlayer } from '@/components/audio/global-audio-player';
+import { useAudio } from '@/lib/audio-context';
 import { Loader2 } from 'lucide-react';
 
 export const meta: MetaFunction = () => [
@@ -87,6 +88,31 @@ function AppProviders({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppContent() {
+  const { currentAudio } = useAudio();
+
+  return (
+    <>
+      <div className="transition-opacity duration-300">
+        <Outlet />
+      </div>
+      <GlobalAudioPlayer />
+      {currentAudio && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
+          <AudioPlayer
+            title={currentAudio.title}
+            author={currentAudio.author}
+            thumbnail={currentAudio.thumbnail}
+            type={currentAudio.type}
+            authorId={currentAudio.authorId}
+            authorUsername={currentAudio.authorUsername}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function App() {
   return (
     <Document>
@@ -98,11 +124,7 @@ export default function App() {
             </div>
           }
         >
-          <div className="transition-opacity duration-300">
-            <Outlet />
-          </div>
-          <GlobalAudioPlayer />
-          <MiniPlayer />
+          <AppContent />
         </Suspense>
       </AppProviders>
     </Document>
