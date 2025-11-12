@@ -9,8 +9,9 @@ import { CategoriesScroll } from '@/components/content/categories-scroll';
 import { Home } from '@/pages/home';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+  // Use hardcoded credentials for server-side (same as in supabase.ts)
+  const supabaseUrl = 'https://yvjrakgbqqazedjltflw.supabase.co';
+  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2anJha2dicXFhemVkamx0Zmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMjIyNTIsImV4cCI6MjA1MjY5ODI1Mn0.tFpht9qLcCeilgnd9vmbF4abiJi96FvzmGZCOXL2DiU';
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
