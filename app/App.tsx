@@ -70,6 +70,20 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const categoryFromUrl = urlParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const isBrowser = typeof window !== "undefined";
+  const [isMobile, setIsMobile] = useState(
+    () => (isBrowser ? window.innerWidth < 768 : false)
+  );
+
+  useEffect(() => {
+    if (!isBrowser) {
+      return;
+    }
+
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isBrowser]);
 
   // Update selected category when URL changes
   useEffect(() => {
@@ -80,7 +94,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
   // Only show categories on home page
   const isHomePage = location.pathname === '/';
-  
+
   // Auto-collapse sidebar on mobile or non-home pages
   useEffect(() => {
     if (isMobile || !isHomePage) {
