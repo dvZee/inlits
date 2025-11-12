@@ -9,7 +9,6 @@ import { useAudio } from "./lib/audio-context";
 import { CategoriesScroll } from "./components/content/categories-scroll";
 import { Home } from "./pages/home";
 import { Loader2 } from 'lucide-react';
-import { AudioPlayer } from './components/audio/audio-player';
 import { Footer } from './components/layout/footer';
 
 // Lazy loaded components with proper dynamic imports
@@ -70,22 +69,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const urlParams = new URLSearchParams(location.search);
   const categoryFromUrl = urlParams.get('category') || 'all';
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
-  const { currentAudio, isPlayerVisible } = useAudio();
   const isBrowser = typeof window !== "undefined";
-  const [isMobile, setIsMobile] = useState(
-    () => (isBrowser ? window.innerWidth < 768 : false)
-  );
-
-  useEffect(() => {
-    if (!isBrowser) {
-      return;
-    }
-
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isBrowser]);
 
   // Update selected category when URL changes
   useEffect(() => {
@@ -194,19 +178,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
       {/* Show footer on static pages except home page */}
       {shouldShowFooter && <Footer />}
-
-      {/* Fixed Audio Player */}
-      {isPlayerVisible && currentAudio && (
-        <AudioPlayer
-          title={currentAudio.title}
-          author={currentAudio.author}
-          authorId={currentAudio.authorId}
-          authorUsername={currentAudio.authorUsername}
-          thumbnail={currentAudio.thumbnail}
-          type={currentAudio.type}
-          isMobile={isMobile}
-        />
-      )}
     </div>
   );
 }
