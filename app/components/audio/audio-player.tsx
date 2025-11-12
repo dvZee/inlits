@@ -571,7 +571,7 @@ export function AudioPlayer({
                 to={currentAudio?.contentUrl || '/'}
                 className="block hover:text-primary transition-colors"
               >
-                <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
+                <h3 className="font-medium text-xs line-clamp-1">{title}</h3>
               </Link>
               <Link
                 to={authorUsername ? `/user/${authorUsername}` : '#'}

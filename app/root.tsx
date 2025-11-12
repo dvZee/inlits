@@ -101,7 +101,7 @@ function AppContent() {
       <div className={`transition-opacity duration-300 ${currentAudio && isPlayerVisible ? 'pb-24' : ''}`}>
         <Outlet />
       </div>
-      <GlobalAudioPlayer />
+      {isClient && <GlobalAudioPlayer />}
       {isClient && currentAudio && isPlayerVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
           <AudioPlayer
