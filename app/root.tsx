@@ -14,6 +14,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ConnectionProvider } from '@/lib/connection-context';
 import { AudioProvider } from '@/lib/audio-context';
 import { ErrorBoundary as NetworkErrorBoundary } from '@/components/error-boundary';
+import { MiniPlayer } from '@/components/audio/mini-player';
 import { Loader2 } from 'lucide-react';
 
 export const meta: MetaFunction = () => [
@@ -96,7 +97,10 @@ export default function App() {
             </div>
           }
         >
-          <Outlet />
+          <div className="transition-opacity duration-300">
+            <Outlet />
+          </div>
+          <MiniPlayer />
         </Suspense>
       </AppProviders>
     </Document>
