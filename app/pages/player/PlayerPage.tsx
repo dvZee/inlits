@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { formatTimeAgo, formatDate } from '@/lib/utils';
 import { getTextLanguageClass } from '@/lib/utils';
+import { AudioPlayer } from '@/components/audio/audio-player';
 
 interface AudioContent {
   id: string;
@@ -958,6 +959,18 @@ export function PlayerPage() {
               <p className={`text-sm sm:text-base text-muted-foreground leading-relaxed reader-content ${getTextLanguageClass(content.description)}`}>
                 {content.description}
               </p>
+            </div>
+
+            {/* Audio Player */}
+            <div className="px-4 lg:px-0">
+              <AudioPlayer
+                title={content.title}
+                author={content.author.name}
+                thumbnail={content.cover_url}
+                type={contentType as 'audiobook' | 'podcast'}
+                authorId={content.author.id}
+                authorUsername={content.author.username}
+              />
             </div>
           </div>
 
