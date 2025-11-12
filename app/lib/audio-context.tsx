@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 interface AudioContextType {
   isPlayerVisible: boolean;
@@ -25,6 +25,9 @@ interface AudioContextType {
   currentChapter: number;
   setCurrentChapter: (index: number) => void;
   updateCurrentTime: (time: number) => void;
+  audioRef: React.RefObject<HTMLAudioElement>;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -41,6 +44,8 @@ export function AudioProvider({
   const [isPlayerVisible, setPlayerVisible] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<AudioContextType['currentAudio']>(null);
   const [currentChapter, setCurrentChapter] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Check if current page is the main player page
   const pathname =
@@ -67,10 +72,10 @@ export function AudioProvider({
         setCurrentAudio(state.currentAudio);
         setPlayerVisible(state.isPlayerVisible);
         setCurrentChapter(state.currentChapter || 0);
+        setIsPlaying(state.isPlaying || false);
       }
     } catch (error) {
       console.error('Error restoring audio state:', error);
-      // Clear potentially corrupted state
       localStorage.removeItem('audioState');
     }
   }, []);
@@ -82,13 +87,14 @@ export function AudioProvider({
         localStorage.setItem('audioState', JSON.stringify({
           currentAudio,
           isPlayerVisible,
-          currentChapter
+          currentChapter,
+          isPlaying
         }));
       } catch (error) {
         console.error('Error saving audio state:', error);
       }
     }
-  }, [currentAudio, isPlayerVisible, currentChapter]);
+  }, [currentAudio, isPlayerVisible, currentChapter, isPlaying]);
 
   return (
     <AudioContext.Provider value={{
@@ -99,7 +105,10 @@ export function AudioProvider({
       isMainPlayerPage,
       currentChapter,
       setCurrentChapter,
-      updateCurrentTime
+      updateCurrentTime,
+      audioRef,
+      isPlaying,
+      setIsPlaying
     }}>
       {children}
     </AudioContext.Provider>

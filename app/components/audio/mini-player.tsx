@@ -1,57 +1,50 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAudio } from '@/lib/audio-context';
 import { Play, Pause, SkipForward, SkipBack, X, Maximize2 } from 'lucide-react';
 import { getTextLanguageClass } from '@/lib/utils';
 
 export function MiniPlayer() {
-  const { currentAudio, isPlayerVisible, setPlayerVisible, isMainPlayerPage, currentChapter } = useAudio();
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const {
+    currentAudio,
+    isPlayerVisible,
+    setPlayerVisible,
+    isMainPlayerPage,
+    audioRef,
+    isPlaying,
+    setIsPlaying,
+    updateCurrentTime
+  } = useAudio();
+
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!currentAudio || !audioRef.current) return;
-
-    const audio = audioRef.current;
-    const currentChapterData = currentAudio.chapters?.[currentChapter];
-
-    if (currentChapterData?.audio_url) {
-      audio.src = currentChapterData.audio_url;
-      if (currentAudio.currentTime) {
-        audio.currentTime = currentAudio.currentTime;
-      }
-      if (isPlaying) {
-        audio.play().catch(console.error);
-      }
-    } else if (currentAudio.audioUrl) {
-      audio.src = currentAudio.audioUrl;
-      if (currentAudio.currentTime) {
-        audio.currentTime = currentAudio.currentTime;
-      }
-      if (isPlaying) {
-        audio.play().catch(console.error);
-      }
-    }
-  }, [currentAudio, currentChapter]);
-
-  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
+    const updateTime = () => {
+      setCurrentTime(audio.currentTime);
+      updateCurrentTime(audio.currentTime);
+    };
+
     const updateDuration = () => setDuration(audio.duration);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
 
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
     };
-  }, []);
+  }, [audioRef, updateCurrentTime, setIsPlaying]);
 
   const togglePlayPause = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -59,10 +52,8 @@ export function MiniPlayer() {
 
     if (isPlaying) {
       audioRef.current.pause();
-      setIsPlaying(false);
     } else {
       audioRef.current.play().catch(console.error);
-      setIsPlaying(true);
     }
   };
 
@@ -85,7 +76,6 @@ export function MiniPlayer() {
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    setIsPlaying(false);
     setPlayerVisible(false);
   };
 
@@ -107,8 +97,6 @@ export function MiniPlayer() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t shadow-lg backdrop-blur-xl bg-opacity-95 animate-slide-up">
-      <audio ref={audioRef} />
-
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
           {/* Thumbnail */}
