@@ -89,7 +89,7 @@ function AppProviders({ children }: { children: React.ReactNode }) {
 }
 
 function AppContent() {
-  const { currentAudio } = useAudio();
+  const { currentAudio, isPlayerVisible } = useAudio();
 
   return (
     <>
@@ -97,7 +97,7 @@ function AppContent() {
         <Outlet />
       </div>
       <GlobalAudioPlayer />
-      {currentAudio && (
+      {currentAudio && isPlayerVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
           <AudioPlayer
             title={currentAudio.title}

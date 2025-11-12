@@ -62,7 +62,7 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
   if (items.length === 0) return null;
 
   return (
-    <div className="group relative mb-10">
+    <div className="group/carousel relative mb-10">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
       </div>
@@ -71,7 +71,7 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
         {showLeftButton && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-r from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="absolute left-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-r from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
             disabled={isScrolling}
           >
             <div className="p-2 bg-background/90 hover:bg-primary hover:text-primary-foreground rounded-full border shadow-lg transition-all">
@@ -99,7 +99,7 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
         {showRightButton && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-l from-background to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="absolute right-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-l from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
             disabled={isScrolling}
           >
             <div className="p-2 bg-background/90 hover:bg-primary hover:text-primary-foreground rounded-full border shadow-lg transition-all">
