@@ -72,7 +72,7 @@ export function PlayerPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { setCurrentAudio, setPlayerVisible } = useAudio();
+  const { setCurrentAudio, setPlayerVisible, playlist, currentTrackIndex, playNext, playPrevious } = useAudio();
   const [content, setContent] = useState<AudioContent | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
