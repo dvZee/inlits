@@ -56,12 +56,11 @@ export function useLazyImage(src: string, lowQualityUrl?: string) {
 
   useEffect(() => {
     isMounted.current = true;
-
+    
     if (!isBrowser || !hasImageConstructor || !src) return;
 
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.referrerPolicy = 'no-referrer';
+    img.src = src;
 
     const handleLoad = () => {
       if (isMounted.current) {
@@ -73,7 +72,6 @@ export function useLazyImage(src: string, lowQualityUrl?: string) {
 
     const handleError = () => {
       if (isMounted.current) {
-        console.warn('Image load error:', src);
         setError(true);
         setIsLoaded(true);
       }
@@ -81,8 +79,6 @@ export function useLazyImage(src: string, lowQualityUrl?: string) {
 
     img.addEventListener('load', handleLoad);
     img.addEventListener('error', handleError);
-
-    img.src = src;
 
     return () => {
       isMounted.current = false;
