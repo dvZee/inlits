@@ -6,7 +6,7 @@ import { HeroBanner } from '@/components/content/hero-banner';
 import { ContinueContent } from '@/components/content/continue-content';
 import { ContentCarousel } from '@/components/content/content-carousel';
 import { SmartRecommendations } from '@/components/content/smart-recommendations';
-import { PopularCollections } from '@/components/content/popular-collections';
+import { CinematicCollections } from '@/components/content/cinematic-collections';
 import { HeroBannerSkeleton, ContentRowSkeleton } from '@/components/content/skeleton-loader';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -727,6 +727,14 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
     .sort((a, b) => b.views - a.views)
     .slice(0, 15);
 
+  const thisMonthDate = new Date();
+  thisMonthDate.setMonth(thisMonthDate.getMonth() - 1);
+
+  const popularThisMonth = allContentItems
+    .filter(item => new Date(item.createdAt) >= thisMonthDate)
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 15);
+
   const newReleases = allContentItems
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 15);
@@ -753,21 +761,30 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
 
         <ContinueContent />
 
-        <PopularCollections />
-
         {trendingItems.length > 0 && (
           <ContentCarousel
-            title="Trending Now"
+            title="🔥 Trending Now"
             items={trendingItems}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
           />
         )}
 
-        {filteredContent.articles.length > 0 && (
+        <CinematicCollections />
+
+        {popularThisMonth.length > 0 && (
           <ContentCarousel
-            title="Latest Articles"
-            items={filteredContent.articles.slice(0, 15)}
+            title="⭐ Popular This Month"
+            items={popularThisMonth}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {newReleases.length > 0 && (
+          <ContentCarousel
+            title="✨ New Releases"
+            items={newReleases}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
           />
@@ -775,7 +792,7 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
 
         {filteredContent.audiobooks.length > 0 && (
           <ContentCarousel
-            title="Popular Audiobooks"
+            title="🎧 Popular Audiobooks"
             items={filteredContent.audiobooks.slice(0, 15)}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
@@ -784,7 +801,7 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
 
         {filteredContent.podcasts.length > 0 && (
           <ContentCarousel
-            title="Top Podcasts"
+            title="🎙️ Top Podcasts"
             items={filteredContent.podcasts.slice(0, 15)}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
@@ -793,17 +810,17 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
 
         {filteredContent.ebooks.length > 0 && (
           <ContentCarousel
-            title="Must-Read Books"
+            title="📚 Must-Read Books"
             items={filteredContent.ebooks.slice(0, 15)}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
           />
         )}
 
-        {newReleases.length > 0 && (
+        {filteredContent.articles.length > 0 && (
           <ContentCarousel
-            title="New Releases"
-            items={newReleases}
+            title="📝 Latest Articles"
+            items={filteredContent.articles.slice(0, 15)}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
           />

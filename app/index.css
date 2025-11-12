@@ -268,6 +268,21 @@ a:hover.hover\:bg-primary svg {
     content-visibility: auto;
   }
 
+  /* 3D Perspective for Collections */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  /* Layered cards effect */
+  @keyframes cardFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
   /* Dialog Animation */
   .dialog-overlay-enter {
     opacity: 0;
