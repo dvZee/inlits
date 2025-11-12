@@ -202,7 +202,7 @@ export function AudioPlayer({
 
     audio.playbackRate = settings.playbackSpeed;
     audio.volume = isMuted ? 0 : volume;
-    
+
     const handleLoadStart = () => { setIsLoading(true); setError(null); };
     const handleCanPlay = () => { setIsLoading(false); };
     const handleLoadedMetadata = () => { setDuration(audio.duration); };
@@ -264,6 +264,16 @@ export function AudioPlayer({
       audio.removeEventListener('error', handleError);
     };
   }, [currentAudio, currentChapter, settings, setCurrentChapter]);
+
+  React.useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current.load();
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     if (settings.sleepTimer > 0 && isPlaying) {
@@ -506,6 +516,14 @@ export function AudioPlayer({
     if (keep !== 'volume') setShowVolumeSlider(false);
   };
 
+  const handleClosePlayer = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+    setPlayerVisible(false);
+  };
+
   return (
     <div className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
       isMobile ? 'bottom-20' : 'bottom-0 h-20'
@@ -686,7 +704,7 @@ export function AudioPlayer({
             )}
             {!isMainPlayerPage && (
               <button
-                onClick={() => setPlayerVisible(false)}
+                onClick={handleClosePlayer}
                 className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                 title="Close Player"
               >
@@ -1062,7 +1080,7 @@ export function AudioPlayer({
                 )}
                 {!isMainPlayerPage && (
                   <button
-                    onClick={() => setPlayerVisible(false)}
+                    onClick={handleClosePlayer}
                     className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                     title="Close Player"
                   >
