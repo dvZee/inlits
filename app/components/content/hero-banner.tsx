@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from '@remix-run/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Play, Info, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageLoader } from '../image-loader';
 import { getTextLanguageClass } from '@/lib/utils';

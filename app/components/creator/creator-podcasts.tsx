@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { Clock, Star, Filter, ArrowUpDown, Mic, Play, Pause, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';

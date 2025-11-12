@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Navigate, useNavigate, Link } from '@remix-run/react';
+import { useParams, Navigate, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { useAudio } from '@/lib/audio-context';

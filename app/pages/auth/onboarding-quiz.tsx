@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from '@remix-run/react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Sparkles, Clock, Target, BookOpen, Headphones, Users, Brain, Heart, Briefcase, GraduationCap, Mic, Coffee } from 'lucide-react';
 
 interface QuizData {

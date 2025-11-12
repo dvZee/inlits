@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from '@remix-run/react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Check, ArrowRight, Crown, Zap, Users, BookOpen, Headphones, Star, Shield } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { BookOpen, Calendar } from 'lucide-react';
 import type { Profile } from '@/lib/types';
 

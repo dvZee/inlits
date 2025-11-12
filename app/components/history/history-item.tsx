@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { Clock, Play, Pause } from 'lucide-react';
 import { ContentTypeIcon } from '../content/content-type-icon';
 import type { ContentItem } from '@/lib/types';

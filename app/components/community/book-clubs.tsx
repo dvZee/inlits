@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { BookOpen, Users, Clock, Plus, ChevronDown, ChevronUp } from 'lucide-react';

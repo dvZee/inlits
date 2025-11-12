@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Link, useNavigate } from '@remix-run/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bookmark, Star, Play, Headphones, BookOpen, FileText } from 'lucide-react';
 import { useOptimisticMutation } from '@/lib/hooks/use-optimistic-mutation';
 import { supabase } from '@/lib/supabase';

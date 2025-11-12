@@ -8,7 +8,7 @@ import {
   ScrollRestoration,
   useLocation
 } from '@remix-run/react';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense } from 'react';
 import styles from './index.css?url';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConnectionProvider } from '@/lib/connection-context';
@@ -90,19 +90,14 @@ function AppProviders({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const { currentAudio, isPlayerVisible } = useAudio();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   return (
     <>
-      <div className={`transition-opacity duration-300 ${currentAudio && isPlayerVisible ? 'pb-24' : ''}`}>
+      <div className="transition-opacity duration-300">
         <Outlet />
       </div>
-      {isClient && <GlobalAudioPlayer />}
-      {isClient && currentAudio && isPlayerVisible && (
+      <GlobalAudioPlayer />
+      {currentAudio && isPlayerVisible && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
           <AudioPlayer
             title={currentAudio.title}

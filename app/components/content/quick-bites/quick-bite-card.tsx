@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
 import { useOptimisticMutation } from '@/lib/hooks/use-optimistic-mutation';
 import { supabase } from '@/lib/supabase';

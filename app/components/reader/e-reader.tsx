@@ -21,7 +21,7 @@ import {
   ArrowLeft,
   ExternalLink,
 } from 'lucide-react';
-import { useNavigate } from '@remix-run/react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/components/theme-provider';
 import { PDFViewer } from './pdf-viewer';
 import { detectUrduText, getTextLanguageClass } from '@/lib/utils';

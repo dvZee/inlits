@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { Users, BookOpen, Heart } from 'lucide-react';
 
 export interface Creator {

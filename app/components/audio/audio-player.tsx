@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Link } from 'react-router-dom';
 import { 
   Play, 
   Pause, 
@@ -507,8 +507,8 @@ export function AudioPlayer({
   };
 
   return (
-    <div className={`bg-background/95 backdrop-blur-sm ${
-      isMobile ? 'h-auto' : 'h-20'
+    <div className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
+      isMobile ? 'bottom-20' : 'bottom-0 h-20'
     }`}>
       <audio 
         ref={audioRef}
@@ -571,7 +571,7 @@ export function AudioPlayer({
                 to={currentAudio?.contentUrl || '/'}
                 className="block hover:text-primary transition-colors"
               >
-                <h3 className="font-medium text-xs line-clamp-1">{title}</h3>
+                <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
               </Link>
               <Link
                 to={authorUsername ? `/user/${authorUsername}` : '#'}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from '@remix-run/react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { ChevronLeft, ChevronDown, Image as ImageIcon, Upload, AlertCircle } from 'lucide-react';

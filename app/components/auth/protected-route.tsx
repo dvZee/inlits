@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from '@remix-run/react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import type { UserRole } from '@/lib/types';

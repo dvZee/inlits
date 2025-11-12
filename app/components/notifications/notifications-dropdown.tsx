@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, X, Settings, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useNotifications } from '@/lib/notifications';
-import { Link, useNavigate } from '@remix-run/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatTimeAgo } from '@/lib/utils';
 
 export function NotificationsDropdown() {
