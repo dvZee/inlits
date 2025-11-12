@@ -71,8 +71,9 @@ export function ImageLoader({
       <img
         src={displayedSrc}
         alt={alt}
-        className={`${className} ${shouldLoad && !isLoaded ? 'blur-sm' : 'blur-0'} transition-all duration-300`}
+        className={`${className} ${shouldLoad && !isLoaded ? 'blur-sm' : 'blur-0'} transition-all duration-200`}
         loading={loadingStrategy}
+        decoding="async"
         crossOrigin="anonymous"
         referrerPolicy="no-referrer"
         onError={() => {
@@ -81,8 +82,8 @@ export function ImageLoader({
         {...props}
       />
       {shouldLoad && !isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+          <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
         </div>
       )}
     </div>

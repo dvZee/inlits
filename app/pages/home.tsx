@@ -790,15 +790,6 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
           />
         )}
 
-        {filteredContent.audiobooks.length > 0 && (
-          <ContentCarousel
-            title="🎧 Popular Audiobooks"
-            items={filteredContent.audiobooks.slice(0, 15)}
-            activeShelf={activeShelf}
-            onAddToShelf={handleAddToShelf}
-          />
-        )}
-
         {filteredContent.podcasts.length > 0 && (
           <ContentCarousel
             title="🎙️ Top Podcasts"

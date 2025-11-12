@@ -30,7 +30,7 @@ export function CinematicCollections() {
           { name: 'Philosophy', description: 'Question everything' },
           { name: 'Science', description: 'Explore the universe' },
           { name: 'History', description: 'Learn from the past' },
-          { name: 'Health', description: 'Live your best life' }
+          { name: 'Entrepreneurship', description: 'Build your empire' }
         ];
 
         const collectionsData = await Promise.all(
@@ -102,7 +102,7 @@ export function CinematicCollections() {
   }
 
   const handleCollectionClick = (collection: Collection) => {
-    navigate(`/?category=${collection.slug}`);
+    window.location.href = `/?category=${collection.slug}`;
   };
 
   return (
