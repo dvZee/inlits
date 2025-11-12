@@ -156,7 +156,7 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
         }
         setError(null);
 
-        // Load all content types in parallel
+        // Load all content types in parallel with limits for better performance
         const [audiobooksResult, booksResult, podcastsResult] = await Promise.all([
           supabase
             .from('audiobooks')
@@ -178,7 +178,8 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             `)
             .eq('status', 'published')
             .order('featured', { ascending: false })
-            .order('created_at', { ascending: false }),
+            .order('created_at', { ascending: false })
+            .limit(20),
 
           supabase
             .from('books')
@@ -199,7 +200,8 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             `)
             .eq('status', 'published')
             .order('featured', { ascending: false })
-            .order('created_at', { ascending: false }),
+            .order('created_at', { ascending: false })
+            .limit(20),
 
           supabase
             .from('podcast_episodes')
@@ -223,6 +225,7 @@ export function Home({ selectedCategory = 'all' }: HomeProps) {
             .eq('status', 'published')
             .order('featured', { ascending: false })
             .order('created_at', { ascending: false })
+            .limit(20)
         ]);
 
         // Check for errors - log to console but continue with partial data
