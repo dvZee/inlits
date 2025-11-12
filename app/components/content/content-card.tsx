@@ -71,7 +71,12 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
     invalidateQueries: ['bookmarks']
   });
 
+  const [isNavigating, setIsNavigating] = React.useState(false);
+
   const handleClick = () => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+
     switch (item.type) {
       case 'article':
         navigate(`/reader/article-${item.id}`);

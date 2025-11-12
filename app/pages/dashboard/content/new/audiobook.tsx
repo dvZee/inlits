@@ -370,7 +370,30 @@ export function NewAudiobookPage() {
           throw updateError;
         }
 
-        // Only update chapters that have new audio files
+        // Get existing chapter IDs from database
+        const { data: existingChapters } = await supabase
+          .from('audiobook_chapters')
+          .select('id')
+          .eq('audiobook_id', editItem.id);
+
+        const existingChapterIds = existingChapters?.map(c => c.id) || [];
+        const currentChapterIds = chapters.map(c => c.id);
+
+        // Delete chapters that were removed
+        const chaptersToDelete = existingChapterIds.filter(id => !currentChapterIds.includes(id));
+        if (chaptersToDelete.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('audiobook_chapters')
+            .delete()
+            .in('id', chaptersToDelete);
+
+          if (deleteError) {
+            console.error('Chapter deletion error:', deleteError);
+            throw deleteError;
+          }
+        }
+
+        // Update or create chapters
         for (const chapter of chapters) {
           if (chapter.audioFile) {
             const audioExt = chapter.audioFile.name.split('.').pop();
@@ -396,6 +419,21 @@ export function NewAudiobookPage() {
               .update({
                 title: chapter.title,
                 audio_url: audioUrl,
+                duration: chapter.duration
+              })
+              .eq('id', chapter.id)
+              .eq('audiobook_id', editItem.id);
+
+            if (chapterError) {
+              console.error('Chapter update error:', chapterError);
+              throw chapterError;
+            }
+          } else {
+            // Update chapter title/duration without changing audio
+            const { error: chapterError } = await supabase
+              .from('audiobook_chapters')
+              .update({
+                title: chapter.title,
                 duration: chapter.duration
               })
               .eq('id', chapter.id)

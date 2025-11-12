@@ -13,7 +13,6 @@ import { AudioPlayer } from './components/audio/audio-player';
 import { Footer } from './components/layout/footer';
 
 // Lazy loaded components with proper dynamic imports
-const GetStartedPage = React.lazy(() => import('./pages/auth/get-started').then(module => ({ default: module.GetStartedPage })));
 const OnboardingQuiz = React.lazy(() => import('./pages/auth/onboarding-quiz').then(module => ({ default: module.OnboardingQuiz })));
 const BecomeCreatorPage = React.lazy(() => import('./pages/auth/become-creator').then(module => ({ default: module.BecomeCreatorPage })));
 const SignInPage = React.lazy(() => import('./pages/auth/sign-in').then(module => ({ default: module.SignInPage })));
@@ -201,7 +200,7 @@ function App() {
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                   <Route path="/verify-email" element={<VerifyEmailPage />} />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
-                  <Route path="/get-started" element={<GetStartedPage />} />
+                  <Route path="/get-started" element={<Navigate to="/signup" replace />} />
                   <Route path="/onboarding" element={<OnboardingQuiz />} />
                   <Route path="/become-creator" element={<BecomeCreatorPage />} />
 
