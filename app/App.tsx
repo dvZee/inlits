@@ -177,7 +177,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <main
         className={`transition-all duration-300 will-change-transform ${
           isHomePage ? 'pt-16' : 'pt-14'
-        } ${
+        } pb-20 ${
           isMobile
             ? 'ml-0'
             : sidebarCollapsed
@@ -185,7 +185,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
               : 'ml-64'
         }`}
       >
-        <div className={`container px-4 mx-auto ${isMobile ? 'max-w-full' : ''}`}>
+        <div className={`${isMobile ? 'px-0' : 'container px-4 mx-auto'}`}>
           {React.isValidElement(children) && React.cloneElement(children as React.ReactElement, { selectedCategory })}
         </div>
       </main>

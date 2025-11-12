@@ -76,7 +76,7 @@ export function HeroBanner({ items }: HeroBannerProps) {
   };
 
   return (
-    <div className="relative w-full h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden rounded-lg mb-8">
+    <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] min-h-[400px] md:min-h-[500px] max-h-[600px] md:max-h-[700px] overflow-hidden rounded-lg mb-8">
       <div className="absolute inset-0">
         <ImageLoader
           src={currentItem.thumbnail}
@@ -93,12 +93,8 @@ export function HeroBanner({ items }: HeroBannerProps) {
             <span className="px-3 py-1 bg-primary/90 text-white rounded-full font-medium">
               Featured
             </span>
-            <span className="text-white/80 capitalize">{currentItem.type}</span>
             {currentItem.category && (
-              <>
-                <span className="text-white/60">•</span>
-                <span className="text-white/80">{currentItem.category}</span>
-              </>
+              <span className="text-white/80">{currentItem.category}</span>
             )}
           </div>
 
@@ -107,12 +103,16 @@ export function HeroBanner({ items }: HeroBannerProps) {
           </h1>
 
           <div className="flex items-center gap-3 text-sm text-white/80">
-            <div className="flex items-center gap-1">
-              <span className="text-yellow-400">★</span>
-              <span>{currentItem.rating?.toFixed(1) || '4.5'}</span>
-            </div>
-            <span>•</span>
-            <span>{currentItem.duration}</span>
+            {currentItem.rating && currentItem.rating > 0 && (
+              <>
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-400">★</span>
+                  <span>{currentItem.rating.toFixed(1)}</span>
+                </div>
+                <span>•</span>
+              </>
+            )}
+            {currentItem.duration && <span>{currentItem.duration}</span>}
             {currentItem.views > 0 && (
               <>
                 <span>•</span>
@@ -151,9 +151,6 @@ export function HeroBanner({ items }: HeroBannerProps) {
             >
               <Info className="w-5 h-5" />
               <span>More Info</span>
-            </button>
-            <button className="p-3 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all backdrop-blur-sm">
-              <Bookmark className="w-5 h-5" />
             </button>
           </div>
         </div>
