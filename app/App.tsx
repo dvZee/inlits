@@ -153,14 +153,14 @@ function MainLayout({ children }: { children: React.ReactNode }) {
           collapsed={isMobile ? true : sidebarCollapsed}
         />
       )}
-      <main 
-        className={`transition-all duration-300 ${
+      <main
+        className={`transition-all duration-300 will-change-transform ${
           isHomePage ? 'pt-16' : 'pt-14'
         } ${isPlayerVisible && isMobile ? 'pb-40' : isPlayerVisible ? 'pb-20' : isMobile ? 'pb-20' : ''} ${
-          isMobile 
-            ? 'ml-0' 
-            : sidebarCollapsed 
-              ? 'ml-16' 
+          isMobile
+            ? 'ml-0'
+            : sidebarCollapsed
+              ? 'ml-16'
               : 'ml-64'
         }`}
       >

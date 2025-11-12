@@ -59,6 +59,21 @@ export function HeroBanner({ items }: HeroBannerProps) {
     }
   };
 
+  const handleMoreInfo = () => {
+    switch (currentItem.type) {
+      case 'article':
+        navigate(`/reader/article-${currentItem.id}`);
+        break;
+      case 'ebook':
+        navigate(`/reader/book-${currentItem.id}`);
+        break;
+      case 'audiobook':
+      case 'podcast':
+        navigate(`/player/${currentItem.type}-${currentItem.id}`);
+        break;
+    }
+  };
+
   return (
     <div className="relative w-full h-[70vh] min-h-[500px] max-h-[700px] overflow-hidden rounded-lg mb-8">
       <div className="absolute inset-0">
@@ -129,7 +144,10 @@ export function HeroBanner({ items }: HeroBannerProps) {
               <Play className="w-5 h-5 fill-current" />
               <span>{currentItem.type === 'article' || currentItem.type === 'ebook' ? 'Read' : 'Play'}</span>
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-md font-semibold hover:bg-white/30 transition-all backdrop-blur-sm">
+            <button
+              onClick={handleMoreInfo}
+              className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-md font-semibold hover:bg-white/30 transition-all backdrop-blur-sm"
+            >
               <Info className="w-5 h-5" />
               <span>More Info</span>
             </button>

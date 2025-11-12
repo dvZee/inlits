@@ -5,7 +5,8 @@ import { ContentLayout } from '@/components/content/content-layout';
 import { HeroBanner } from '@/components/content/hero-banner';
 import { ContinueContent } from '@/components/content/continue-content';
 import { ContentCarousel } from '@/components/content/content-carousel';
-import { Recommendations } from '@/components/content/recommendations';
+import { SmartRecommendations } from '@/components/content/smart-recommendations';
+import { PopularCollections } from '@/components/content/popular-collections';
 import { HeroBannerSkeleton, ContentRowSkeleton } from '@/components/content/skeleton-loader';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
@@ -747,15 +748,26 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
           }}
         />
       )}
-      <div className="space-y-8">
+      <div className="space-y-10 animate-fadeInUp">
         <HeroBanner items={allContentItems} />
 
         <ContinueContent />
+
+        <PopularCollections />
 
         {trendingItems.length > 0 && (
           <ContentCarousel
             title="Trending Now"
             items={trendingItems}
+            activeShelf={activeShelf}
+            onAddToShelf={handleAddToShelf}
+          />
+        )}
+
+        {filteredContent.articles.length > 0 && (
+          <ContentCarousel
+            title="Latest Articles"
+            items={filteredContent.articles.slice(0, 15)}
             activeShelf={activeShelf}
             onAddToShelf={handleAddToShelf}
           />
@@ -797,7 +809,7 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
           />
         )}
 
-        <Recommendations />
+        <SmartRecommendations />
       </div>
     </>
   );

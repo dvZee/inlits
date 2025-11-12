@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bookmark, Star, Play } from 'lucide-react';
+import { Bookmark, Star, Play, Headphones, BookOpen, FileText } from 'lucide-react';
 import { useOptimisticMutation } from '@/lib/hooks/use-optimistic-mutation';
 import { supabase } from '@/lib/supabase';
 import { ContentTypeIcon } from './content-type-icon';
@@ -133,6 +133,27 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
     return name[0]?.toUpperCase() || 'U';
   };
 
+  // Get content label and icon
+  const getContentLabel = () => {
+    switch (item.type) {
+      case 'audiobook':
+        return { icon: Headphones, label: 'Full Audiobook' };
+      case 'ebook':
+        return { icon: BookOpen, label: 'Full Book' };
+      case 'podcast':
+        return { icon: Headphones, label: 'Podcast' };
+      case 'article':
+        return { icon: FileText, label: 'Article' };
+      case 'summary':
+        return { icon: BookOpen, label: 'Summary' };
+      default:
+        return { icon: BookOpen, label: item.type };
+    }
+  };
+
+  const contentLabel = getContentLabel();
+  const ContentIcon = contentLabel.icon;
+
   return (
     <div
       onClick={handleClick}
@@ -153,9 +174,9 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
         />
         
         {/* Content type badge */}
-        <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-background/90 text-xs font-medium flex items-center gap-1 shadow-sm">
-          <ContentTypeIcon type={item.type} className="w-3 h-3" />
-          <span className="capitalize">{item.type}</span>
+        <div className="absolute top-2 left-2 px-2.5 py-1.5 rounded-full bg-black/80 backdrop-blur-sm text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg border border-white/10">
+          <ContentIcon className="w-3.5 h-3.5" />
+          <span>{contentLabel.label}</span>
         </div>
 
         {/* Play button for audio content */}
