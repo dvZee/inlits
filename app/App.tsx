@@ -177,7 +177,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <main
         className={`transition-all duration-300 will-change-transform ${
           isHomePage ? 'pt-16' : 'pt-14'
-        } ${isPlayerVisible && isMobile ? 'pb-40' : isPlayerVisible ? 'pb-20' : isMobile ? 'pb-20' : ''} ${
+        } ${
           isMobile
             ? 'ml-0'
             : sidebarCollapsed
