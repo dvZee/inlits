@@ -73,8 +73,6 @@ export function ImageLoader({
         alt={alt}
         className={`${className} ${shouldLoad && !isLoaded ? 'blur-sm' : 'blur-0'} transition-all duration-300`}
         loading={loadingStrategy}
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
         onError={() => {
           setHardError(true);
         }}
