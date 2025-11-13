@@ -112,13 +112,13 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
   const getAspectRatio = () => {
     switch (item.type) {
       case 'ebook':
-        return 'aspect-[2/3]'; // Book standard size
+        return 'aspect-[2/3] min-h-[280px]'; // Book standard size with minimum height
       case 'article':
       case 'podcast':
       case 'audiobook':
-        return 'aspect-video'; // 16:9 ratio
+        return 'aspect-[3/4] min-h-[240px]'; // Taller ratio for audiobooks
       default:
-        return 'aspect-video';
+        return 'aspect-[3/4] min-h-[240px]';
     }
   };
 
