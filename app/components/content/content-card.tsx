@@ -161,16 +161,15 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
     >
       {/* Thumbnail with fixed aspect ratio */}
       <div className={`relative ${getAspectRatio()}`}>
-        <ImageLoader
+        <img
           src={item.thumbnail}
           alt={item.title}
           className="w-full h-full object-cover"
-          lowQualityUrl={thumbnailLowQuality}
-          fallback={
-            <div className="w-full h-full bg-muted flex items-center justify-center">
-              <ContentTypeIcon type={item.type} className="w-8 h-8 text-muted-foreground" />
-            </div>
-          }
+          loading="lazy"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://placehold.co/600x800?text=Content';
+          }}
         />
         
         {/* Content type badge */}
@@ -203,19 +202,20 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
             className="flex items-center gap-2 hover:text-primary transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
-              <ImageLoader
+            <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-primary/10 flex items-center justify-center">
+              <img
                 src={item.creator.avatar}
                 alt={getCreatorName()}
                 className="w-full h-full object-cover"
-                lowQualityUrl={creatorLowQuality}
-                fallback={
-                  <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary text-xs font-medium">
-                      {getCreatorInitial()}
-                    </span>
-                  </div>
-                }
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `<span class="text-primary text-xs font-medium">${getCreatorInitial()}</span>`;
+                  }
+                }}
               />
             </div>
             <span className="text-xs text-muted-foreground hover:text-primary transition-colors">

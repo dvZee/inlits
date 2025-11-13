@@ -5,6 +5,7 @@ import { ContentLayout } from '@/components/content/content-layout';
 import { HeroBanner } from '@/components/content/hero-banner';
 import { ContinueContent } from '@/components/content/continue-content';
 import { ContentCarousel } from '@/components/content/content-carousel';
+import { ContentCard } from '@/components/content/content-card';
 import { SmartRecommendations } from '@/components/content/smart-recommendations';
 import { CinematicCollections } from '@/components/content/cinematic-collections';
 import { HeroBannerSkeleton, ContentRowSkeleton } from '@/components/content/skeleton-loader';
@@ -738,6 +739,49 @@ export function Home({ selectedCategory = 'all', initialData }: HomeProps) {
   const newReleases = allContentItems
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 15);
+
+  // If a category is selected, show only filtered grid
+  if (selectedCategory !== 'all') {
+    return (
+      <>
+        {activeShelf && (
+          <AddToShelfBanner
+            shelfName={shelfName}
+            onClose={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete('shelf');
+              window.history.replaceState(
+                {},
+                '',
+                `${window.location.pathname}?${newSearchParams.toString()}`
+              );
+              setActiveShelf(null);
+            }}
+          />
+        )}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">
+              {selectedCategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            </h2>
+            <p className="text-muted-foreground">
+              {allContentItems.length} {allContentItems.length === 1 ? 'item' : 'items'}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {allContentItems.map((item) => (
+              <ContentCard
+                key={`${item.type}-${item.id}`}
+                item={item}
+                activeShelf={activeShelf}
+                onAddToShelf={handleAddToShelf}
+              />
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
