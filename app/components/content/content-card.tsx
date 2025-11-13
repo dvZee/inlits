@@ -165,7 +165,7 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
           src={item.thumbnail}
           alt={item.title}
           className="w-full h-full object-cover"
-          loading="eager"
+          loading="lazy"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://placehold.co/600x800?text=Content';
@@ -207,7 +207,7 @@ export const ContentCard = memo(function ContentCard({ item, activeShelf, onAddT
                 src={item.creator.avatar}
                 alt={getCreatorName()}
                 className="w-full h-full object-cover"
-                loading="eager"
+                loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
