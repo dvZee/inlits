@@ -433,6 +433,11 @@ export function AudioPlayer({
   };
 
   const handleClosePlayer = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setContextIsPlaying(false);
     setPlayerVisible(false);
   };
 

@@ -75,7 +75,9 @@ export function MiniPlayer() {
     e.stopPropagation();
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
+    setIsPlaying(false);
     setPlayerVisible(false);
   };
 
