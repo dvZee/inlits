@@ -49,21 +49,35 @@ export function useIntersectionObserver(
 
 // Lazy image loading hook with better error handling
 export function useLazyImage(src: string, lowQualityUrl?: string) {
-  const [currentSrc, setCurrentSrc] = useState(lowQualityUrl || '');
+  const [currentSrc, setCurrentSrc] = useState(lowQualityUrl || src || '');
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
   const isMounted = useRef(true);
 
   useEffect(() => {
     isMounted.current = true;
-    
-    if (!isBrowser || !hasImageConstructor || !src) return;
+
+    if (!isBrowser || !hasImageConstructor || !src) {
+      if (isMounted.current) {
+        setIsLoaded(true);
+        setError(!src);
+      }
+      return;
+    }
 
     const img = new Image();
     img.src = src;
 
+    const timeout = setTimeout(() => {
+      if (isMounted.current && !isLoaded) {
+        setCurrentSrc(src);
+        setIsLoaded(true);
+      }
+    }, 5000);
+
     const handleLoad = () => {
       if (isMounted.current) {
+        clearTimeout(timeout);
         setCurrentSrc(src);
         setIsLoaded(true);
         setError(false);
@@ -72,6 +86,7 @@ export function useLazyImage(src: string, lowQualityUrl?: string) {
 
     const handleError = () => {
       if (isMounted.current) {
+        clearTimeout(timeout);
         setError(true);
         setIsLoaded(true);
       }
@@ -82,6 +97,7 @@ export function useLazyImage(src: string, lowQualityUrl?: string) {
 
     return () => {
       isMounted.current = false;
+      clearTimeout(timeout);
       img.removeEventListener('load', handleLoad);
       img.removeEventListener('error', handleError);
     };

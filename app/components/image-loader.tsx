@@ -23,7 +23,7 @@ export function ImageLoader({
     isBrowser && typeof window.IntersectionObserver !== 'undefined';
   const containerRef = useRef<HTMLDivElement>(null);
   const { currentSrc, isLoaded, error } = useLazyImage(src || '', lowQualityUrl);
-  const [shouldLoad, setShouldLoad] = useState(true);
+  const [shouldLoad, setShouldLoad] = useState(loadingStrategy === 'eager');
   const [hardError, setHardError] = useState(false);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function ImageLoader({
       <img
         src={displayedSrc}
         alt={alt}
-        className={`${className} ${shouldLoad && !isLoaded ? 'blur-sm' : 'blur-0'} transition-all duration-200`}
+        className={`${className} ${shouldLoad && !isLoaded ? 'opacity-90' : 'opacity-100'} transition-opacity duration-200`}
         loading={loadingStrategy}
         decoding="async"
         crossOrigin="anonymous"
@@ -79,9 +79,9 @@ export function ImageLoader({
         }}
         {...props}
       />
-      {shouldLoad && !isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
-          <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+      {shouldLoad && !isLoaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
+          <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         </div>
       )}
     </div>
