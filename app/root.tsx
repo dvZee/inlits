@@ -98,7 +98,7 @@ function AppContent() {
       </div>
       <GlobalAudioPlayer />
       {currentAudio && isPlayerVisible && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg md:bottom-0 max-md:pb-16">
           <AudioPlayer
             title={currentAudio.title}
             author={currentAudio.author}

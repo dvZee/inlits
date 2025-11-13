@@ -442,16 +442,14 @@ export function AudioPlayer({
   };
 
   return (
-    <div className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
-      isMobile ? 'bottom-20' : 'bottom-0 h-20'
-    }`}>
+    <div className="relative w-full bg-background/95 backdrop-blur-sm">
 
       <div
         ref={progressRef}
         onMouseDown={handleProgressMouseDown}
         onMouseMove={handleProgressMouseMove}
         onMouseLeave={handleProgressMouseLeave}
-        className="relative h-2 bg-muted cursor-pointer group hover:h-3 transition-all duration-200"
+        className="relative h-1 md:h-2 bg-muted cursor-pointer group hover:h-3 transition-all duration-200"
       >
         <div className="absolute inset-0 bg-muted rounded-full" />
         <div
@@ -474,24 +472,19 @@ export function AudioPlayer({
         )}
       </div>
 
-      {isMobile ? (
-        <div className="px-2 py-1 flex items-center justify-between">
-          <div className="flex items-center gap-1 min-w-0 flex-1">
+      <div className="px-3 py-2 md:px-4 md:py-3">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Link
               to={currentAudio?.contentUrl || '/'}
-              className="flex items-center gap-1 hover:text-primary transition-colors flex-shrink-0"
+              className="flex items-center gap-2 hover:text-primary transition-colors flex-shrink-0"
             >
-              <div className="w-6 h-6 rounded overflow-hidden bg-muted">
-                <ImageLoader
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded overflow-hidden bg-muted">
+                <img
                   src={thumbnail}
                   alt={title}
                   className="w-full h-full object-cover"
-                  lowQualityUrl={`${thumbnail}?w=50`}
-                  fallback={
-                    <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                      <Play className="w-2 h-2 text-primary" />
-                    </div>
-                  }
+                  loading="eager"
                 />
               </div>
             </Link>
@@ -500,11 +493,11 @@ export function AudioPlayer({
                 to={currentAudio?.contentUrl || '/'}
                 className="block hover:text-primary transition-colors"
               >
-                <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
+                <h3 className="font-medium text-xs md:text-sm line-clamp-1">{title}</h3>
               </Link>
               <Link
                 to={authorUsername ? `/user/${authorUsername}` : '#'}
-                className="text-xs text-muted-foreground line-clamp-1 hover:text-primary transition-colors"
+                className="text-xs md:text-sm text-muted-foreground line-clamp-1 hover:text-primary transition-colors"
                 onClick={(e) => !authorUsername && e.preventDefault()}
               >
                 {author}
@@ -512,66 +505,66 @@ export function AudioPlayer({
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 md:gap-1">
             {playlist.length > 1 && (
               <button
                 onClick={playPrevious}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                className="p-1 md:p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all hidden md:flex"
                 disabled={isLoading}
                 title="Previous track"
               >
-                <SkipBack className="w-5 h-5" />
+                <SkipBack className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             )}
             <button
               onClick={() => skipTime(-15)}
-              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+              className="p-1 md:p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               disabled={isLoading}
               title="Skip back 15s"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <button
               onClick={togglePlay}
               disabled={isLoading || (!currentAudio?.audioUrl && !(currentAudio?.chapters && currentAudio.chapters.length > 0))}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
+              className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
             >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
               ) : contextIsPlaying ? (
-                <Pause className="w-5 h-5" />
+                <Pause className="w-4 h-4 md:w-5 md:h-5" />
               ) : (
-                <Play className="w-5 h-5 ml-0.5" />
+                <Play className="w-4 h-4 md:w-5 md:h-5 ml-0.5" />
               )}
             </button>
             <button
               onClick={() => skipTime(30)}
-              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+              className="p-1 md:p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
               disabled={isLoading}
               title="Skip forward 30s"
             >
-              <RotateCw className="w-5 h-5" />
+              <RotateCw className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             {playlist.length > 1 && (
               <button
                 onClick={playNext}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                className="p-1 md:p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all hidden md:flex"
                 disabled={isLoading}
                 title="Next track"
               >
-                <SkipForward className="w-5 h-5" />
+                <SkipForward className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-1">
-            <div className="relative">
+          <div className="flex items-center gap-0.5 md:gap-1">
+            <div className="relative hidden md:block">
               <button
                 onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                className="p-1 md:p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                 title="Volume"
               >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
               </button>
               {showVolumeSlider && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-popover border rounded-lg shadow-xl">
@@ -589,34 +582,27 @@ export function AudioPlayer({
               )}
             </div>
             <button
-              onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
-              className={`p-1.5 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
-              title={`${listeningMode.charAt(0).toUpperCase() + listeningMode.slice(1)} Mode`}
-            >
-              {getModeIcon(listeningMode)}
-            </button>
-            <button
               onClick={() => { closeAllExcept('settings'); setShowSettings(!showSettings); }}
-              className={`p-1.5 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+              className={`p-1 md:p-1.5 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
               disabled={isLoading}
               title="Player Settings"
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
               <button
                 onClick={() => { closeAllExcept('playlist'); setShowPlaylist(!showPlaylist); }}
-                className={`p-1.5 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+                className={`p-1 md:p-1.5 rounded-lg transition-all hidden md:flex ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
                 disabled={isLoading}
                 title="Chapters"
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             )}
             {!isMainPlayerPage && (
               <button
                 onClick={handleClosePlayer}
-                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                className="p-0.5 md:p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                 title="Close Player"
               >
                 <X className="w-3 h-3" />
@@ -624,7 +610,16 @@ export function AudioPlayer({
             )}
           </div>
         </div>
-      ) : (
+      </div>
+
+      {/* Desktop Time Display */}
+      <div className="hidden md:flex items-center justify-between px-4 pb-1 text-xs text-muted-foreground">
+        <span>{formatTime(currentTime)}</span>
+        <span>{formatTime(duration)}</span>
+      </div>
+
+      {/* Moved desktop layout below - NOT used anymore */}
+      {false && (
         <div className="container mx-auto px-4 py-4 h-full">
           <div className="flex items-center h-full">
             <div className="flex items-center gap-3 min-w-0 w-80 flex-shrink-0">
