@@ -2,14 +2,13 @@ import React, { useEffect } from 'react';
 import { useAudio } from '@/lib/audio-context';
 
 export function GlobalAudioPlayer() {
-  const { audioRef, currentAudio, currentChapter, isPlaying, updateCurrentTime } = useAudio();
+  const { audioRef, currentAudio, currentChapter, isPlaying, setIsPlaying, updateCurrentTime } = useAudio();
 
   useEffect(() => {
     if (!currentAudio || !audioRef.current) return;
 
     const audio = audioRef.current;
     const currentChapterData = currentAudio.chapters?.[currentChapter];
-
     const source = currentChapterData?.audio_url || currentAudio.audioUrl;
 
     if (!source) return;
@@ -27,10 +26,12 @@ export function GlobalAudioPlayer() {
     const isSameSource = currentSrc === newSrc;
 
     if (isSameSource) {
+      // Restore playback position if needed
       if (currentAudio.currentTime && currentAudio.currentTime > 0 && Math.abs(audio.currentTime - currentAudio.currentTime) > 2) {
         audio.currentTime = currentAudio.currentTime;
       }
 
+      // Sync play/pause state
       if (isPlaying && audio.paused) {
         audio.play().catch(console.error);
       } else if (!isPlaying && !audio.paused) {
@@ -39,6 +40,7 @@ export function GlobalAudioPlayer() {
       return;
     }
 
+    // Load new source
     audio.src = source;
     audio.load();
 
@@ -59,6 +61,24 @@ export function GlobalAudioPlayer() {
     };
   }, [currentAudio, currentChapter, audioRef, isPlaying]);
 
+  // Sync isPlaying state with actual audio state
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [audioRef, setIsPlaying]);
+
+  // Track current time
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -84,5 +104,5 @@ export function GlobalAudioPlayer() {
     };
   }, [audioRef, updateCurrentTime]);
 
-  return <audio ref={audioRef} className="hidden" />;
+  return <audio ref={audioRef} className="hidden" preload="auto" />;
 }

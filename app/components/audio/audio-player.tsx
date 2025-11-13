@@ -74,12 +74,12 @@ export function AudioPlayer({
     playlist,
     currentTrackIndex,
     playNext,
-    playPrevious
+    playPrevious,
+    audioRef,
+    isPlaying: contextIsPlaying,
+    setIsPlaying: setContextIsPlaying
   } = useAudio();
-
-  const audioRef = React.useRef<HTMLAudioElement>(null);
   const progressRef = React.useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
@@ -116,85 +116,13 @@ export function AudioPlayer({
 
     if (isChapterLocked) {
       setError('Please sign in to access this chapter');
-      setIsPlaying(false);
+      setContextIsPlaying(false);
       if (audioRef.current) {
         audioRef.current.pause();
       }
       return;
     }
-
-    try {
-      const source = currentAudio.chapters && currentAudio.chapters.length > 0 && currentAudio.chapters[currentChapter]
-        ? currentAudio.chapters[currentChapter].audio_url
-        : currentAudio.audioUrl;
-
-      if (audioRef.current && source) {
-        const normalizeUrl = (url: string) => {
-          try {
-            return new URL(url).href;
-          } catch {
-            return url;
-          }
-        };
-
-        const currentSrc = audioRef.current.src ? normalizeUrl(audioRef.current.src) : '';
-        const newSrc = normalizeUrl(source);
-        const isSameSource = currentSrc === newSrc;
-
-        if (isSameSource) {
-          if (currentAudio.currentTime && currentAudio.currentTime > 0 && Math.abs(audioRef.current.currentTime - currentAudio.currentTime) > 2) {
-            audioRef.current.currentTime = currentAudio.currentTime;
-          }
-
-          if (!audioRef.current.paused && !isPlaying) {
-            setIsPlaying(true);
-          } else if (audioRef.current.paused && isPlaying) {
-            audioRef.current.play().catch(err => console.error('Error resuming:', err));
-          }
-
-          if (hasInitialized.current) {
-            return;
-          }
-          hasInitialized.current = true;
-          return;
-        }
-
-        hasInitialized.current = false;
-        audioRef.current.src = source;
-        audioRef.current.load();
-
-        const handleCanPlayThrough = () => {
-          if (audioRef.current) {
-            if (currentAudio.currentTime && currentAudio.currentTime > 0) {
-              audioRef.current.currentTime = currentAudio.currentTime;
-            }
-
-            audioRef.current.play()
-              .then(() => {
-                setIsPlaying(true);
-                setError(null);
-                hasInitialized.current = true;
-              })
-              .catch(err => {
-                console.error('Error auto-playing:', err);
-                setIsPlaying(false);
-              });
-          }
-        };
-
-        audioRef.current.addEventListener('canplaythrough', handleCanPlayThrough, { once: true });
-
-        return () => {
-          if (audioRef.current) {
-            audioRef.current.removeEventListener('canplaythrough', handleCanPlayThrough);
-          }
-        };
-      }
-    } catch (err) {
-      console.error('Error setting audio source:', err);
-      setError('Failed to load audio source');
-    }
-  }, [currentAudio, currentChapter, isPlaying]);
+  }, [currentAudio, currentChapter, user, audioRef, setContextIsPlaying]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -226,26 +154,26 @@ export function AudioPlayer({
         const isNextChapterLocked = !user && nextChapterIndex > 0;
 
         if (isNextChapterLocked) {
-          setIsPlaying(false);
+          setContextIsPlaying(false);
           return;
         }
 
         if (settings.autoplay || settings.repeat === 'all') {
           setCurrentChapter(nextChapterIndex);
         } else {
-          setIsPlaying(false);
+          setContextIsPlaying(false);
         }
       } else if (settings.repeat === 'all' && currentAudio?.chapters) {
         setCurrentChapter(0);
       } else {
-        setIsPlaying(false);
+        setContextIsPlaying(false);
       }
     };
     const handleError = (e: Event) => {
       const audioError = (e.target as HTMLAudioElement).error;
       setError(audioError?.message || 'Error playing audio');
       setIsLoading(false);
-      setIsPlaying(false);
+      setContextIsPlaying(false);
     };
 
     audio.addEventListener('loadstart', handleLoadStart);
@@ -265,18 +193,9 @@ export function AudioPlayer({
     };
   }, [currentAudio, currentChapter, settings, setCurrentChapter]);
 
-  React.useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current.load();
-      }
-    };
-  }, []);
 
   React.useEffect(() => {
-    if (settings.sleepTimer > 0 && isPlaying) {
+    if (settings.sleepTimer > 0 && contextIsPlaying) {
       setSleepTimerRemaining(settings.sleepTimer * 60);
       
       const interval = setInterval(() => {
@@ -284,7 +203,7 @@ export function AudioPlayer({
           if (prev <= 1) {
             if (audioRef.current) {
               audioRef.current.pause();
-              setIsPlaying(false);
+              setContextIsPlaying(false);
             }
             setSettings(prev => ({ ...prev, sleepTimer: 0 }));
             return 0;
@@ -295,23 +214,20 @@ export function AudioPlayer({
 
       return () => clearInterval(interval);
     }
-  }, [settings.sleepTimer, isPlaying]);
+  }, [settings.sleepTimer, contextIsPlaying, audioRef, setContextIsPlaying]);
 
   const togglePlay = async () => {
     if (!audioRef.current || isLoading) return;
 
     try {
-      if (isPlaying) {
+      if (contextIsPlaying) {
         audioRef.current.pause();
-        setIsPlaying(false);
       } else {
         await audioRef.current.play();
-        setIsPlaying(true);
       }
     } catch (error) {
       console.error('Error toggling play:', error);
       setError('Failed to play audio');
-      setIsPlaying(false);
     }
   };
 
@@ -517,10 +433,6 @@ export function AudioPlayer({
   };
 
   const handleClosePlayer = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
     setPlayerVisible(false);
   };
 
@@ -528,12 +440,6 @@ export function AudioPlayer({
     <div className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
       isMobile ? 'bottom-20' : 'bottom-0 h-20'
     }`}>
-      <audio 
-        ref={audioRef}
-        preload="auto"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
 
       <div
         ref={progressRef}
@@ -627,7 +533,7 @@ export function AudioPlayer({
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isPlaying ? (
+              ) : contextIsPlaying ? (
                 <Pause className="w-5 h-5" />
               ) : (
                 <Play className="w-5 h-5 ml-0.5" />
@@ -773,7 +679,7 @@ export function AudioPlayer({
               >
                 {isLoading ? (
                   <Loader2 className="w-6 h-6 animate-spin" />
-                ) : isPlaying ? (
+                ) : contextIsPlaying ? (
                   <Pause className="w-6 h-6" />
                 ) : (
                   <Play className="w-6 h-6 ml-0.5" />
@@ -1056,7 +962,7 @@ export function AudioPlayer({
                                         <Lock className="w-3 h-3" />
                                       ) : isLoading && isCurrent ? (
                                         <Loader2 className="w-3 h-3 animate-spin" />
-                                      ) : isCurrent && isPlaying ? (
+                                      ) : isCurrent && contextIsPlaying ? (
                                         <Pause className="w-3 h-3" />
                                       ) : (
                                         <Play className="w-3 h-3" />
@@ -1255,7 +1161,7 @@ export function AudioPlayer({
                           <Lock className="w-3 h-3" />
                         ) : isLoading && isCurrent ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : isCurrent && isPlaying ? (
+                        ) : isCurrent && contextIsPlaying ? (
                           <Pause className="w-3 h-3" />
                         ) : (
                           <Play className="w-3 h-3" />
@@ -1283,20 +1189,6 @@ export function AudioPlayer({
         </div>
       )}
 
-      {sleepTimerRemaining > 0 && (
-        <div className="mt-2 px-3 py-1.5 bg-primary/10 text-primary rounded text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MoonIcon className="w-3 h-3" />
-            <span>Sleep: {formatSleepTimer(sleepTimerRemaining)}</span>
-          </div>
-          <button
-            onClick={() => setSettings(prev => ({ ...prev, sleepTimer: 0 }))}
-            className="text-xs hover:underline"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
     </div>
   );
 }
