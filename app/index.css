@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -10,13 +10,13 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221 74% 40%;      /* #1f4ead */
+    --primary: 221 74% 40%; /* #1f4ead */
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 221 74% 45%;       /* #355fb5 */
+    --accent: 221 74% 45%; /* #355fb5 */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -25,9 +25,9 @@
     --ring: 221 74% 40%;
     --radius: 0.75rem;
     --sidebar-background: 0 0% 100%;
-    --content-background: 220 33% 98%;  /* #f8f9fc */
+    --content-background: 220 33% 98%; /* #f8f9fc */
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -35,30 +35,36 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 221 74% 40%;      /* #1f4ead */
+    --primary: 221 74% 40%; /* #1f4ead */
     --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 221 74% 45%;       /* #355fb5 */
+    --accent: 221 74% 45%; /* #355fb5 */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 221 74% 40%;
-    --sidebar-background: 215 24% 12%;  /* #171C26 */
-    --content-background: 217 30% 8%;   /* #0E121B */
+    --sidebar-background: 215 24% 12%; /* #171C26 */
+    --content-background: 217 30% 8%; /* #0E121B */
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  html {
+    overflow-x: hidden;
   }
 }
 
@@ -89,53 +95,53 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 
-/* Global hover consistency - ensure text and icons are white when hovering over primary colored elements */
-.hover\:bg-primary:hover,
-.hover\:bg-primary\/90:hover,
-.hover\:border-primary:hover {
-  color: white !important;
-}
+  /* Global hover consistency - ensure text and icons are white when hovering over primary colored elements */
+  .hover\:bg-primary:hover,
+  .hover\:bg-primary\/90:hover,
+  .hover\:border-primary:hover {
+    color: white !important;
+  }
 
-.hover\:bg-primary:hover svg,
-.hover\:bg-primary\/90:hover svg,
-.hover\:border-primary:hover svg {
-  color: white !important;
-}
+  .hover\:bg-primary:hover svg,
+  .hover\:bg-primary\/90:hover svg,
+  .hover\:border-primary:hover svg {
+    color: white !important;
+  }
 
-/* Ensure all primary background elements have white text */
-.bg-primary,
-.bg-primary\/90 {
-  color: white !important;
-}
+  /* Ensure all primary background elements have white text */
+  .bg-primary,
+  .bg-primary\/90 {
+    color: white !important;
+  }
 
-.bg-primary svg,
-.bg-primary\/90 svg {
-  color: white !important;
-}
+  .bg-primary svg,
+  .bg-primary\/90 svg {
+    color: white !important;
+  }
 
-/* Fix button hover states */
-button:hover.hover\:bg-primary,
-a:hover.hover\:bg-primary {
-  color: white !important;
-}
+  /* Fix button hover states */
+  button:hover.hover\:bg-primary,
+  a:hover.hover\:bg-primary {
+    color: white !important;
+  }
 
-button:hover.hover\:bg-primary svg,
-a:hover.hover\:bg-primary svg {
-  color: white !important;
-}
+  button:hover.hover\:bg-primary svg,
+  a:hover.hover\:bg-primary svg {
+    color: white !important;
+  }
 
-/* Ensure dropdown items have proper hover states */
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1 !important;
-}
+  /* Ensure dropdown items have proper hover states */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1 !important;
+  }
 
-.group:hover .group-hover\:pointer-events-auto {
-  pointer-events: auto !important;
-}
+  .group:hover .group-hover\:pointer-events-auto {
+    pointer-events: auto !important;
+  }
 
-.group:hover .group-hover\:scale-100 {
-  transform: scale(1) !important;
-}
+  .group:hover .group-hover\:scale-100 {
+    transform: scale(1) !important;
+  }
 
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -216,7 +222,12 @@ a:hover.hover\:bg-primary svg {
 
   .animate-shimmer {
     animation: shimmer 2s infinite;
-    background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
     background-size: 1000px 100%;
   }
 
@@ -255,11 +266,13 @@ a:hover.hover\:bg-primary svg {
 
   /* Smooth hover transitions */
   * {
-    transition-property: transform, opacity, box-shadow, background-color, border-color, color;
+    transition-property: transform, opacity, box-shadow, background-color,
+      border-color, color;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  button, a {
+  button,
+  a {
     transition-duration: 200ms;
   }
 
@@ -275,7 +288,8 @@ a:hover.hover\:bg-primary svg {
 
   /* Layered cards effect */
   @keyframes cardFloat {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -415,7 +429,7 @@ a:hover.hover\:bg-primary svg {
 }
 
 .playing-animation::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -4px;
   border-radius: 50%;
@@ -507,7 +521,7 @@ a:hover.hover\:bg-primary svg {
 .prose h4,
 .prose h5,
 .prose h6 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 600;
   line-height: 1.3;
   overflow-wrap: break-word;
@@ -559,7 +573,7 @@ a:hover.hover\:bg-primary svg {
 }
 
 .prose code {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.9em;
   background-color: hsl(var(--muted));
   padding: 0.2em 0.4em;
@@ -588,11 +602,12 @@ a:hover.hover\:bg-primary svg {
 
 /* Urdu Typography */
 .urdu-content {
-  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif;
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq",
+    "Urdu Typesetting", serif;
   text-align: right !important;
   direction: rtl;
-  line-height: 2.0 !important;
-  font-size: 1.0em !important;
+  line-height: 2 !important;
+  font-size: 1em !important;
   overflow-wrap: break-word !important;
   word-wrap: break-word !important;
   word-break: break-word !important;
@@ -606,7 +621,8 @@ a:hover.hover\:bg-primary svg {
 .urdu-content h4,
 .urdu-content h5,
 .urdu-content h6 {
-  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', serif !important;
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq",
+    "Urdu Typesetting", serif !important;
   text-align: right !important;
   direction: rtl !important;
   line-height: 1.6 !important;
@@ -615,7 +631,7 @@ a:hover.hover\:bg-primary svg {
 .urdu-content p {
   text-align: right !important;
   direction: rtl !important;
-  line-height: 2.0 !important;
+  line-height: 2 !important;
 }
 
 .urdu-content blockquote {
@@ -624,7 +640,7 @@ a:hover.hover\:bg-primary svg {
   padding-left: 0;
   padding-right: 1.5em;
   text-align: right !important;
-  line-height: 2.0 !important;
+  line-height: 2 !important;
   overflow-wrap: break-word !important;
   word-wrap: break-word !important;
   word-break: break-word !important;
@@ -636,12 +652,13 @@ a:hover.hover\:bg-primary svg {
 .urdu-content ol {
   text-align: right !important;
   direction: rtl !important;
-  line-height: 2.0 !important;
+  line-height: 2 !important;
 }
 
 /* English Content Styling */
 .english-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   text-align: left !important;
   direction: ltr !important;
   line-height: 1.4 !important;
@@ -658,7 +675,8 @@ a:hover.hover\:bg-primary svg {
 .english-content h4,
 .english-content h5,
 .english-content h6 {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 500 !important;
   line-height: 1.3 !important;
   text-align: left !important;
@@ -694,7 +712,7 @@ a:hover.hover\:bg-primary svg {
 
 /* Content Card Specific Styling */
 .content-card-title.urdu-content {
-  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-family: "Noto Nastaliq Urdu", serif !important;
   direction: rtl !important;
   text-align: right !important;
   line-height: 1.8 !important;
@@ -702,14 +720,15 @@ a:hover.hover\:bg-primary svg {
 }
 
 .content-card-title.english-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 500 !important;
   direction: ltr !important;
   text-align: left !important;
   line-height: 1.3 !important;
 }
 .content-card-description.urdu-content {
-  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-family: "Noto Nastaliq Urdu", serif !important;
   direction: rtl !important;
   text-align: right !important;
   line-height: 1.9 !important;
@@ -717,28 +736,30 @@ a:hover.hover\:bg-primary svg {
 }
 
 .content-card-description.english-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
   direction: ltr !important;
   text-align: left !important;
   line-height: 1.4 !important;
 }
 /* Reader Specific Styling */
 .reader-title.urdu-content {
-  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-family: "Noto Nastaliq Urdu", serif !important;
   direction: rtl !important;
   text-align: right !important;
   line-height: 1.8 !important;
 }
 
 .reader-title.english-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 600 !important;
   direction: ltr !important;
   text-align: left !important;
   line-height: 1.2 !important;
 }
 .reader-content.urdu-content {
-  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-family: "Noto Nastaliq Urdu", serif !important;
   direction: rtl !important;
   text-align: right !important;
   line-height: 2.2 !important;
@@ -767,6 +788,32 @@ a:hover.hover\:bg-primary svg {
 }
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  body,
+  html {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* Ensure container doesn't add unwanted margins on mobile */
+  .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+
   .prose {
     font-size: 1rem;
     padding: 0 !important;
@@ -776,7 +823,7 @@ a:hover.hover\:bg-primary svg {
     box-sizing: border-box !important;
     overflow-x: hidden !important;
   }
-  
+
   .urdu-content {
     font-size: 1.1rem;
     line-height: 2.1;
@@ -784,28 +831,28 @@ a:hover.hover\:bg-primary svg {
     box-sizing: border-box !important;
     overflow-x: hidden !important;
   }
-  
+
   .content-card-title.urdu-content {
     font-size: 0.85em !important;
     line-height: 1.9 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .content-card-description.urdu-content {
     font-size: 0.85em !important;
-    line-height: 2.0 !important;
+    line-height: 2 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .prose h2 {
     font-size: 1.4em;
     margin-top: 2em;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .urdu-content h2 {
     font-size: 1.5em;
     margin-top: 2em;
@@ -813,14 +860,14 @@ a:hover.hover\:bg-primary svg {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .prose h3 {
     font-size: 1.2em;
     margin-top: 1.5em;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   .urdu-content h3 {
     font-size: 1.3em;
     margin-top: 1.5em;

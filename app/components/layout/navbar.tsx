@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Sun,
-  Moon,
-  ChevronDown,
-  X,
-  BookOpen,
-  User,
-  Crown
-} from "lucide-react";
+import { Sun, Moon, ChevronDown, X, BookOpen, User, Crown } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/lib/auth";
 import { SearchBox } from "@/components/search/search-box";
-import { NotificationsDropdown } from '@/components/notifications/notifications-dropdown';
+import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -20,14 +12,18 @@ export function Navbar() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const navigate = useNavigate();
   const isBrowser = typeof window !== "undefined";
-  const [isMobile, setIsMobile] = useState(
-    () => (isBrowser ? window.innerWidth < 768 : false)
+  const [isMobile, setIsMobile] = useState(() =>
+    isBrowser ? window.innerWidth < 768 : false
   );
   const resolvedUsername =
     profile?.username ||
     user?.user_metadata?.username ||
-    (user?.email ? user.email.split('@')[0] : undefined);
-  const profileLink = user ? (resolvedUsername ? `/user/${resolvedUsername}` : '/profile') : '/signin';
+    (user?.email ? user.email.split("@")[0] : undefined);
+  const profileLink = user
+    ? resolvedUsername
+      ? `/user/${resolvedUsername}`
+      : "/profile"
+    : "/signin";
 
   useEffect(() => {
     if (!isBrowser) {
@@ -44,7 +40,7 @@ export function Navbar() {
       await signOut();
       setShowUserDropdown(false);
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -53,9 +49,9 @@ export function Navbar() {
     if (resolvedUsername) {
       navigate(`/user/${resolvedUsername}`);
     } else if (user) {
-      navigate('/profile');
+      navigate("/profile");
     } else {
-      navigate('/signin');
+      navigate("/signin");
     }
   };
 
@@ -64,21 +60,22 @@ export function Navbar() {
     if (resolvedUsername) {
       navigate(`/dashboard/${resolvedUsername}/settings`);
     } else {
-      navigate('/profile');
+      navigate("/profile");
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <BookOpen className="h-7 w-7 text-primary transition-transform group-hover:scale-110" />
-            <span className="hidden text-2xl font-bold md:inline bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Inlits</span>
+            <span className="hidden text-2xl font-bold md:inline bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Inlits
+            </span>
           </Link>
-        
         </div>
 
         {/* Center Section - Search */}
@@ -129,7 +126,10 @@ export function Navbar() {
                   />
                 ) : (
                   <div className="flex items-center justify-center w-8 h-8 font-medium rounded-full bg-primary/10 text-primary">
-                    {profile?.username?.[0]?.toUpperCase() || (resolvedUsername ? resolvedUsername[0]?.toUpperCase() : '?')}
+                    {profile?.username?.[0]?.toUpperCase() ||
+                      (resolvedUsername
+                        ? resolvedUsername[0]?.toUpperCase()
+                        : "?")}
                   </div>
                 )}
                 {!isMobile && <ChevronDown className="w-4 h-4" />}
@@ -186,10 +186,7 @@ export function Navbar() {
             <div className="flex items-center gap-2">
               {/* Show both buttons on desktop, only icon on mobile */}
               {isMobile ? (
-                <Link
-                  to="/signin"
-                  className="p-2"
-                >
+                <Link to="/signin" className="p-2">
                   <User className="w-5 h-5" />
                 </Link>
               ) : (

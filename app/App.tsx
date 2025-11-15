@@ -8,50 +8,190 @@ import { useAuth } from "./lib/auth";
 import { useAudio } from "./lib/audio-context";
 import { CategoriesScroll } from "./components/content/categories-scroll";
 import { Home } from "./pages/home";
-import { Loader2 } from 'lucide-react';
-import { Footer } from './components/layout/footer';
+import { Loader2 } from "lucide-react";
+import { Footer } from "./components/layout/footer";
 
 // Lazy loaded components with proper dynamic imports
-const OnboardingQuiz = React.lazy(() => import('./pages/auth/onboarding-quiz').then(module => ({ default: module.OnboardingQuiz })));
-const BecomeCreatorPage = React.lazy(() => import('./pages/auth/become-creator').then(module => ({ default: module.BecomeCreatorPage })));
-const SignInPage = React.lazy(() => import('./pages/auth/sign-in').then(module => ({ default: module.SignInPage })));
-const SignUpPage = React.lazy(() => import('./pages/auth/sign-up').then(module => ({ default: module.SignUpPage })));
-const ForgotPasswordPage = React.lazy(() => import('./pages/auth/forgot-password').then(module => ({ default: module.ForgotPasswordPage })));
-const ResetPasswordPage = React.lazy(() => import('./pages/auth/reset-password').then(module => ({ default: module.ResetPasswordPage })));
-const VerifyEmailPage = React.lazy(() => import('./pages/auth/verify-email').then(module => ({ default: module.VerifyEmailPage })));
-const AuthCallbackPage = React.lazy(() => import('./pages/auth/callback').then(module => ({ default: module.AuthCallbackPage })));
-const QuickBitesPage = React.lazy(() => import('./pages/quick-bites').then(module => ({ default: module.QuickBitesPage })));
-const FollowedPage = React.lazy(() => import('./pages/followed').then(module => ({ default: module.FollowedPage })));
-const LibraryPage = React.lazy(() => import('./pages/library').then(module => ({ default: module.LibraryPage })));
-const CommunityPage = React.lazy(() => import('./pages/community').then(module => ({ default: module.CommunityPage })));
-const HistoryPage = React.lazy(() => import('./pages/history').then(module => ({ default: module.HistoryPage })));
-const CreatorProfilePage = React.lazy(() => import('./pages/creator/CreatorProfilePage').then(module => ({ default: module.CreatorProfilePage })));
+const OnboardingQuiz = React.lazy(() =>
+  import("./pages/auth/onboarding-quiz").then((module) => ({
+    default: module.OnboardingQuiz,
+  }))
+);
+const BecomeCreatorPage = React.lazy(() =>
+  import("./pages/auth/become-creator").then((module) => ({
+    default: module.BecomeCreatorPage,
+  }))
+);
+const SignInPage = React.lazy(() =>
+  import("./pages/auth/sign-in").then((module) => ({
+    default: module.SignInPage,
+  }))
+);
+const SignUpPage = React.lazy(() =>
+  import("./pages/auth/sign-up").then((module) => ({
+    default: module.SignUpPage,
+  }))
+);
+const ForgotPasswordPage = React.lazy(() =>
+  import("./pages/auth/forgot-password").then((module) => ({
+    default: module.ForgotPasswordPage,
+  }))
+);
+const ResetPasswordPage = React.lazy(() =>
+  import("./pages/auth/reset-password").then((module) => ({
+    default: module.ResetPasswordPage,
+  }))
+);
+const VerifyEmailPage = React.lazy(() =>
+  import("./pages/auth/verify-email").then((module) => ({
+    default: module.VerifyEmailPage,
+  }))
+);
+const AuthCallbackPage = React.lazy(() =>
+  import("./pages/auth/callback").then((module) => ({
+    default: module.AuthCallbackPage,
+  }))
+);
+const QuickBitesPage = React.lazy(() =>
+  import("./pages/quick-bites").then((module) => ({
+    default: module.QuickBitesPage,
+  }))
+);
+const FollowedPage = React.lazy(() =>
+  import("./pages/followed").then((module) => ({
+    default: module.FollowedPage,
+  }))
+);
+const LibraryPage = React.lazy(() =>
+  import("./pages/library").then((module) => ({ default: module.LibraryPage }))
+);
+const CommunityPage = React.lazy(() =>
+  import("./pages/community").then((module) => ({
+    default: module.CommunityPage,
+  }))
+);
+const HistoryPage = React.lazy(() =>
+  import("./pages/history").then((module) => ({ default: module.HistoryPage }))
+);
+const CreatorProfilePage = React.lazy(() =>
+  import("./pages/creator/CreatorProfilePage").then((module) => ({
+    default: module.CreatorProfilePage,
+  }))
+);
 
-const DashboardLayout = React.lazy(() => import('./pages/dashboard').then(module => ({ default: module.DashboardLayout })));
-const DashboardOverviewPage = React.lazy(() => import('./pages/dashboard/overview').then(module => ({ default: module.DashboardOverviewPage })));
-const ContentPage = React.lazy(() => import('./pages/dashboard/content').then(module => ({ default: module.ContentPage })));
-const NewArticlePage = React.lazy(() => import('./pages/dashboard/content/new/article').then(module => ({ default: module.NewArticlePage })));
-const NewBookPage = React.lazy(() => import('./pages/dashboard/content/new/book').then(module => ({ default: module.NewBookPage })));
-const NewAudiobookPage = React.lazy(() => import('./pages/dashboard/content/new/audiobook').then(module => ({ default: module.NewAudiobookPage })));
-const NewPodcastPage = React.lazy(() => import('./pages/dashboard/content/new/podcast').then(module => ({ default: module.NewPodcastPage })));
-const EarningsPage = React.lazy(() => import('./pages/dashboard/earnings').then(module => ({ default: module.EarningsPage })));
-const AppointmentsPage = React.lazy(() => import('./pages/dashboard/appointments').then(module => ({ default: module.AppointmentsPage })));
-const AnalyticsPage = React.lazy(() => import('./pages/dashboard/analytics').then(module => ({ default: module.AnalyticsPage })));
-const SettingsPage = React.lazy(() => import('./pages/dashboard/settings').then(module => ({ default: module.SettingsPage })));
-const ReaderPage = React.lazy(() => import('./pages/reader/ReaderPage').then(module => ({ default: module.ReaderPage })));
-const PlayerPage = React.lazy(() => import('./pages/player/PlayerPage').then(module => ({ default: module.PlayerPage })));
-const SearchPage = React.lazy(() => import('./pages/search').then(module => ({ default: module.default })));
-const ContactPage = React.lazy(() => import('./pages/contact').then(module => ({ default: module.default })));
-const PrivacyPage = React.lazy(() => import('./pages/privacy').then(module => ({ default: module.PrivacyPage })));
-const TermsPage = React.lazy(() => import('./pages/terms').then(module => ({ default: module.TermsPage })));
-const RefundPolicyPage = React.lazy(() => import('./pages/refund-policy').then(module => ({ default: module.RefundPolicyPage })));
-const CopyrightPage = React.lazy(() => import('./pages/copyright').then(module => ({ default: module.default })));
-const AboutPage = React.lazy(() => import('./pages/about').then(module => ({ default: module.AboutPage })));
-const SubscriptionPage = React.lazy(() => import('./pages/subscription/index').then(module => ({ default: module.SubscriptionPage })));
-const SubscriptionPaymentPage = React.lazy(() => import('./pages/subscription/payment').then(module => ({ default: module.SubscriptionPaymentPage })));
-const SubscriptionVerifyPage = React.lazy(() => import('./pages/subscription/verify').then(module => ({ default: module.SubscriptionVerifyPage })));
-const SubscriptionConfirmPage = React.lazy(() => import('./pages/subscription/confirm').then(module => ({ default: module.SubscriptionConfirmPage })));
-const CollectionPlayerPage = React.lazy(() => import('./pages/collection/CollectionPlayerPage').then(module => ({ default: module.CollectionPlayerPage })));
+const DashboardLayout = React.lazy(() =>
+  import("./pages/dashboard").then((module) => ({
+    default: module.DashboardLayout,
+  }))
+);
+const DashboardOverviewPage = React.lazy(() =>
+  import("./pages/dashboard/overview").then((module) => ({
+    default: module.DashboardOverviewPage,
+  }))
+);
+const ContentPage = React.lazy(() =>
+  import("./pages/dashboard/content").then((module) => ({
+    default: module.ContentPage,
+  }))
+);
+const NewArticlePage = React.lazy(() =>
+  import("./pages/dashboard/content/new/article").then((module) => ({
+    default: module.NewArticlePage,
+  }))
+);
+const NewBookPage = React.lazy(() =>
+  import("./pages/dashboard/content/new/book").then((module) => ({
+    default: module.NewBookPage,
+  }))
+);
+const NewAudiobookPage = React.lazy(() =>
+  import("./pages/dashboard/content/new/audiobook").then((module) => ({
+    default: module.NewAudiobookPage,
+  }))
+);
+const NewPodcastPage = React.lazy(() =>
+  import("./pages/dashboard/content/new/podcast").then((module) => ({
+    default: module.NewPodcastPage,
+  }))
+);
+const EarningsPage = React.lazy(() =>
+  import("./pages/dashboard/earnings").then((module) => ({
+    default: module.EarningsPage,
+  }))
+);
+const AppointmentsPage = React.lazy(() =>
+  import("./pages/dashboard/appointments").then((module) => ({
+    default: module.AppointmentsPage,
+  }))
+);
+const AnalyticsPage = React.lazy(() =>
+  import("./pages/dashboard/analytics").then((module) => ({
+    default: module.AnalyticsPage,
+  }))
+);
+const SettingsPage = React.lazy(() =>
+  import("./pages/dashboard/settings").then((module) => ({
+    default: module.SettingsPage,
+  }))
+);
+const ReaderPage = React.lazy(() =>
+  import("./pages/reader/ReaderPage").then((module) => ({
+    default: module.ReaderPage,
+  }))
+);
+const PlayerPage = React.lazy(() =>
+  import("./pages/player/PlayerPage").then((module) => ({
+    default: module.PlayerPage,
+  }))
+);
+const SearchPage = React.lazy(() =>
+  import("./pages/search").then((module) => ({ default: module.default }))
+);
+const ContactPage = React.lazy(() =>
+  import("./pages/contact").then((module) => ({ default: module.default }))
+);
+const PrivacyPage = React.lazy(() =>
+  import("./pages/privacy").then((module) => ({ default: module.PrivacyPage }))
+);
+const TermsPage = React.lazy(() =>
+  import("./pages/terms").then((module) => ({ default: module.TermsPage }))
+);
+const RefundPolicyPage = React.lazy(() =>
+  import("./pages/refund-policy").then((module) => ({
+    default: module.RefundPolicyPage,
+  }))
+);
+const CopyrightPage = React.lazy(() =>
+  import("./pages/copyright").then((module) => ({ default: module.default }))
+);
+const AboutPage = React.lazy(() =>
+  import("./pages/about").then((module) => ({ default: module.AboutPage }))
+);
+const SubscriptionPage = React.lazy(() =>
+  import("./pages/subscription/index").then((module) => ({
+    default: module.SubscriptionPage,
+  }))
+);
+const SubscriptionPaymentPage = React.lazy(() =>
+  import("./pages/subscription/payment").then((module) => ({
+    default: module.SubscriptionPaymentPage,
+  }))
+);
+const SubscriptionVerifyPage = React.lazy(() =>
+  import("./pages/subscription/verify").then((module) => ({
+    default: module.SubscriptionVerifyPage,
+  }))
+);
+const SubscriptionConfirmPage = React.lazy(() =>
+  import("./pages/subscription/confirm").then((module) => ({
+    default: module.SubscriptionConfirmPage,
+  }))
+);
+const CollectionPlayerPage = React.lazy(() =>
+  import("./pages/collection/CollectionPlayerPage").then((module) => ({
+    default: module.CollectionPlayerPage,
+  }))
+);
 
 function LoadingFallback() {
   return (
@@ -67,11 +207,11 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
   // Get category from URL params
   const urlParams = new URLSearchParams(location.search);
-  const categoryFromUrl = urlParams.get('category') || 'all';
+  const categoryFromUrl = urlParams.get("category") || "all";
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const isBrowser = typeof window !== "undefined";
-  const [isMobile, setIsMobile] = useState(
-    () => (isBrowser ? window.innerWidth < 768 : false)
+  const [isMobile, setIsMobile] = useState(() =>
+    isBrowser ? window.innerWidth < 768 : false
   );
 
   useEffect(() => {
@@ -88,12 +228,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   // Update selected category when URL changes
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const category = params.get('category') || 'all';
+    const category = params.get("category") || "all";
     setSelectedCategory(category);
   }, [location.search]);
 
   // Only show categories on home page
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === "/";
 
   // Auto-collapse sidebar on mobile or non-home pages
   useEffect(() => {
@@ -121,18 +261,18 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     { id: "17", name: "Travel", slug: "travel" },
     { id: "19", name: "Science", slug: "science" },
     { id: "20", name: "Health", slug: "health" },
-    { id: "12", name: "Science Fiction", slug: "science-fiction" }
+    { id: "12", name: "Science Fiction", slug: "science-fiction" },
   ];
 
   // Check if the current page is a static page that should show the footer
   // Removed '/' from this list to not show footer on home page
   const shouldShowFooter = [
-    '/about',
-    '/contact',
-    '/privacy',
-    '/terms',
-    '/refund-policy',
-    '/copyright'
+    "/about",
+    "/contact",
+    "/privacy",
+    "/terms",
+    "/refund-policy",
+    "/copyright",
   ].includes(location.pathname);
 
   return (
@@ -141,20 +281,17 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <EmailVerificationBanner />
       {/* Only show desktop sidebar on non-mobile */}
       {!isMobile && (
-        <Sidebar 
-          onCollapse={setSidebarCollapsed} 
+        <Sidebar
+          onCollapse={setSidebarCollapsed}
           defaultCollapsed={!isHomePage || isMobile}
         />
       )}
-      
+
       {/* Mobile bottom navigation */}
       {isMobile && (
-        <Sidebar 
-          onCollapse={setSidebarCollapsed} 
-          defaultCollapsed={true}
-        />
+        <Sidebar onCollapse={setSidebarCollapsed} defaultCollapsed={true} />
       )}
-      
+
       {isHomePage && (
         <CategoriesScroll
           categories={categories}
@@ -163,30 +300,31 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             setSelectedCategory(category);
             // Update URL when category is selected
             const params = new URLSearchParams(window.location.search);
-            if (category === 'all') {
-              params.delete('category');
+            if (category === "all") {
+              params.delete("category");
             } else {
-              params.set('category', category);
+              params.set("category", category);
             }
-            const newUrl = params.toString() ? `/?${params.toString()}` : '/';
-            window.history.pushState({}, '', newUrl);
+            const newUrl = params.toString() ? `/?${params.toString()}` : "/";
+            window.history.pushState({}, "", newUrl);
           }}
           collapsed={isMobile ? true : sidebarCollapsed}
         />
       )}
       <main
         className={`transition-all duration-300 will-change-transform ${
-          isHomePage ? 'pt-16' : 'pt-14'
-        } pb-20 ${
-          isMobile
-            ? 'ml-0'
-            : sidebarCollapsed
-              ? 'ml-16'
-              : 'ml-64'
+          isHomePage ? "pt-28" : "pt-16"
+        } ${isMobile ? "pb-24" : "pb-8"} ${
+          isMobile ? "ml-0 w-full" : sidebarCollapsed ? "ml-16" : "ml-64"
         }`}
       >
-        <div className={`${isMobile ? 'px-0' : 'container px-4 mx-auto'}`}>
-          {React.isValidElement(children) && React.cloneElement(children as React.ReactElement, { selectedCategory })}
+        <div
+          className={`${isMobile ? "px-0 w-full" : "container px-4 mx-auto"}`}
+        >
+          {React.isValidElement(children) &&
+            React.cloneElement(children as React.ReactElement, {
+              selectedCategory,
+            })}
         </div>
       </main>
 
@@ -201,211 +339,226 @@ function App() {
     <>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-                  {/* Auth Routes */}
-                  <Route path="/signin" element={<SignInPage />} />
-                  <Route path="/signup" element={<SignUpPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route path="/verify-email" element={<VerifyEmailPage />} />
-                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
-                  <Route path="/get-started" element={<Navigate to="/signup" replace />} />
-                  <Route path="/onboarding" element={<OnboardingQuiz />} />
-                  <Route path="/become-creator" element={<BecomeCreatorPage />} />
+          {/* Auth Routes */}
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/get-started"
+            element={<Navigate to="/signup" replace />}
+          />
+          <Route path="/onboarding" element={<OnboardingQuiz />} />
+          <Route path="/become-creator" element={<BecomeCreatorPage />} />
 
-                  {/* Dashboard Routes */}
-                  <Route
-                    path="/dashboard/:username/*"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route index element={<DashboardOverviewPage />} />
-                    <Route path="content" element={<ContentPage />} />
-                    <Route path="content/new/article" element={<NewArticlePage />} />
-                    <Route path="content/new/book" element={<NewBookPage />} />
-                    <Route path="content/new/audiobook" element={<NewAudiobookPage />} />
-                    <Route path="content/new/podcast" element={<NewPodcastPage />} />
-                    <Route path="earnings" element={<EarningsPage />} />
-                    <Route path="appointments" element={<AppointmentsPage />} />
-                    <Route path="analytics" element={<AnalyticsPage />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                  </Route>
+          {/* Dashboard Routes */}
+          <Route
+            path="/dashboard/:username/*"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardOverviewPage />} />
+            <Route path="content" element={<ContentPage />} />
+            <Route path="content/new/article" element={<NewArticlePage />} />
+            <Route path="content/new/book" element={<NewBookPage />} />
+            <Route
+              path="content/new/audiobook"
+              element={<NewAudiobookPage />}
+            />
+            <Route path="content/new/podcast" element={<NewPodcastPage />} />
+            <Route path="earnings" element={<EarningsPage />} />
+            <Route path="appointments" element={<AppointmentsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
 
-                  {/* Player Routes */}
-                  <Route
-                    path="/player/:id"
-                    element={
-                      <MainLayout>
-                        <PlayerPage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Player Routes */}
+          <Route
+            path="/player/:id"
+            element={
+              <MainLayout>
+                <PlayerPage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Reader Routes */}
-                  <Route
-                    path="/reader/:id"
-                    element={
-                      <MainLayout>
-                        <ReaderPage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Reader Routes */}
+          <Route
+            path="/reader/:id"
+            element={
+              <MainLayout>
+                <ReaderPage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Search Route */}
-                  <Route
-                    path="/search"
-                    element={
-                      <MainLayout>
-                        <SearchPage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Search Route */}
+          <Route
+            path="/search"
+            element={
+              <MainLayout>
+                <SearchPage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Collection Player Route */}
-                  <Route
-                    path="/collection/:category"
-                    element={
-                      <MainLayout>
-                        <CollectionPlayerPage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Collection Player Route */}
+          <Route
+            path="/collection/:category"
+            element={
+              <MainLayout>
+                <CollectionPlayerPage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Static Pages */}
-                  <Route
-                    path="/about"
-                    element={
-                      <MainLayout>
-                        <AboutPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/contact"
-                    element={
-                      <MainLayout>
-                        <ContactPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/privacy"
-                    element={
-                      <MainLayout>
-                        <PrivacyPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/terms"
-                    element={
-                      <MainLayout>
-                        <TermsPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/refund-policy"
-                    element={
-                      <MainLayout>
-                        <RefundPolicyPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/copyright"
-                    element={
-                      <MainLayout>
-                        <CopyrightPage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Static Pages */}
+          <Route
+            path="/about"
+            element={
+              <MainLayout>
+                <AboutPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <MainLayout>
+                <ContactPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <MainLayout>
+                <PrivacyPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <MainLayout>
+                <TermsPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/refund-policy"
+            element={
+              <MainLayout>
+                <RefundPolicyPage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/copyright"
+            element={
+              <MainLayout>
+                <CopyrightPage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Subscription Routes */}
-                  <Route path="/subscription" element={<SubscriptionPage />} />
-                  <Route path="/subscription/payment" element={<SubscriptionPaymentPage />} />
-                  <Route path="/subscription/verify" element={<SubscriptionVerifyPage />} />
-                  <Route path="/subscription/confirm" element={<SubscriptionConfirmPage />} />
+          {/* Subscription Routes */}
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route
+            path="/subscription/payment"
+            element={<SubscriptionPaymentPage />}
+          />
+          <Route
+            path="/subscription/verify"
+            element={<SubscriptionVerifyPage />}
+          />
+          <Route
+            path="/subscription/confirm"
+            element={<SubscriptionConfirmPage />}
+          />
 
-                  {/* Main App Routes */}
-                  <Route
-                    path="/"
-                    element={
-                      <MainLayout>
-                        <Home />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/library"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <LibraryPage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/quick-bites"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <QuickBitesPage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/followed"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <FollowedPage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/community"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <CommunityPage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/history"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <HistoryPage />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/@:username"
-                    element={
-                      <MainLayout>
-                        <CreatorProfilePage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/user/:username"
-                    element={
-                      <MainLayout>
-                        <CreatorProfilePage />
-                      </MainLayout>
-                    }
-                  />
+          {/* Main App Routes */}
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                <Home />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/library"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <LibraryPage />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/quick-bites"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <QuickBitesPage />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/followed"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <FollowedPage />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/community"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <CommunityPage />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <MainLayout>
+                <ProtectedRoute>
+                  <HistoryPage />
+                </ProtectedRoute>
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/@:username"
+            element={
+              <MainLayout>
+                <CreatorProfilePage />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/user/:username"
+            element={
+              <MainLayout>
+                <CreatorProfilePage />
+              </MainLayout>
+            }
+          />
 
-                  {/* Catch all route */}
+          {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

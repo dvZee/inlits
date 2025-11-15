@@ -1,11 +1,11 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Volume2, 
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
   VolumeX,
   Settings,
   List,
@@ -28,17 +28,17 @@ import {
   RotateCcw,
   RotateCw,
   Zap,
-  Headphones
-} from 'lucide-react';
-import { useAudio } from '@/lib/audio-context';
-import { ImageLoader } from '@/components/image-loader';
-import { useAuth } from '@/lib/auth';
+  Headphones,
+} from "lucide-react";
+import { useAudio } from "@/lib/audio-context";
+import { ImageLoader } from "@/components/image-loader";
+import { useAuth } from "@/lib/auth";
 
 interface AudioPlayerProps {
   title: string;
   author: string;
   thumbnail: string;
-  type: 'audiobook' | 'podcast';
+  type: "audiobook" | "podcast";
   isMobile?: boolean;
   authorId?: string;
   authorUsername?: string;
@@ -49,11 +49,11 @@ interface Settings {
   autoplay: boolean;
   skipSilence: boolean;
   sleepTimer: number;
-  repeat: 'off' | 'one' | 'all';
+  repeat: "off" | "one" | "all";
   shuffle: boolean;
 }
 
-type ListeningMode = 'normal' | 'driving' | 'walking' | 'sleep' | 'workout';
+type ListeningMode = "normal" | "driving" | "walking" | "sleep" | "workout";
 
 export function AudioPlayer({
   title,
@@ -62,7 +62,7 @@ export function AudioPlayer({
   type,
   isMobile = false,
   authorId,
-  authorUsername
+  authorUsername,
 }: AudioPlayerProps) {
   const { user } = useAuth();
   const {
@@ -77,8 +77,31 @@ export function AudioPlayer({
     playPrevious,
     audioRef,
     isPlaying: contextIsPlaying,
-    setIsPlaying: setContextIsPlaying
+    setIsPlaying: setContextIsPlaying,
   } = useAudio();
+  // Detect mobile automatically
+  const [isMobileDetected, setIsMobileDetected] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return isMobile;
+  });
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      setIsMobileDetected(window.innerWidth < 768);
+    };
+
+    handleResize(); // Check on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Use detected mobile state
+  const isMobileView = isMobileDetected || isMobile;
+
   const progressRef = React.useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
@@ -95,10 +118,11 @@ export function AudioPlayer({
     autoplay: true,
     skipSilence: false,
     sleepTimer: 0,
-    repeat: 'all',
-    shuffle: false
+    repeat: "all",
+    shuffle: false,
   });
-  const [listeningMode, setListeningMode] = React.useState<ListeningMode>('normal');
+  const [listeningMode, setListeningMode] =
+    React.useState<ListeningMode>("normal");
   const [showModeSelector, setShowModeSelector] = React.useState(false);
   const [isLiked, setIsLiked] = React.useState(false);
   const [isBookmarked, setIsBookmarked] = React.useState(false);
@@ -112,10 +136,14 @@ export function AudioPlayer({
   React.useEffect(() => {
     if (!currentAudio) return;
 
-    const isChapterLocked = !user && currentChapter > 0 && currentAudio.chapters && currentAudio.chapters.length > 0;
+    const isChapterLocked =
+      !user &&
+      currentChapter > 0 &&
+      currentAudio.chapters &&
+      currentAudio.chapters.length > 0;
 
     if (isChapterLocked) {
-      setError('Please sign in to access this chapter');
+      setError("Please sign in to access this chapter");
       setContextIsPlaying(false);
       if (audioRef.current) {
         audioRef.current.pause();
@@ -131,25 +159,37 @@ export function AudioPlayer({
     audio.playbackRate = settings.playbackSpeed;
     audio.volume = isMuted ? 0 : volume;
 
-    const handleLoadStart = () => { setIsLoading(true); setError(null); };
-    const handleCanPlay = () => { setIsLoading(false); };
-    const handleLoadedMetadata = () => { setDuration(audio.duration); };
+    const handleLoadStart = () => {
+      setIsLoading(true);
+      setError(null);
+    };
+    const handleCanPlay = () => {
+      setIsLoading(false);
+    };
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       if (currentAudio) {
         try {
-          const savedState = JSON.parse(localStorage.getItem('audioState') || '{}');
+          const savedState = JSON.parse(
+            localStorage.getItem("audioState") || "{}"
+          );
           if (savedState.currentAudio) {
             savedState.currentAudio.currentTime = audio.currentTime;
-            localStorage.setItem('audioState', JSON.stringify(savedState));
+            localStorage.setItem("audioState", JSON.stringify(savedState));
           }
         } catch (e) {
-          console.error('Error saving playback position:', e);
+          console.error("Error saving playback position:", e);
         }
       }
     };
     const handleEnded = () => {
-      if (currentAudio?.chapters && currentChapter < currentAudio.chapters.length - 1) {
+      if (
+        currentAudio?.chapters &&
+        currentChapter < currentAudio.chapters.length - 1
+      ) {
         const nextChapterIndex = currentChapter + 1;
         const isNextChapterLocked = !user && nextChapterIndex > 0;
 
@@ -158,12 +198,12 @@ export function AudioPlayer({
           return;
         }
 
-        if (settings.autoplay || settings.repeat === 'all') {
+        if (settings.autoplay || settings.repeat === "all") {
           setCurrentChapter(nextChapterIndex);
         } else {
           setContextIsPlaying(false);
         }
-      } else if (settings.repeat === 'all' && currentAudio?.chapters) {
+      } else if (settings.repeat === "all" && currentAudio?.chapters) {
         setCurrentChapter(0);
       } else {
         setContextIsPlaying(false);
@@ -171,41 +211,40 @@ export function AudioPlayer({
     };
     const handleError = (e: Event) => {
       const audioError = (e.target as HTMLAudioElement).error;
-      setError(audioError?.message || 'Error playing audio');
+      setError(audioError?.message || "Error playing audio");
       setIsLoading(false);
       setContextIsPlaying(false);
     };
 
-    audio.addEventListener('loadstart', handleLoadStart);
-    audio.addEventListener('canplay', handleCanPlay);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
+    audio.addEventListener("loadstart", handleLoadStart);
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
 
     return () => {
-      audio.removeEventListener('loadstart', handleLoadStart);
-      audio.removeEventListener('canplay', handleCanPlay);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
+      audio.removeEventListener("loadstart", handleLoadStart);
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
     };
   }, [currentAudio, currentChapter, settings, setCurrentChapter]);
-
 
   React.useEffect(() => {
     if (settings.sleepTimer > 0 && contextIsPlaying) {
       setSleepTimerRemaining(settings.sleepTimer * 60);
-      
+
       const interval = setInterval(() => {
-        setSleepTimerRemaining(prev => {
+        setSleepTimerRemaining((prev) => {
           if (prev <= 1) {
             if (audioRef.current) {
               audioRef.current.pause();
               setContextIsPlaying(false);
             }
-            setSettings(prev => ({ ...prev, sleepTimer: 0 }));
+            setSettings((prev) => ({ ...prev, sleepTimer: 0 }));
             return 0;
           }
           return prev - 1;
@@ -226,48 +265,57 @@ export function AudioPlayer({
         await audioRef.current.play();
       }
     } catch (error) {
-      console.error('Error toggling play:', error);
-      setError('Failed to play audio');
+      console.error("Error toggling play:", error);
+      setError("Failed to play audio");
     }
   };
 
   const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressRef.current || !audioRef.current || isLoading) return;
-    
+
     setIsDragging(true);
     const rect = progressRef.current.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const percent = Math.max(
+      0,
+      Math.min(1, (e.clientX - rect.left) / rect.width)
+    );
     const newTime = percent * duration;
-    
+
     audioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
-    
+
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!progressRef.current || !audioRef.current) return;
-      
+
       const rect = progressRef.current.getBoundingClientRect();
-      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const percent = Math.max(
+        0,
+        Math.min(1, (e.clientX - rect.left) / rect.width)
+      );
       const newTime = percent * duration;
-      
+
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
     };
-    
+
     const handleGlobalMouseUp = () => {
       setIsDragging(false);
-      document.removeEventListener('mousemove', handleGlobalMouseMove);
-      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
     };
-    
-    document.addEventListener('mousemove', handleGlobalMouseMove);
-    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    document.addEventListener("mousemove", handleGlobalMouseMove);
+    document.addEventListener("mouseup", handleGlobalMouseUp);
   };
 
   const handleProgressMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressRef.current || !duration) return;
-    
+
     const rect = progressRef.current.getBoundingClientRect();
-    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const percent = Math.max(
+      0,
+      Math.min(1, (e.clientX - rect.left) / rect.width)
+    );
     const time = percent * duration;
     setHoverTime(time);
   };
@@ -297,18 +345,24 @@ export function AudioPlayer({
     if (audioRef.current) {
       audioRef.current.playbackRate = rate;
       setPlaybackRate(rate);
-      setSettings(prev => ({ ...prev, playbackSpeed: rate }));
+      setSettings((prev) => ({ ...prev, playbackSpeed: rate }));
     }
   };
 
   const skipTime = (seconds: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, Math.min(currentTime + seconds, duration));
+      audioRef.current.currentTime = Math.max(
+        0,
+        Math.min(currentTime + seconds, duration)
+      );
     }
   };
 
   const nextChapter = () => {
-    if (currentAudio?.chapters && currentChapter < currentAudio.chapters.length - 1) {
+    if (
+      currentAudio?.chapters &&
+      currentChapter < currentAudio.chapters.length - 1
+    ) {
       setCurrentChapter(currentChapter + 1);
     }
   };
@@ -323,17 +377,19 @@ export function AudioPlayer({
     const hours = Math.floor(time / 3600);
     const minutes = Math.floor((time % 3600) / 60);
     const seconds = Math.floor(time % 60);
-    
+
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
     }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const formatSleepTimer = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const handleModeChange = (mode: ListeningMode) => {
@@ -341,58 +397,58 @@ export function AudioPlayer({
     closeAllExcept(null);
 
     switch (mode) {
-      case 'driving':
-        setSettings(prev => ({
+      case "driving":
+        setSettings((prev) => ({
           ...prev,
           skipSilence: true,
           playbackSpeed: 1,
-          autoplay: true
+          autoplay: true,
         }));
         break;
-      case 'walking':
-        setSettings(prev => ({
+      case "walking":
+        setSettings((prev) => ({
           ...prev,
           skipSilence: false,
           playbackSpeed: 1.2,
-          autoplay: true
+          autoplay: true,
         }));
         break;
-      case 'sleep':
-        setSettings(prev => ({
+      case "sleep":
+        setSettings((prev) => ({
           ...prev,
           autoplay: false,
           playbackSpeed: 0.9,
-          sleepTimer: 30
+          sleepTimer: 30,
         }));
         break;
-      case 'workout':
-        setSettings(prev => ({
+      case "workout":
+        setSettings((prev) => ({
           ...prev,
           autoplay: true,
           playbackSpeed: 1.5,
-          skipSilence: true
+          skipSilence: true,
         }));
         break;
       default:
-        setSettings(prev => ({
+        setSettings((prev) => ({
           ...prev,
           autoplay: true,
           playbackSpeed: 1,
           skipSilence: false,
-          sleepTimer: 0
+          sleepTimer: 0,
         }));
     }
   };
 
   const getModeIcon = (mode: ListeningMode) => {
     switch (mode) {
-      case 'driving':
+      case "driving":
         return <Car className="w-4 h-4" />;
-      case 'walking':
+      case "walking":
         return <Timer className="w-4 h-4" />;
-      case 'sleep':
+      case "sleep":
         return <MoonIcon className="w-4 h-4" />;
-      case 'workout':
+      case "workout":
         return <Dumbbell className="w-4 h-4" />;
       default:
         return <Headphones className="w-4 h-4" />;
@@ -415,21 +471,23 @@ export function AudioPlayer({
         await navigator.share({
           title: title,
           text: `Listen to "${title}" by ${author}`,
-          url: window.location.href
+          url: window.location.href,
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error("Error sharing:", error);
     }
   };
 
-  const closeAllExcept = (keep: 'settings' | 'playlist' | 'mode' | 'volume' | null) => {
-    if (keep !== 'settings') setShowSettings(false);
-    if (keep !== 'playlist') setShowPlaylist(false);
-    if (keep !== 'mode') setShowModeSelector(false);
-    if (keep !== 'volume') setShowVolumeSlider(false);
+  const closeAllExcept = (
+    keep: "settings" | "playlist" | "mode" | "volume" | null
+  ) => {
+    if (keep !== "settings") setShowSettings(false);
+    if (keep !== "playlist") setShowPlaylist(false);
+    if (keep !== "mode") setShowModeSelector(false);
+    if (keep !== "volume") setShowVolumeSlider(false);
   };
 
   const handleClosePlayer = () => {
@@ -442,10 +500,11 @@ export function AudioPlayer({
   };
 
   return (
-    <div className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
-      isMobile ? 'bottom-20' : 'bottom-0 h-20'
-    }`}>
-
+    <div
+      className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t shadow-lg z-40 ${
+        isMobileView ? "bottom-20" : "bottom-0 h-20"
+      }`}
+    >
       <div
         ref={progressRef}
         onMouseDown={handleProgressMouseDown}
@@ -460,9 +519,14 @@ export function AudioPlayer({
         />
         <div
           className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-lg transition-all duration-200 ${
-            isDragging || hoverTime !== null ? 'opacity-100 scale-110' : 'opacity-0 group-hover:opacity-100'
+            isDragging || hoverTime !== null
+              ? "opacity-100 scale-110"
+              : "opacity-0 group-hover:opacity-100"
           }`}
-          style={{ left: `${(currentTime / duration) * 100}%`, transform: 'translateX(-50%) translateY(-50%)' }}
+          style={{
+            left: `${(currentTime / duration) * 100}%`,
+            transform: "translateX(-50%) translateY(-50%)",
+          }}
         />
         {hoverTime !== null && (
           <div
@@ -474,154 +538,147 @@ export function AudioPlayer({
         )}
       </div>
 
-      {isMobile ? (
-        <div className="px-2 py-1 flex items-center justify-between">
-          <div className="flex items-center gap-1 min-w-0 flex-1">
+      {isMobileView ? (
+        <div className="px-2 py-2">
+          {/* Compact Single Row Layout */}
+          <div className="flex items-center gap-2">
+            {/* Thumbnail and Info */}
             <Link
-              to={currentAudio?.contentUrl || '/'}
-              className="flex items-center gap-1 hover:text-primary transition-colors flex-shrink-0"
+              to={currentAudio?.contentUrl || "/"}
+              className="flex items-center gap-2 hover:text-primary transition-colors min-w-0 flex-shrink"
             >
-              <div className="w-6 h-6 rounded overflow-hidden bg-muted">
-                <ImageLoader
+              <div className="w-10 h-10 rounded overflow-hidden bg-muted flex-shrink-0">
+                <img
                   src={thumbnail}
                   alt={title}
                   className="w-full h-full object-cover"
-                  lowQualityUrl={`${thumbnail}?w=50`}
-                  fallback={
-                    <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                      <Play className="w-2 h-2 text-primary" />
-                    </div>
-                  }
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.src = "https://placehold.co/100x100?text=Audio";
+                  }}
                 />
               </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-xs line-clamp-1">{title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1">
+                  {author}
+                </p>
+              </div>
             </Link>
-            <div className="min-w-0 flex-1">
-              <Link
-                to={currentAudio?.contentUrl || '/'}
-                className="block hover:text-primary transition-colors"
+
+            {/* Main Controls */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={() => skipTime(-15)}
+                className="p-1.5 hover:bg-accent rounded-lg transition-all active:scale-95"
+                disabled={isLoading}
+                title="Skip back 15s"
               >
-                <h3 className="font-medium text-xs line-clamp-1">{title.slice(0, 5)}...</h3>
-              </Link>
-              <Link
-                to={authorUsername ? `/user/${authorUsername}` : '#'}
-                className="text-xs text-muted-foreground line-clamp-1 hover:text-primary transition-colors"
-                onClick={(e) => !authorUsername && e.preventDefault()}
+                <RotateCcw className="w-5 h-5" />
+              </button>
+              <button
+                onClick={togglePlay}
+                disabled={
+                  isLoading ||
+                  (!currentAudio?.audioUrl &&
+                    !(
+                      currentAudio?.chapters && currentAudio.chapters.length > 0
+                    ))
+                }
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
               >
-                {author}
-              </Link>
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : contextIsPlaying ? (
+                  <Pause className="w-5 h-5" />
+                ) : (
+                  <Play className="w-5 h-5 ml-0.5" />
+                )}
+              </button>
+              <button
+                onClick={() => skipTime(30)}
+                className="p-1.5 hover:bg-accent rounded-lg transition-all active:scale-95"
+                disabled={isLoading}
+                title="Skip forward 30s"
+              >
+                <RotateCw className="w-5 h-5" />
+              </button>
             </div>
-          </div>
 
-          <div className="flex items-center gap-1">
-            {playlist.length > 1 && (
+            {/* Extra Controls */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               <button
-                onClick={playPrevious}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
-                disabled={isLoading}
-                title="Previous track"
-              >
-                <SkipBack className="w-5 h-5" />
-              </button>
-            )}
-            <button
-              onClick={() => skipTime(-15)}
-              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
-              disabled={isLoading}
-              title="Skip back 15s"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </button>
-            <button
-              onClick={togglePlay}
-              disabled={isLoading || (!currentAudio?.audioUrl && !(currentAudio?.chapters && currentAudio.chapters.length > 0))}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : contextIsPlaying ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5 ml-0.5" />
-              )}
-            </button>
-            <button
-              onClick={() => skipTime(30)}
-              className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
-              disabled={isLoading}
-              title="Skip forward 30s"
-            >
-              <RotateCw className="w-5 h-5" />
-            </button>
-            {playlist.length > 1 && (
-              <button
-                onClick={playNext}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
-                disabled={isLoading}
-                title="Next track"
-              >
-                <SkipForward className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1">
-            <div className="relative">
-              <button
-                onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
-                className="p-1.5 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
+                onClick={() => {
+                  closeAllExcept("volume");
+                  setShowVolumeSlider(!showVolumeSlider);
+                }}
+                className="p-1.5 hover:bg-accent rounded-lg transition-all"
                 title="Volume"
               >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                {isMuted ? (
+                  <VolumeX className="w-4 h-4" />
+                ) : (
+                  <Volume2 className="w-4 h-4" />
+                )}
               </button>
-              {showVolumeSlider && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-popover border rounded-lg shadow-xl">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="h-24 w-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-lg"
-                    style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical' }}
-                  />
-                </div>
+              <button
+                onClick={() => {
+                  closeAllExcept("mode");
+                  setShowModeSelector(!showModeSelector);
+                }}
+                className={`p-1.5 rounded-lg transition-all ${
+                  listeningMode !== "normal"
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-accent"
+                }`}
+                title={`${
+                  listeningMode.charAt(0).toUpperCase() + listeningMode.slice(1)
+                } Mode`}
+              >
+                {getModeIcon(listeningMode)}
+              </button>
+              <button
+                onClick={() => {
+                  closeAllExcept("settings");
+                  setShowSettings(!showSettings);
+                }}
+                className={`p-1.5 rounded-lg transition-all ${
+                  showSettings
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-accent"
+                }`}
+                disabled={isLoading}
+                title="Player Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
+                <button
+                  onClick={() => {
+                    closeAllExcept("playlist");
+                    setShowPlaylist(!showPlaylist);
+                  }}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    showPlaylist
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-accent"
+                  }`}
+                  disabled={isLoading}
+                  title="Chapters"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              )}
+              {!isMainPlayerPage && (
+                <button
+                  onClick={handleClosePlayer}
+                  className="p-1.5 hover:bg-accent rounded-lg transition-all"
+                  title="Close Player"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               )}
             </div>
-            <button
-              onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
-              className={`p-1.5 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
-              title={`${listeningMode.charAt(0).toUpperCase() + listeningMode.slice(1)} Mode`}
-            >
-              {getModeIcon(listeningMode)}
-            </button>
-            <button
-              onClick={() => { closeAllExcept('settings'); setShowSettings(!showSettings); }}
-              className={`p-1.5 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
-              disabled={isLoading}
-              title="Player Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-              <button
-                onClick={() => { closeAllExcept('playlist'); setShowPlaylist(!showPlaylist); }}
-                className={`p-1.5 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
-                disabled={isLoading}
-                title="Chapters"
-              >
-                <List className="w-5 h-5" />
-              </button>
-            )}
-            {!isMainPlayerPage && (
-              <button
-                onClick={handleClosePlayer}
-                className="p-1 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
-                title="Close Player"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -629,7 +686,7 @@ export function AudioPlayer({
           <div className="flex items-center h-full">
             <div className="flex items-center gap-3 min-w-0 w-80 flex-shrink-0">
               <Link
-                to={currentAudio?.contentUrl || '/'}
+                to={currentAudio?.contentUrl || "/"}
                 className="flex items-center gap-3 hover:text-primary transition-colors flex-shrink-0"
               >
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted shadow-md">
@@ -648,13 +705,15 @@ export function AudioPlayer({
               </Link>
               <div className="min-w-0 flex-1">
                 <Link
-                  to={currentAudio?.contentUrl || '/'}
+                  to={currentAudio?.contentUrl || "/"}
                   className="block hover:text-primary transition-colors"
                 >
-                  <h3 className="font-semibold line-clamp-1 text-sm">{title}</h3>
+                  <h3 className="font-semibold line-clamp-1 text-sm">
+                    {title}
+                  </h3>
                 </Link>
                 <Link
-                  to={authorUsername ? `/user/${authorUsername}` : '#'}
+                  to={authorUsername ? `/user/${authorUsername}` : "#"}
                   className="text-xs text-muted-foreground line-clamp-1 hover:text-primary transition-colors block"
                   onClick={(e) => !authorUsername && e.preventDefault()}
                 >
@@ -662,7 +721,8 @@ export function AudioPlayer({
                 </Link>
                 {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
                   <p className="text-xs text-primary">
-                    Chapter {currentChapter + 1} of {currentAudio.chapters.length}
+                    Chapter {currentChapter + 1} of{" "}
+                    {currentAudio.chapters.length}
                   </p>
                 )}
               </div>
@@ -679,7 +739,13 @@ export function AudioPlayer({
               </button>
               <button
                 onClick={togglePlay}
-                disabled={isLoading || (!currentAudio?.audioUrl && !(currentAudio?.chapters && currentAudio.chapters.length > 0))}
+                disabled={
+                  isLoading ||
+                  (!currentAudio?.audioUrl &&
+                    !(
+                      currentAudio?.chapters && currentAudio.chapters.length > 0
+                    ))
+                }
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
                 {isLoading ? (
@@ -711,17 +777,26 @@ export function AudioPlayer({
                 </button>
                 <span>/</span>
                 <span>
-                  {showTimeRemaining ? `-${formatTime(duration - currentTime)}` : formatTime(duration)}
+                  {showTimeRemaining
+                    ? `-${formatTime(duration - currentTime)}`
+                    : formatTime(duration)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <button
-                    onClick={() => { closeAllExcept('volume'); setShowVolumeSlider(!showVolumeSlider); }}
+                    onClick={() => {
+                      closeAllExcept("volume");
+                      setShowVolumeSlider(!showVolumeSlider);
+                    }}
                     className="p-2 hover:bg-primary hover:text-primary-foreground rounded-lg transition-all"
                     title="Volume"
                   >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5" />
+                    ) : (
+                      <Volume2 className="w-5 h-5" />
+                    )}
                   </button>
                   {showVolumeSlider && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-3 bg-popover border rounded-lg shadow-xl">
@@ -733,38 +808,80 @@ export function AudioPlayer({
                         value={volume}
                         onChange={handleVolumeChange}
                         className="h-24 w-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-lg"
-                        style={{ writingMode: 'bt-lr', WebkitAppearance: 'slider-vertical' }}
+                        style={{
+                          writingMode: "bt-lr",
+                          WebkitAppearance: "slider-vertical",
+                        }}
                       />
                     </div>
                   )}
                 </div>
                 <div className="relative">
                   <button
-                    onClick={() => { closeAllExcept('mode'); setShowModeSelector(!showModeSelector); }}
-                    className={`p-2 rounded-lg transition-all ${listeningMode !== 'normal' ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
-                    title={`${listeningMode.charAt(0).toUpperCase() + listeningMode.slice(1)} Mode`}
+                    onClick={() => {
+                      closeAllExcept("mode");
+                      setShowModeSelector(!showModeSelector);
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      listeningMode !== "normal"
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-primary hover:text-primary-foreground"
+                    }`}
+                    title={`${
+                      listeningMode.charAt(0).toUpperCase() +
+                      listeningMode.slice(1)
+                    } Mode`}
                   >
                     {getModeIcon(listeningMode)}
                   </button>
                   {showModeSelector && (
                     <div className="absolute bottom-full right-0 mb-2 w-48 bg-popover border rounded-lg shadow-xl">
                       <div className="p-3">
-                        <h4 className="text-sm font-medium mb-3">Listening Mode</h4>
+                        <h4 className="text-sm font-medium mb-3">
+                          Listening Mode
+                        </h4>
                         <div className="space-y-1">
                           {[
-                            { mode: 'normal', label: 'Normal', icon: Headphones, desc: 'Standard listening' },
-                            { mode: 'driving', label: 'Driving', icon: Car, desc: 'Skip silence, clear audio' },
-                            { mode: 'walking', label: 'Walking', icon: Timer, desc: 'Slightly faster pace' },
-                            { mode: 'sleep', label: 'Sleep', icon: MoonIcon, desc: 'Slower, with sleep timer' },
-                            { mode: 'workout', label: 'Workout', icon: Dumbbell, desc: 'Faster pace, auto-continue' }
+                            {
+                              mode: "normal",
+                              label: "Normal",
+                              icon: Headphones,
+                              desc: "Standard listening",
+                            },
+                            {
+                              mode: "driving",
+                              label: "Driving",
+                              icon: Car,
+                              desc: "Skip silence, clear audio",
+                            },
+                            {
+                              mode: "walking",
+                              label: "Walking",
+                              icon: Timer,
+                              desc: "Slightly faster pace",
+                            },
+                            {
+                              mode: "sleep",
+                              label: "Sleep",
+                              icon: MoonIcon,
+                              desc: "Slower, with sleep timer",
+                            },
+                            {
+                              mode: "workout",
+                              label: "Workout",
+                              icon: Dumbbell,
+                              desc: "Faster pace, auto-continue",
+                            },
                           ].map(({ mode, label, icon: Icon, desc }) => (
                             <button
                               key={mode}
-                              onClick={() => handleModeChange(mode as ListeningMode)}
+                              onClick={() =>
+                                handleModeChange(mode as ListeningMode)
+                              }
                               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                                 listeningMode === mode
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'hover:bg-primary hover:text-primary-foreground'
+                                  ? "bg-primary text-primary-foreground"
+                                  : "hover:bg-primary hover:text-primary-foreground"
                               }`}
                             >
                               <Icon className="w-4 h-4" />
@@ -780,9 +897,16 @@ export function AudioPlayer({
                   )}
                 </div>
                 <div className="relative">
-                  <button 
-                    onClick={() => { closeAllExcept('settings'); setShowSettings(!showSettings); }}
-                    className={`p-2 rounded-lg transition-all ${showSettings ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+                  <button
+                    onClick={() => {
+                      closeAllExcept("settings");
+                      setShowSettings(!showSettings);
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      showSettings
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-primary hover:text-primary-foreground"
+                    }`}
                     disabled={isLoading}
                     title="Player Settings"
                   >
@@ -803,14 +927,14 @@ export function AudioPlayer({
                         <div className="space-y-2">
                           <h5 className="text-sm font-medium">Speed</h5>
                           <div className="grid grid-cols-5 gap-1">
-                            {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(speed => (
+                            {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
                               <button
                                 key={speed}
                                 onClick={() => handlePlaybackRateChange(speed)}
                                 className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                                  settings.playbackSpeed === speed 
-                                    ? 'bg-primary text-primary-foreground' 
-                                    : 'hover:bg-primary hover:text-primary-foreground bg-muted'
+                                  settings.playbackSpeed === speed
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-primary hover:text-primary-foreground bg-muted"
                                 }`}
                               >
                                 {speed}x
@@ -825,44 +949,65 @@ export function AudioPlayer({
                               <input
                                 type="checkbox"
                                 checked={settings.autoplay}
-                                onChange={(e) => setSettings(prev => ({ ...prev, autoplay: e.target.checked }))}
+                                onChange={(e) =>
+                                  setSettings((prev) => ({
+                                    ...prev,
+                                    autoplay: e.target.checked,
+                                  }))
+                                }
                                 className="sr-only peer"
                               />
                               <div className="w-9 h-5 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                             </label>
                           </div>
-                          <p className="text-xs text-muted-foreground">Automatically play next chapter</p>
+                          <p className="text-xs text-muted-foreground">
+                            Automatically play next chapter
+                          </p>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <h5 className="text-sm font-medium">Skip Silence</h5>
+                            <h5 className="text-sm font-medium">
+                              Skip Silence
+                            </h5>
                             <label className="relative inline-flex items-center cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={settings.skipSilence}
-                                onChange={(e) => setSettings(prev => ({ ...prev, skipSilence: e.target.checked }))}
+                                onChange={(e) =>
+                                  setSettings((prev) => ({
+                                    ...prev,
+                                    skipSilence: e.target.checked,
+                                  }))
+                                }
                                 className="sr-only peer"
                               />
                               <div className="w-9 h-5 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                             </label>
                           </div>
-                          <p className="text-xs text-muted-foreground">Automatically skip silent parts</p>
+                          <p className="text-xs text-muted-foreground">
+                            Automatically skip silent parts
+                          </p>
                         </div>
                         <div className="space-y-2">
                           <h5 className="text-sm font-medium">Repeat</h5>
                           <div className="grid grid-cols-3 gap-1">
                             {[
-                              { value: 'off', label: 'Off' },
-                              { value: 'one', label: 'One' },
-                              { value: 'all', label: 'All' }
-                            ].map(option => (
+                              { value: "off", label: "Off" },
+                              { value: "one", label: "One" },
+                              { value: "all", label: "All" },
+                            ].map((option) => (
                               <button
                                 key={option.value}
-                                onClick={() => setSettings(prev => ({ ...prev, repeat: option.value as any }))}
+                                onClick={() =>
+                                  setSettings((prev) => ({
+                                    ...prev,
+                                    repeat: option.value as any,
+                                  }))
+                                }
                                 className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                                  settings.repeat === option.value 
-                                    ? 'bg-primary text-primary-foreground' 
-                                    : 'hover:bg-primary hover:text-primary-foreground bg-muted'
+                                  settings.repeat === option.value
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-primary hover:text-primary-foreground bg-muted"
                                 }`}
                               >
                                 {option.label}
@@ -877,13 +1022,20 @@ export function AudioPlayer({
                               <input
                                 type="checkbox"
                                 checked={settings.shuffle}
-                                onChange={(e) => setSettings(prev => ({ ...prev, shuffle: e.target.checked }))}
+                                onChange={(e) =>
+                                  setSettings((prev) => ({
+                                    ...prev,
+                                    shuffle: e.target.checked,
+                                  }))
+                                }
                                 className="sr-only peer"
                               />
                               <div className="w-9 h-5 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                             </label>
                           </div>
-                          <p className="text-xs text-muted-foreground">Randomize chapter order</p>
+                          <p className="text-xs text-muted-foreground">
+                            Randomize chapter order
+                          </p>
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
@@ -895,17 +1047,26 @@ export function AudioPlayer({
                             )}
                           </div>
                           <div className="grid grid-cols-4 gap-1">
-                            {[0, 15, 30, 60].map(minutes => (
+                            {[0, 15, 30, 60].map((minutes) => (
                               <button
                                 key={minutes}
-                                onClick={() => setSettings(prev => ({ ...prev, sleepTimer: minutes }))}
+                                onClick={() =>
+                                  setSettings((prev) => ({
+                                    ...prev,
+                                    sleepTimer: minutes,
+                                  }))
+                                }
                                 className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                                  settings.sleepTimer === minutes 
-                                    ? 'bg-primary text-primary-foreground' 
-                                    : 'hover:bg-primary hover:text-primary-foreground bg-muted'
+                                  settings.sleepTimer === minutes
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-primary hover:text-primary-foreground bg-muted"
                                 }`}
                               >
-                                {minutes === 0 ? 'Off' : minutes >= 60 ? `${minutes/60}h` : `${minutes}m`}
+                                {minutes === 0
+                                  ? "Off"
+                                  : minutes >= 60
+                                  ? `${minutes / 60}h`
+                                  : `${minutes}m`}
                               </button>
                             ))}
                           </div>
@@ -917,8 +1078,15 @@ export function AudioPlayer({
                 {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
                   <div className="relative">
                     <button
-                      onClick={() => { closeAllExcept('playlist'); setShowPlaylist(!showPlaylist); }}
-                      className={`p-2 rounded-lg transition-all ${showPlaylist ? 'bg-primary/10 text-primary' : 'hover:bg-primary hover:text-primary-foreground'}`}
+                      onClick={() => {
+                        closeAllExcept("playlist");
+                        setShowPlaylist(!showPlaylist);
+                      }}
+                      className={`p-2 rounded-lg transition-all ${
+                        showPlaylist
+                          ? "bg-primary/10 text-primary"
+                          : "hover:bg-primary hover:text-primary-foreground"
+                      }`}
                       disabled={isLoading}
                       title="Chapters"
                     >
@@ -942,7 +1110,7 @@ export function AudioPlayer({
                             {currentAudio.chapters.map((chapter, index) => {
                               const isLocked = !user && index > 0;
                               const isCurrent = currentChapter === index;
-                              
+
                               return (
                                 <button
                                   key={chapter.id}
@@ -953,11 +1121,11 @@ export function AudioPlayer({
                                     }
                                   }}
                                   className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                                    isLocked 
-                                      ? 'bg-muted/30 cursor-not-allowed opacity-60' 
+                                    isLocked
+                                      ? "bg-muted/30 cursor-not-allowed opacity-60"
                                       : isCurrent
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'hover:bg-primary hover:text-primary-foreground'
+                                      ? "bg-primary text-primary-foreground"
+                                      : "hover:bg-primary hover:text-primary-foreground"
                                   }`}
                                   disabled={isLoading || isLocked}
                                 >
@@ -1004,25 +1172,25 @@ export function AudioPlayer({
         </div>
       )}
 
-      {isMobile && showModeSelector && (
+      {isMobileView && showModeSelector && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-3 bg-popover border rounded-lg shadow-xl">
           <div className="p-3">
             <h4 className="text-sm font-medium mb-3">Listening Mode</h4>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { mode: 'normal', label: 'Normal', icon: Headphones },
-                { mode: 'driving', label: 'Driving', icon: Car },
-                { mode: 'walking', label: 'Walking', icon: Timer },
-                { mode: 'sleep', label: 'Sleep', icon: MoonIcon },
-                { mode: 'workout', label: 'Workout', icon: Dumbbell }
+                { mode: "normal", label: "Normal", icon: Headphones },
+                { mode: "driving", label: "Driving", icon: Car },
+                { mode: "walking", label: "Walking", icon: Timer },
+                { mode: "sleep", label: "Sleep", icon: MoonIcon },
+                { mode: "workout", label: "Workout", icon: Dumbbell },
               ].map(({ mode, label, icon: Icon }) => (
                 <button
                   key={mode}
                   onClick={() => handleModeChange(mode as ListeningMode)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
                     listeningMode === mode
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-primary hover:text-primary-foreground'
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-primary hover:text-primary-foreground"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -1034,7 +1202,7 @@ export function AudioPlayer({
         </div>
       )}
 
-      {isMobile && showSettings && (
+      {isMobileView && showSettings && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-3 bg-popover border rounded-lg shadow-xl max-h-80 overflow-y-auto">
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
@@ -1049,14 +1217,14 @@ export function AudioPlayer({
             <div className="space-y-2">
               <h5 className="text-sm font-medium">Speed</h5>
               <div className="grid grid-cols-4 gap-1">
-                {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(speed => (
+                {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
                   <button
                     key={speed}
                     onClick={() => handlePlaybackRateChange(speed)}
                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                      settings.playbackSpeed === speed 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'hover:bg-primary hover:text-primary-foreground bg-muted'
+                      settings.playbackSpeed === speed
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-primary hover:text-primary-foreground bg-muted"
                     }`}
                   >
                     {speed}x
@@ -1074,17 +1242,23 @@ export function AudioPlayer({
                 )}
               </div>
               <div className="grid grid-cols-4 gap-1">
-                {[0, 15, 30, 60].map(minutes => (
+                {[0, 15, 30, 60].map((minutes) => (
                   <button
                     key={minutes}
-                    onClick={() => setSettings(prev => ({ ...prev, sleepTimer: minutes }))}
+                    onClick={() =>
+                      setSettings((prev) => ({ ...prev, sleepTimer: minutes }))
+                    }
                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
-                      settings.sleepTimer === minutes 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'hover:bg-primary hover:text-primary-foreground bg-muted'
+                      settings.sleepTimer === minutes
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-primary hover:text-primary-foreground bg-muted"
                     }`}
                   >
-                    {minutes === 0 ? 'Off' : minutes >= 60 ? `${minutes/60}h` : `${minutes}m`}
+                    {minutes === 0
+                      ? "Off"
+                      : minutes >= 60
+                      ? `${minutes / 60}h`
+                      : `${minutes}m`}
                   </button>
                 ))}
               </div>
@@ -1097,7 +1271,12 @@ export function AudioPlayer({
                     <input
                       type="checkbox"
                       checked={settings.autoplay}
-                      onChange={(e) => setSettings(prev => ({ ...prev, autoplay: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          autoplay: e.target.checked,
+                        }))
+                      }
                       className="sr-only peer"
                     />
                     <div className="w-8 h-4 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
@@ -1111,7 +1290,12 @@ export function AudioPlayer({
                     <input
                       type="checkbox"
                       checked={settings.skipSilence}
-                      onChange={(e) => setSettings(prev => ({ ...prev, skipSilence: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          skipSilence: e.target.checked,
+                        }))
+                      }
                       className="sr-only peer"
                     />
                     <div className="w-8 h-4 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
@@ -1123,7 +1307,7 @@ export function AudioPlayer({
         </div>
       )}
 
-      {isMobile && showPlaylist && (
+      {isMobileView && showPlaylist && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-3 bg-popover border rounded-lg shadow-xl max-h-80 overflow-hidden">
           <div className="p-3 border-b">
             <div className="flex items-center justify-between">
@@ -1141,7 +1325,7 @@ export function AudioPlayer({
               {currentAudio?.chapters?.map((chapter, index) => {
                 const isLocked = !user && index > 0;
                 const isCurrent = currentChapter === index;
-                
+
                 return (
                   <button
                     key={chapter.id}
@@ -1152,11 +1336,11 @@ export function AudioPlayer({
                       }
                     }}
                     className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                      isLocked 
-                        ? 'bg-muted/30 cursor-not-allowed opacity-60' 
+                      isLocked
+                        ? "bg-muted/30 cursor-not-allowed opacity-60"
                         : isCurrent
-                          ? 'bg-primary text-primary-foreground'
-                          : 'hover:bg-primary hover:text-primary-foreground'
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-primary hover:text-primary-foreground"
                     }`}
                     disabled={isLoading || isLocked}
                   >
@@ -1193,7 +1377,6 @@ export function AudioPlayer({
           {error}
         </div>
       )}
-
     </div>
   );
 }

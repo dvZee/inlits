@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Play, ChevronRight } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { ImageLoader } from '../image-loader';
-import { useAudio } from '@/lib/audio-context';
+import React, { useEffect, useState } from "react";
+import { Play, ChevronRight } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { ImageLoader } from "../image-loader";
+import { useAudio } from "@/lib/audio-context";
 
 interface Collection {
   id: string;
@@ -23,59 +23,62 @@ export function CinematicCollections() {
     const fetchCollections = async () => {
       try {
         const categories = [
-          { name: 'Business', description: 'Master the art of success' },
-          { name: 'Psychology', description: 'Understand the human mind' },
-          { name: 'Self-Help', description: 'Transform your life' },
-          { name: 'Technology', description: 'Embrace the future' },
-          { name: 'Philosophy', description: 'Question everything' },
-          { name: 'Science', description: 'Explore the universe' },
-          { name: 'History', description: 'Learn from the past' },
-          { name: 'Entrepreneurship', description: 'Build your empire' }
+          { name: "Business", description: "Master the art of success" },
+          { name: "Psychology", description: "Understand the human mind" },
+          { name: "Self-Help", description: "Transform your life" },
+          { name: "Technology", description: "Embrace the future" },
+          { name: "Philosophy", description: "Question everything" },
+          { name: "Science", description: "Explore the universe" },
+          { name: "History", description: "Learn from the past" },
+          { name: "Entrepreneurship", description: "Build your empire" },
         ];
 
         const collectionsData = await Promise.all(
           categories.map(async (category) => {
-            const [audiobooksResult, booksResult, podcastsResult] = await Promise.all([
-              supabase
-                .from('audiobooks')
-                .select('id, cover_url, title')
-                .eq('status', 'published')
-                .contains('categories', [category.name])
-                .order('created_at', { ascending: false })
-                .limit(10),
-              supabase
-                .from('books')
-                .select('id, cover_url, title')
-                .eq('status', 'published')
-                .eq('category', category.name)
-                .order('created_at', { ascending: false })
-                .limit(10),
-              supabase
-                .from('podcast_episodes')
-                .select('id, cover_url, title')
-                .eq('status', 'published')
-                .contains('categories', [category.name])
-                .order('created_at', { ascending: false })
-                .limit(10)
-            ]);
+            const [audiobooksResult, booksResult, podcastsResult] =
+              await Promise.all([
+                supabase
+                  .from("audiobooks")
+                  .select("id, cover_url, title")
+                  .eq("status", "published")
+                  .contains("categories", [category.name])
+                  .order("created_at", { ascending: false })
+                  .limit(10),
+                supabase
+                  .from("books")
+                  .select("id, cover_url, title")
+                  .eq("status", "published")
+                  .eq("category", category.name)
+                  .order("created_at", { ascending: false })
+                  .limit(10),
+                supabase
+                  .from("podcast_episodes")
+                  .select("id, cover_url, title")
+                  .eq("status", "published")
+                  .contains("categories", [category.name])
+                  .order("created_at", { ascending: false })
+                  .limit(10),
+              ]);
 
             const allItems = [
               ...(audiobooksResult.data || []),
               ...(booksResult.data || []),
-              ...(podcastsResult.data || [])
-            ].filter(item => item.cover_url);
+              ...(podcastsResult.data || []),
+            ].filter((item) => item.cover_url);
 
             // Get unique items by both ID and cover URL to ensure truly unique content
             const seenIds = new Set<string>();
             const seenCovers = new Set<string>();
-            const uniqueCovers = allItems.filter(item => {
-              if (seenIds.has(item.id) || seenCovers.has(item.cover_url)) {
-                return false;
-              }
-              seenIds.add(item.id);
-              seenCovers.add(item.cover_url);
-              return true;
-            }).slice(0, 4);
+            const uniqueCovers = allItems
+              .filter((item) => {
+                if (seenIds.has(item.id) || seenCovers.has(item.cover_url)) {
+                  return false;
+                }
+                seenIds.add(item.id);
+                seenCovers.add(item.cover_url);
+                return true;
+              })
+              .slice(0, 4);
 
             const totalCount =
               (audiobooksResult.data?.length || 0) +
@@ -85,18 +88,22 @@ export function CinematicCollections() {
             return {
               id: category.name.toLowerCase(),
               name: category.name,
-              slug: category.name.toLowerCase().replace(/\s+/g, '-'),
+              slug: category.name.toLowerCase().replace(/\s+/g, "-"),
               count: totalCount,
-              mainCover: uniqueCovers[0]?.cover_url || '',
-              layeredCovers: uniqueCovers.slice(1, 4).map(item => item.cover_url),
-              description: category.description
+              mainCover: uniqueCovers[0]?.cover_url || "",
+              layeredCovers: uniqueCovers
+                .slice(1, 4)
+                .map((item) => item.cover_url),
+              description: category.description,
             };
           })
         );
 
-        setCollections(collectionsData.filter(c => c.count > 0 && c.mainCover));
+        setCollections(
+          collectionsData.filter((c) => c.count > 0 && c.mainCover)
+        );
       } catch (error) {
-        console.error('Error fetching collections:', error);
+        console.error("Error fetching collections:", error);
       } finally {
         setLoading(false);
       }
@@ -116,8 +123,9 @@ export function CinematicCollections() {
 
       const [audiobooksResult, podcastsResult] = await Promise.all([
         supabase
-          .from('audiobooks')
-          .select(`
+          .from("audiobooks")
+          .select(
+            `
             id,
             title,
             cover_url,
@@ -127,14 +135,16 @@ export function CinematicCollections() {
               avatar_url,
               username
             )
-          `)
-          .eq('status', 'published')
-          .contains('categories', [categoryName])
-          .order('created_at', { ascending: false }),
+          `
+          )
+          .eq("status", "published")
+          .contains("categories", [categoryName])
+          .order("created_at", { ascending: false }),
 
         supabase
-          .from('podcast_episodes')
-          .select(`
+          .from("podcast_episodes")
+          .select(
+            `
             id,
             title,
             cover_url,
@@ -144,23 +154,24 @@ export function CinematicCollections() {
               avatar_url,
               username
             )
-          `)
-          .eq('status', 'published')
-          .contains('categories', [categoryName])
-          .order('created_at', { ascending: false })
+          `
+          )
+          .eq("status", "published")
+          .contains("categories", [categoryName])
+          .order("created_at", { ascending: false }),
       ]);
 
       const normalizeAuthor = (author: any) => {
         const data = Array.isArray(author) ? author[0] : author;
         return {
-          id: data?.id || '',
-          name: data?.name || data?.username || 'Unknown Creator',
-          avatar: data?.avatar_url || '',
-          username: data?.username || 'creator'
+          id: data?.id || "",
+          name: data?.name || data?.username || "Unknown Creator",
+          avatar: data?.avatar_url || "",
+          username: data?.username || "creator",
         };
       };
 
-      const audiobooks = (audiobooksResult.data || []).map(item => {
+      const audiobooks = (audiobooksResult.data || []).map((item) => {
         const author = normalizeAuthor(item.author);
         return {
           id: item.id,
@@ -168,13 +179,13 @@ export function CinematicCollections() {
           author: author.name,
           authorId: author.id,
           authorUsername: author.username,
-          thumbnail: item.cover_url || '',
-          type: 'audiobook' as const,
-          contentUrl: `/player/audiobook-${item.id}`
+          thumbnail: item.cover_url || "",
+          type: "audiobook" as const,
+          contentUrl: `/player/audiobook-${item.id}`,
         };
       });
 
-      const podcasts = (podcastsResult.data || []).map(item => {
+      const podcasts = (podcastsResult.data || []).map((item) => {
         const author = normalizeAuthor(item.author);
         return {
           id: item.id,
@@ -182,9 +193,9 @@ export function CinematicCollections() {
           author: author.name,
           authorId: author.id,
           authorUsername: author.username,
-          thumbnail: item.cover_url || '',
-          type: 'podcast' as const,
-          contentUrl: `/player/podcast-${item.id}`
+          thumbnail: item.cover_url || "",
+          type: "podcast" as const,
+          contentUrl: `/player/podcast-${item.id}`,
         };
       });
 
@@ -199,12 +210,12 @@ export function CinematicCollections() {
         playAudio(playlistItems[0]);
       }
     } catch (error) {
-      console.error('Error loading collection playlist:', error);
+      console.error("Error loading collection playlist:", error);
     }
   };
 
   return (
-    <div className="mb-12">
+    <div className="mb-12 -mx-4 md:mx-0 px-4 md:px-0">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl md:text-3xl font-bold">Popular Collections</h2>
       </div>
@@ -223,9 +234,11 @@ export function CinematicCollections() {
                     key={idx}
                     className="absolute inset-0 rounded-lg overflow-hidden shadow-xl transition-all duration-500 group-hover:scale-95"
                     style={{
-                      transform: `translateX(${(idx + 1) * 8}px) translateY(${(idx + 1) * 8}px) scale(${1 - (idx + 1) * 0.05})`,
+                      transform: `translateX(${(idx + 1) * 8}px) translateY(${
+                        (idx + 1) * 8
+                      }px) scale(${1 - (idx + 1) * 0.05})`,
                       zIndex: 3 - idx,
-                      opacity: 0.6 - idx * 0.15
+                      opacity: 0.6 - idx * 0.15,
                     }}
                   >
                     <ImageLoader

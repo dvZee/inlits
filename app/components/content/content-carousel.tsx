@@ -1,7 +1,7 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ContentCard } from './content-card';
-import type { ContentItem } from '@/lib/types';
+import React, { useRef, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ContentCard } from "./content-card";
+import type { ContentItem } from "@/lib/types";
 
 interface ContentCarouselProps {
   title: string;
@@ -10,7 +10,12 @@ interface ContentCarouselProps {
   onAddToShelf?: (contentId: string, contentType: string) => void;
 }
 
-export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: ContentCarouselProps) {
+export function ContentCarousel({
+  title,
+  items,
+  activeShelf,
+  onAddToShelf,
+}: ContentCarouselProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(true);
@@ -24,19 +29,20 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
     setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
   }, []);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     if (!rowRef.current || isScrolling) return;
 
     setIsScrolling(true);
     const container = rowRef.current;
     const scrollAmount = container.clientWidth * 0.8;
-    const scrollPosition = direction === 'left'
-      ? container.scrollLeft - scrollAmount
-      : container.scrollLeft + scrollAmount;
+    const scrollPosition =
+      direction === "left"
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount;
 
     container.scrollTo({
       left: scrollPosition,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
 
     setTimeout(() => {
@@ -50,12 +56,12 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
     if (!container) return;
 
     updateButtonVisibility();
-    container.addEventListener('scroll', updateButtonVisibility);
-    window.addEventListener('resize', updateButtonVisibility);
+    container.addEventListener("scroll", updateButtonVisibility);
+    window.addEventListener("resize", updateButtonVisibility);
 
     return () => {
-      container.removeEventListener('scroll', updateButtonVisibility);
-      window.removeEventListener('resize', updateButtonVisibility);
+      container.removeEventListener("scroll", updateButtonVisibility);
+      window.removeEventListener("resize", updateButtonVisibility);
     };
   }, [updateButtonVisibility]);
 
@@ -67,11 +73,11 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
         <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
       </div>
 
-      <div className="relative">
+      <div className="relative -mx-4 md:mx-0">
         {showLeftButton && (
           <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-r from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+            onClick={() => scroll("left")}
+            className="hidden md:flex absolute left-0 top-0 bottom-0 z-10 w-12 items-center justify-center bg-gradient-to-r from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
             disabled={isScrolling}
           >
             <div className="p-2 bg-background/90 hover:bg-primary hover:text-primary-foreground rounded-full border shadow-lg transition-all">
@@ -82,11 +88,14 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
 
         <div
           ref={rowRef}
-          className="flex overflow-x-auto gap-3 md:gap-4 pb-4 scrollbar-hide scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex overflow-x-auto gap-3 md:gap-4 pb-4 px-4 md:px-0 scrollbar-hide scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {items.map(item => (
-            <div key={item.id} className="flex-shrink-0 w-[150px] sm:w-[160px] md:w-[180px] lg:w-[200px]">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex-shrink-0 w-[150px] sm:w-[160px] md:w-[180px] lg:w-[200px]"
+            >
               <ContentCard
                 item={item}
                 activeShelf={activeShelf}
@@ -98,8 +107,8 @@ export function ContentCarousel({ title, items, activeShelf, onAddToShelf }: Con
 
         {showRightButton && (
           <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-0 bottom-0 z-10 w-12 flex items-center justify-center bg-gradient-to-l from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
+            onClick={() => scroll("right")}
+            className="hidden md:flex absolute right-0 top-0 bottom-0 z-10 w-12 items-center justify-center bg-gradient-to-l from-background to-transparent opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300"
             disabled={isScrolling}
           >
             <div className="p-2 bg-background/90 hover:bg-primary hover:text-primary-foreground rounded-full border shadow-lg transition-all">
