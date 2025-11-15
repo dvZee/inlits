@@ -95,21 +95,31 @@ export function ContentCard({
   const [isNavigating, setIsNavigating] = React.useState(false);
 
   const handleClick = () => {
-    if (isNavigating) return;
+    console.log("Card clicked:", item.title, item.type, item.id);
+
+    if (isNavigating) {
+      console.log("Already navigating, ignoring click");
+      return;
+    }
+
     setIsNavigating(true);
 
+    let targetUrl = "";
     switch (item.type) {
       case "article":
-        navigate(`/reader/article-${item.id}`);
+        targetUrl = `/reader/article-${item.id}`;
         break;
       case "ebook":
-        navigate(`/reader/book-${item.id}`);
+        targetUrl = `/reader/book-${item.id}`;
         break;
       case "audiobook":
       case "podcast":
-        navigate(`/player/${item.type}-${item.id}`);
+        targetUrl = `/player/${item.type}-${item.id}`;
         break;
     }
+
+    console.log("Navigating to:", targetUrl);
+    navigate(targetUrl);
   };
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
@@ -178,14 +188,16 @@ export function ContentCard({
         style={{ paddingBottom: "150%" }}
       >
         <img
-          src={item.thumbnail || "https://placehold.co/600x900?text=Content"}
+          src={item.thumbnail}
           alt={item.title}
-          className="absolute inset-0 w-full h-full object-cover"
-          onLoad={() => console.log("Image loaded:", item.title)}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
           onError={(e) => {
-            console.error("Image failed to load:", item.title, item.thumbnail);
+            console.error("✗ Image failed:", item.title, item.thumbnail);
             const target = e.currentTarget;
-            target.src = "https://placehold.co/600x900?text=Content";
+            target.src =
+              "https://placehold.co/600x900/1f4ead/ffffff?text=" +
+              encodeURIComponent(item.title.substring(0, 20));
           }}
         />
 

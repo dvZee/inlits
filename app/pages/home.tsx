@@ -24,6 +24,8 @@ interface HomeProps {
     books: any[];
     podcasts: any[];
     articles: any[];
+    views?: Array<{ content_id: string; content_type: string }>;
+    likes?: Array<{ content_id: string; content_type: string; rating: number }>;
   };
 }
 
@@ -86,14 +88,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
     articles: ContentItem[];
     podcasts: ContentItem[];
   }>(() => {
-    if (initialData) {
-      return {
-        audiobooks: initialData.audiobooks || [],
-        ebooks: initialData.books || [],
-        articles: initialData.articles || [],
-        podcasts: initialData.podcasts || [],
-      };
-    }
+    // Don't transform here - let useEffect handle it properly
     return {
       audiobooks: [],
       ebooks: [],
@@ -101,9 +96,9 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
       podcasts: [],
     };
   });
-  const [loading, setLoading] = useState(!initialData);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(!!initialData);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // Get shelf parameter from URL
   const shelfParam = searchParams.get("shelf");
@@ -186,42 +181,56 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
 
   // Load content once mounted and refresh cache on user changes
   useEffect(() => {
-    // Skip client-side fetch if we have SSR data
-    if (initialData && initialLoadComplete) {
-      return;
-    }
-
     let isMounted = true;
 
     const loadAllContent = async () => {
       try {
-        if (!initialLoadComplete) {
-          setLoading(true);
-        }
+        setLoading(true);
         setError(null);
 
-        // Load all content types in parallel with limits for better performance
-        const [audiobooksResult, booksResult, podcastsResult] =
-          await Promise.all([
+        // Use SSR data if available, otherwise fetch from client
+        let audiobooksData, booksData, podcastsData, viewsDataRaw, likesDataRaw;
+
+        if (
+          initialData &&
+          initialData.audiobooks &&
+          initialData.audiobooks.length > 0
+        ) {
+          // Use SSR data - fastest path
+          audiobooksData = initialData.audiobooks;
+          booksData = initialData.books;
+          podcastsData = initialData.podcasts;
+          viewsDataRaw = initialData.views || [];
+          likesDataRaw = initialData.likes || [];
+          console.log("✅ Using SSR data - instant load!");
+        } else {
+          // Fallback to client-side fetch
+          const [
+            audiobooksResult,
+            booksResult,
+            podcastsResult,
+            viewsData,
+            likesData,
+          ] = await Promise.all([
             supabase
               .from("audiobooks")
               .select(
                 `
-              id,
-              title,
-              description,
-              cover_url,
-              created_at,
-              featured,
-              category,
-              categories,
-              author:profiles!audiobooks_author_id_fkey (
                 id,
-                name,
-                avatar_url,
-                username
-              )
-            `
+                title,
+                description,
+                cover_url,
+                created_at,
+                featured,
+                category,
+                categories,
+                author:profiles!audiobooks_author_id_fkey (
+                  id,
+                  name,
+                  avatar_url,
+                  username
+                )
+              `
               )
               .eq("status", "published")
               .order("featured", { ascending: false })
@@ -231,20 +240,20 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
               .from("books")
               .select(
                 `
-              id,
-              title,
-              description,
-              cover_url,
-              created_at,
-              featured,
-              category,
-              author:profiles!books_author_id_fkey (
                 id,
-                name,
-                avatar_url,
-                username
-              )
-            `
+                title,
+                description,
+                cover_url,
+                created_at,
+                featured,
+                category,
+                author:profiles!books_author_id_fkey (
+                  id,
+                  name,
+                  avatar_url,
+                  username
+                )
+              `
               )
               .eq("status", "published")
               .order("featured", { ascending: false })
@@ -254,92 +263,104 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
               .from("podcast_episodes")
               .select(
                 `
-              id,
-              title,
-              description,
-              cover_url,
-              duration,
-              created_at,
-              featured,
-              category,
-              categories,
-              author:profiles!podcast_episodes_author_id_fkey (
                 id,
-                name,
-                avatar_url,
-                username
-              )
-            `
+                title,
+                description,
+                cover_url,
+                duration,
+                created_at,
+                featured,
+                category,
+                categories,
+                author:profiles!podcast_episodes_author_id_fkey (
+                  id,
+                  name,
+                  avatar_url,
+                  username
+                )
+              `
               )
               .eq("status", "published")
               .order("featured", { ascending: false })
-              .order("created_at", { ascending: false })
-              .limit(20),
+              .order("created_at", { ascending: false }),
+
+            supabase.from("content_views").select("content_id, content_type"),
+            supabase
+              .from("ratings")
+              .select("content_id, content_type, rating")
+              .eq("rating", 5),
           ]);
 
-        // Check for errors - log to console but continue with partial data
-        if (audiobooksResult.error) {
-          console.error("Audiobooks error:", audiobooksResult.error);
-        }
-        if (booksResult.error) {
-          console.error("Books error:", booksResult.error);
-        }
-        if (podcastsResult.error) {
-          console.error("Podcasts error:", podcastsResult.error);
+          // Check for errors
+          if (audiobooksResult.error) {
+            console.error("Audiobooks error:", audiobooksResult.error);
+          }
+          if (booksResult.error) {
+            console.error("Books error:", booksResult.error);
+          }
+          if (podcastsResult.error) {
+            console.error("Podcasts error:", podcastsResult.error);
+          }
+
+          if (
+            audiobooksResult.error &&
+            booksResult.error &&
+            podcastsResult.error
+          ) {
+            throw new Error(
+              "Unable to load content. Please check your connection and try again."
+            );
+          }
+
+          audiobooksData = audiobooksResult.data || [];
+          booksData = booksResult.data || [];
+          podcastsData = podcastsResult.data || [];
+          viewsDataRaw = viewsData.data || [];
+          likesDataRaw = likesData.data || [];
         }
 
-        // If all queries failed, throw an error
-        if (
-          audiobooksResult.error &&
-          booksResult.error &&
-          podcastsResult.error
-        ) {
-          throw new Error(
-            "Unable to load content. Please check your connection and try again."
-          );
+        // Minimal logging for performance
+        if (process.env.NODE_ENV === "development") {
+          console.log("Raw data loaded:", {
+            audiobooks: audiobooksData.length,
+            books: booksData.length,
+            podcasts: podcastsData.length,
+          });
         }
 
-        console.log("Raw data loaded:", {
-          audiobooks: audiobooksResult.data?.length || 0,
-          books: booksResult.data?.length || 0,
-          podcasts: podcastsResult.data?.length || 0,
+        // Get user bookmarks in parallel (non-blocking)
+        let userBookmarks: { content_id: string; content_type: string }[] = [];
+        const bookmarksPromise = user
+          ? supabase
+              .from("bookmarks")
+              .select("content_id, content_type")
+              .eq("user_id", user.id)
+          : Promise.resolve({ data: [] });
+
+        // Create lookup maps for O(1) access
+        const viewsMap = new Map<string, number>();
+        viewsDataRaw.forEach((view: any) => {
+          const key = `${view.content_type}:${view.content_id}`;
+          viewsMap.set(key, (viewsMap.get(key) || 0) + 1);
         });
 
-        // Get user bookmarks if logged in
-        let userBookmarks: { content_id: string; content_type: string }[] = [];
-        if (user) {
-          const { data: bookmarksData } = await supabase
-            .from("bookmarks")
-            .select("content_id, content_type")
-            .eq("user_id", user.id);
+        const likesMap = new Map<string, number>();
+        likesDataRaw.forEach((like: any) => {
+          const key = `${like.content_type}:${like.content_id}`;
+          likesMap.set(key, (likesMap.get(key) || 0) + 1);
+        });
 
-          userBookmarks = bookmarksData || [];
-        }
-
-        // Get real view counts from database
-        const getViewCount = async (contentId: string, contentType: string) => {
-          const { count } = await supabase
-            .from("content_views")
-            .select("*", { count: "exact", head: true })
-            .eq("content_id", contentId)
-            .eq("content_type", contentType);
-          return count || 0;
+        const getViewCount = (contentId: string, contentType: string) => {
+          return viewsMap.get(`${contentType}:${contentId}`) || 0;
         };
 
-        // Get real like counts from database
-        const getLikeCount = async (contentId: string, contentType: string) => {
-          const { data } = await supabase
-            .from("ratings")
-            .select("rating")
-            .eq("content_id", contentId)
-            .eq("content_type", contentType)
-            .eq("rating", 5);
-          return data?.length || 0;
+        const getLikeCount = (contentId: string, contentType: string) => {
+          return likesMap.get(`${contentType}:${contentId}`) || 0;
         };
+
+        // Start with no bookmarks for faster initial render
         const isBookmarked = (id: string, type: string) => {
-          return userBookmarks.some(
-            (b) => b.content_id === id && b.content_type === type
-          );
+          return false; // Will be updated after initial render
         };
 
         const normalizeAuthor = (author: unknown, fallbackId: string) => {
@@ -386,81 +407,72 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           return [];
         };
 
-        // Transform data to ContentItem format
-        const audiobooks = await Promise.all(
-          (audiobooksResult.data || []).map(async (item) => ({
-            id: item.id,
-            type: "audiobook" as const,
-            title: item.title,
-            thumbnail:
-              item.cover_url && item.cover_url.trim().length > 0
-                ? item.cover_url
-                : getPlaceholderThumbnail("audiobook"),
-            duration: "2 hours",
-            views: await getViewCount(item.id, "audiobook"),
-            createdAt: item.created_at,
-            creator: {
-              ...normalizeAuthor(item.author, item.id),
-              followers: 0,
-            },
-            category: item.category || "Audiobook",
-            categories: resolveCategories(item),
-            featured: item.featured,
-            rating: 4.5,
-            bookmarked: isBookmarked(item.id, "audiobook"),
-            likes_count: await getLikeCount(item.id, "audiobook"),
-          }))
-        );
+        // Transform data to ContentItem format (synchronous now - much faster!)
+        const audiobooks = audiobooksData.map((item: any) => ({
+          id: item.id,
+          type: "audiobook" as const,
+          title: item.title,
+          thumbnail:
+            item.cover_url ||
+            `https://source.unsplash.com/random/800x600?audiobook&sig=${item.id}`,
+          duration: "2 hours",
+          views: getViewCount(item.id, "audiobook"),
+          createdAt: item.created_at,
+          creator: {
+            ...normalizeAuthor(item.author, item.id),
+            followers: 0,
+          },
+          category: item.category || "Audiobook",
+          categories: resolveCategories(item),
+          featured: item.featured,
+          rating: 4.5,
+          bookmarked: isBookmarked(item.id, "audiobook"),
+          likes_count: getLikeCount(item.id, "audiobook"),
+        }));
 
-        const books = await Promise.all(
-          (booksResult.data || []).map(async (item) => ({
-            id: item.id,
-            type: "ebook" as const,
-            title: item.title,
-            thumbnail:
-              item.cover_url && item.cover_url.trim().length > 0
-                ? item.cover_url
-                : getPlaceholderThumbnail("ebook"),
-            duration: "4 hours",
-            views: await getViewCount(item.id, "book"),
-            createdAt: item.created_at,
-            creator: {
-              ...normalizeAuthor(item.author, item.id),
-              followers: 0,
-            },
-            category: item.category || "Book",
-            categories: resolveCategories(item),
-            featured: item.featured,
-            rating: 4.5,
-            bookmarked: isBookmarked(item.id, "book"),
-            likes_count: await getLikeCount(item.id, "book"),
-          }))
-        );
+        const books = booksData.map((item: any) => ({
+          id: item.id,
+          type: "ebook" as const,
+          title: item.title,
+          thumbnail:
+            item.cover_url ||
+            `https://source.unsplash.com/random/800x600?book&sig=${item.id}`,
+          duration: "4 hours",
+          views: getViewCount(item.id, "book"),
+          createdAt: item.created_at,
+          creator: {
+            ...normalizeAuthor(item.author, item.id),
+            followers: 0,
+          },
+          category: item.category || "Book",
+          categories: resolveCategories(item),
+          featured: item.featured,
+          rating: 4.5,
+          bookmarked: isBookmarked(item.id, "book"),
+          likes_count: getLikeCount(item.id, "book"),
+        }));
 
-        const podcasts = await Promise.all(
-          (podcastsResult.data || []).map(async (item) => ({
-            id: item.id,
-            type: "podcast" as const,
-            title: item.title,
-            thumbnail:
-              item.cover_url && item.cover_url.trim().length > 0
-                ? item.cover_url
-                : getPlaceholderThumbnail("podcast"),
-            duration: item.duration,
-            views: await getViewCount(item.id, "podcast"),
-            createdAt: item.created_at,
-            creator: {
-              ...normalizeAuthor(item.author, item.id),
-              followers: 0,
-            },
-            category: item.category || "Podcast",
-            categories: resolveCategories(item),
-            featured: item.featured,
-            rating: 4.5,
-            bookmarked: isBookmarked(item.id, "podcast"),
-            likes_count: await getLikeCount(item.id, "podcast"),
-          }))
-        );
+        const podcasts = podcastsData.map((item: any) => ({
+          id: item.id,
+          type: "podcast" as const,
+          title: item.title,
+          thumbnail:
+            item.cover_url ||
+            `https://source.unsplash.com/random/800x600?podcast&sig=${item.id}`,
+          duration: item.duration,
+          views: getViewCount(item.id, "podcast"),
+          createdAt: item.created_at,
+          creator: {
+            ...normalizeAuthor(item.author, item.id),
+            followers: 0,
+          },
+          category: item.category || "Podcast",
+          categories: resolveCategories(item),
+          featured: item.featured,
+          rating: 4.5,
+          bookmarked: isBookmarked(item.id, "podcast"),
+          likes_count: getLikeCount(item.id, "podcast"),
+        }));
 
         const contentData = {
           audiobooks,
@@ -482,21 +494,41 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
         setLoading(false);
         setInitialLoadComplete(true);
 
-        try {
-          safeStorage.setItem(
-            LOCAL_STORAGE_KEY,
-            JSON.stringify({ data: contentData, timestamp: Date.now() })
-          );
-        } catch (storageError) {
-          console.warn("Failed to persist home content cache:", storageError);
-        }
+        // Resolve bookmarks asynchronously after initial render
+        bookmarksPromise.then(({ data: bookmarksData }) => {
+          if (!isMounted || !bookmarksData || bookmarksData.length === 0)
+            return;
 
-        console.log("Content loaded and cached:", {
-          audiobooks: audiobooks.length,
-          books: books.length,
-          articles: 0,
-          podcasts: podcasts.length,
+          userBookmarks = bookmarksData;
+
+          // Update content with bookmark status
+          const updateBookmarks = (items: ContentItem[]) =>
+            items.map((item) => ({
+              ...item,
+              bookmarked: userBookmarks.some(
+                (b) => b.content_id === item.id && b.content_type === item.type
+              ),
+            }));
+
+          setAllContent({
+            audiobooks: updateBookmarks(contentData.audiobooks),
+            ebooks: updateBookmarks(contentData.ebooks),
+            articles: updateBookmarks(contentData.articles),
+            podcasts: updateBookmarks(contentData.podcasts),
+          });
         });
+
+        // Save to localStorage asynchronously (non-blocking)
+        setTimeout(() => {
+          try {
+            safeStorage.setItem(
+              LOCAL_STORAGE_KEY,
+              JSON.stringify({ data: contentData, timestamp: Date.now() })
+            );
+          } catch (storageError) {
+            console.warn("Failed to persist home content cache:", storageError);
+          }
+        }, 0);
       } catch (err) {
         console.error("Error loading content:", err);
         if (isMounted) {
@@ -512,20 +544,26 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
       }
     };
 
-    // If we have fresh in-memory cache and already loaded, reuse it to avoid duplicate network
+    // Check for fresh in-memory cache first
     const cached = contentCache.get("all-content");
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    const hasFreshCache =
+      cached && Date.now() - cached.timestamp < CACHE_DURATION;
+
+    // Skip if we have fresh cache AND same initial data
+    if (hasFreshCache && !initialData) {
       setAllContent(cached.data);
       setLoading(false);
       setInitialLoadComplete(true);
-    } else {
-      loadAllContent();
+      return;
     }
+
+    // Always load if we have SSR data or no cache
+    loadAllContent();
 
     return () => {
       isMounted = false;
     };
-  }, [user, initialLoadComplete, initialData]);
+  }, [user, initialData]);
 
   // Filter content based on selected category (client-side filtering for instant response)
   const filteredContent = useMemo(() => {
@@ -796,6 +834,17 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
     ...filteredContent.podcasts,
   ];
 
+  // Shuffle function for variety
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Trending: Top viewed items
   const trendingItems = allContentItems
     .sort((a, b) => b.views - a.views)
     .slice(0, 15);
@@ -803,12 +852,23 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
   const thisMonthDate = new Date();
   thisMonthDate.setMonth(thisMonthDate.getMonth() - 1);
 
+  // Popular This Month: Recent items with high views, excluding trending
+  const trendingIds = new Set(trendingItems.map((item) => item.id));
   const popularThisMonth = allContentItems
-    .filter((item) => new Date(item.createdAt) >= thisMonthDate)
+    .filter(
+      (item) =>
+        new Date(item.createdAt) >= thisMonthDate && !trendingIds.has(item.id)
+    )
     .sort((a, b) => b.views - a.views)
     .slice(0, 15);
 
+  // New Releases: Latest items, excluding trending and popular
+  const usedIds = new Set([
+    ...trendingItems.map((item) => item.id),
+    ...popularThisMonth.map((item) => item.id),
+  ]);
   const newReleases = allContentItems
+    .filter((item) => !usedIds.has(item.id))
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -862,17 +922,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
     );
   }
 
-  // Debug: Log content data
-  console.log("Home page content:", {
-    allContentItems: allContentItems.length,
-    trendingItems: trendingItems.length,
-    popularThisMonth: popularThisMonth.length,
-    newReleases: newReleases.length,
-    podcasts: filteredContent.podcasts.length,
-    ebooks: filteredContent.ebooks.length,
-    audiobooks: filteredContent.audiobooks.length,
-  });
-
   return (
     <>
       {activeShelf && (
@@ -920,14 +969,14 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
 
         <ContentCarousel
           title="🎙️ Top Podcasts"
-          items={filteredContent.podcasts.slice(0, 15)}
+          items={shuffleArray(filteredContent.podcasts).slice(0, 15)}
           activeShelf={activeShelf}
           onAddToShelf={handleAddToShelf}
         />
 
         <ContentCarousel
           title="📚 Must-Read Books"
-          items={filteredContent.ebooks.slice(0, 15)}
+          items={shuffleArray(filteredContent.ebooks).slice(0, 15)}
           activeShelf={activeShelf}
           onAddToShelf={handleAddToShelf}
         />

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Category } from '@/lib/types';
+import React, { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Category } from "@/lib/types";
 
 interface CategoriesScrollProps {
   categories: Category[];
@@ -9,18 +9,18 @@ interface CategoriesScrollProps {
   collapsed?: boolean;
 }
 
-export function CategoriesScroll({ 
-  categories, 
-  selectedCategory, 
+export function CategoriesScroll({
+  categories,
+  selectedCategory,
   onSelectCategory,
-  collapsed
+  collapsed,
 }: CategoriesScrollProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const isBrowser = typeof window !== 'undefined';
-  const [isMobile, setIsMobile] = useState(
-    () => (isBrowser ? window.innerWidth < 768 : false)
+  const isBrowser = typeof window !== "undefined";
+  const [isMobile, setIsMobile] = useState(() =>
+    isBrowser ? window.innerWidth < 768 : false
   );
 
   useEffect(() => {
@@ -29,31 +29,32 @@ export function CategoriesScroll({
     }
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [isBrowser]);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    
+
     const scrollAmount = 200;
-    const newScrollLeft = direction === 'left' 
-      ? scrollRef.current.scrollLeft - scrollAmount
-      : scrollRef.current.scrollLeft + scrollAmount;
-    
+    const newScrollLeft =
+      direction === "left"
+        ? scrollRef.current.scrollLeft - scrollAmount
+        : scrollRef.current.scrollLeft + scrollAmount;
+
     scrollRef.current.scrollTo({
       left: newScrollLeft,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
-    
+
     setShowLeftArrow(scrollRef.current.scrollLeft > 0);
     setShowRightArrow(
-      scrollRef.current.scrollLeft < 
-      scrollRef.current.scrollWidth - scrollRef.current.clientWidth
+      scrollRef.current.scrollLeft <
+        scrollRef.current.scrollWidth - scrollRef.current.clientWidth
     );
   };
 
@@ -62,22 +63,22 @@ export function CategoriesScroll({
   }, [categories, isMobile]);
 
   return (
-    <div 
-      className="fixed top-14 right-0 h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-40 transition-all duration-300" 
-      style={{ 
-        left: isMobile ? '0' : (collapsed ? '64px' : '256px')
+    <div
+      className="fixed top-16 right-0 h-14 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b z-40 transition-all duration-300"
+      style={{
+        left: isMobile ? "0" : collapsed ? "64px" : "256px",
       }}
     >
       <div className="relative flex items-center h-full">
         {showLeftArrow && (
           <button
-            onClick={() => scroll('left')}
+            onClick={() => scroll("left")}
             className="absolute left-0 z-10 h-full px-2 flex items-center justify-center bg-gradient-to-r from-background via-background to-transparent"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
         )}
-        
+
         <div
           ref={scrollRef}
           onScroll={handleScroll}
@@ -87,13 +88,18 @@ export function CategoriesScroll({
             <button
               key={category.id}
               onClick={() => {
-                console.log('Selected category:', category.slug, 'Name:', category.name);
+                console.log(
+                  "Selected category:",
+                  category.slug,
+                  "Name:",
+                  category.name
+                );
                 onSelectCategory(category.slug);
               }}
               className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === category.slug
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-primary/10'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted hover:bg-primary/10"
               }`}
             >
               {category.name}
@@ -103,7 +109,7 @@ export function CategoriesScroll({
 
         {showRightArrow && (
           <button
-            onClick={() => scroll('right')}
+            onClick={() => scroll("right")}
             className="absolute right-0 z-10 h-full px-2 flex items-center justify-center bg-gradient-to-l from-background via-background to-transparent"
           >
             <ChevronRight className="w-5 h-5" />
