@@ -80,13 +80,32 @@ export function GlobalAudioPlayer() {
     };
   }, [currentAudio, currentChapter, audioRef, isPlaying, setIsPlaying]);
 
-  // Sync isPlaying state with actual audio state
+  // Sync isPlaying state with actual audio state (prevent loops)
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    let isUpdating = false;
+
+    const handlePlay = () => {
+      if (!isUpdating) {
+        isUpdating = true;
+        setIsPlaying(true);
+        setTimeout(() => {
+          isUpdating = false;
+        }, 100);
+      }
+    };
+
+    const handlePause = () => {
+      if (!isUpdating) {
+        isUpdating = true;
+        setIsPlaying(false);
+        setTimeout(() => {
+          isUpdating = false;
+        }, 100);
+      }
+    };
 
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);

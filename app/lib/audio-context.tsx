@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 
 interface AudioContextType {
   isPlayerVisible: boolean;
@@ -17,10 +23,10 @@ interface AudioContextType {
       audio_url: string;
       duration: string;
     }>;
-    type: 'audiobook' | 'podcast';
+    type: "audiobook" | "podcast";
     currentTime?: number;
   } | null;
-  setCurrentAudio: (audio: AudioContextType['currentAudio']) => void;
+  setCurrentAudio: (audio: AudioContextType["currentAudio"]) => void;
   isMainPlayerPage: boolean;
   currentChapter: number;
   setCurrentChapter: (index: number) => void;
@@ -35,23 +41,26 @@ interface AudioContextType {
     authorId?: string;
     authorUsername?: string;
     thumbnail: string;
-    type: 'audiobook' | 'podcast' | 'ebook';
+    type: "audiobook" | "podcast" | "ebook";
     contentUrl: string;
   }>;
-  setPlaylist: (playlist: AudioContextType['playlist']) => void;
+  setPlaylist: (playlist: AudioContextType["playlist"]) => void;
   currentTrackIndex: number;
   setCurrentTrackIndex: (index: number) => void;
   playNext: () => void;
   playPrevious: () => void;
-  playAudio: (audio: {
-    id: string;
-    title: string;
-    author: string;
-    authorId?: string;
-    authorUsername?: string;
-    thumbnail: string;
-    type: 'audiobook' | 'podcast';
-  }) => void;
+  playAudio: (
+    audio: {
+      id: string;
+      title: string;
+      author: string;
+      authorId?: string;
+      authorUsername?: string;
+      thumbnail: string;
+      type: "audiobook" | "podcast";
+    },
+    immediate?: boolean
+  ) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -63,28 +72,29 @@ interface AudioProviderProps {
 
 export function AudioProvider({
   children,
-  currentPathname
+  currentPathname,
 }: AudioProviderProps) {
   const [isPlayerVisible, setPlayerVisible] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<AudioContextType['currentAudio']>(null);
+  const [currentAudio, setCurrentAudio] =
+    useState<AudioContextType["currentAudio"]>(null);
   const [currentChapter, setCurrentChapter] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playlist, setPlaylist] = useState<AudioContextType['playlist']>([]);
+  const [playlist, setPlaylist] = useState<AudioContextType["playlist"]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Check if current page is the main player page
   const pathname =
     currentPathname ??
-    (typeof window !== 'undefined' ? window.location.pathname : '');
-  const isMainPlayerPage = pathname.startsWith('/player/');
+    (typeof window !== "undefined" ? window.location.pathname : "");
+  const isMainPlayerPage = pathname.startsWith("/player/");
 
   // Update current time function
   const updateCurrentTime = (time: number) => {
     if (currentAudio) {
       setCurrentAudio({
         ...currentAudio,
-        currentTime: time
+        currentTime: time,
       });
     }
   };
@@ -103,7 +113,8 @@ export function AudioProvider({
   // Play previous track in playlist
   const playPrevious = () => {
     if (playlist.length === 0) return;
-    const prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    const prevIndex =
+      (currentTrackIndex - 1 + playlist.length) % playlist.length;
     const prevTrack = playlist[prevIndex];
     if (prevTrack) {
       setCurrentTrackIndex(prevIndex);
@@ -111,24 +122,39 @@ export function AudioProvider({
     }
   };
 
-  // Play audio function
-  const playAudio = (audio: {
-    id: string;
-    title: string;
-    author: string;
-    authorId?: string;
-    authorUsername?: string;
-    thumbnail: string;
-    type: 'audiobook' | 'podcast';
-  }) => {
-    if (typeof window === 'undefined') return;
-    window.location.href = `/player/${audio.type}-${audio.id}`;
+  // Play audio function - starts immediately in bottom player, then navigates
+  const playAudio = (
+    audio: {
+      id: string;
+      title: string;
+      author: string;
+      authorId?: string;
+      authorUsername?: string;
+      thumbnail: string;
+      type: "audiobook" | "podcast";
+    },
+    immediate: boolean = false
+  ) => {
+    if (typeof window === "undefined") return;
+
+    if (immediate) {
+      // Start playing immediately in bottom player
+      setPlayerVisible(true);
+      setIsPlaying(true);
+      // Navigate after a short delay to allow audio to start
+      setTimeout(() => {
+        window.location.href = `/player/${audio.type}-${audio.id}`;
+      }, 100);
+    } else {
+      // Normal navigation
+      window.location.href = `/player/${audio.type}-${audio.id}`;
+    }
   };
 
   // Restore state from localStorage on mount
   useEffect(() => {
     try {
-      const savedState = localStorage.getItem('audioState');
+      const savedState = localStorage.getItem("audioState");
       if (savedState) {
         const state = JSON.parse(savedState);
         setCurrentAudio(state.currentAudio);
@@ -139,8 +165,8 @@ export function AudioProvider({
         setCurrentTrackIndex(state.currentTrackIndex || 0);
       }
     } catch (error) {
-      console.error('Error restoring audio state:', error);
-      localStorage.removeItem('audioState');
+      console.error("Error restoring audio state:", error);
+      localStorage.removeItem("audioState");
     }
   }, []);
 
@@ -148,41 +174,53 @@ export function AudioProvider({
   useEffect(() => {
     if (currentAudio || isPlayerVisible) {
       try {
-        localStorage.setItem('audioState', JSON.stringify({
-          currentAudio,
-          isPlayerVisible,
-          currentChapter,
-          isPlaying,
-          playlist,
-          currentTrackIndex
-        }));
+        localStorage.setItem(
+          "audioState",
+          JSON.stringify({
+            currentAudio,
+            isPlayerVisible,
+            currentChapter,
+            isPlaying,
+            playlist,
+            currentTrackIndex,
+          })
+        );
       } catch (error) {
-        console.error('Error saving audio state:', error);
+        console.error("Error saving audio state:", error);
       }
     }
-  }, [currentAudio, isPlayerVisible, currentChapter, isPlaying, playlist, currentTrackIndex]);
+  }, [
+    currentAudio,
+    isPlayerVisible,
+    currentChapter,
+    isPlaying,
+    playlist,
+    currentTrackIndex,
+  ]);
 
   return (
-    <AudioContext.Provider value={{
-      isPlayerVisible,
-      setPlayerVisible,
-      currentAudio,
-      setCurrentAudio,
-      isMainPlayerPage,
-      currentChapter,
-      setCurrentChapter,
-      updateCurrentTime,
-      audioRef,
-      isPlaying,
-      setIsPlaying,
-      playlist,
-      setPlaylist,
-      currentTrackIndex,
-      setCurrentTrackIndex,
-      playNext,
-      playPrevious,
-      playAudio
-    }}>
+    <AudioContext.Provider
+      value={{
+        isPlayerVisible,
+        setPlayerVisible,
+        currentAudio,
+        setCurrentAudio,
+        isMainPlayerPage,
+        currentChapter,
+        setCurrentChapter,
+        updateCurrentTime,
+        audioRef,
+        isPlaying,
+        setIsPlaying,
+        playlist,
+        setPlaylist,
+        currentTrackIndex,
+        setCurrentTrackIndex,
+        playNext,
+        playPrevious,
+        playAudio,
+      }}
+    >
       {children}
     </AudioContext.Provider>
   );
@@ -191,7 +229,7 @@ export function AudioProvider({
 export function useAudio() {
   const context = useContext(AudioContext);
   if (!context) {
-    throw new Error('useAudio must be used within an AudioProvider');
+    throw new Error("useAudio must be used within an AudioProvider");
   }
   return context;
 }

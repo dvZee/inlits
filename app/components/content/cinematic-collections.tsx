@@ -206,8 +206,8 @@ export function CinematicCollections() {
         setPlaylist(playlistItems);
         setCurrentTrackIndex(0);
 
-        // Play the first item
-        playAudio(playlistItems[0]);
+        // Play the first item immediately (starts bottom player, then navigates)
+        playAudio(playlistItems[0], true);
       }
     } catch (error) {
       console.error("Error loading collection playlist:", error);

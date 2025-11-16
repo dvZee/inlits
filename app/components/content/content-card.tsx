@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { ContentTypeIcon } from "./content-type-icon";
 import { ImageLoader } from "../image-loader";
 import { useAuth } from "@/lib/auth";
+import { useAudio } from "@/lib/audio-context";
 import { getTextLanguageClass } from "@/lib/utils";
 import type { ContentItem } from "@/lib/types";
 
@@ -34,6 +35,7 @@ export function ContentCard({
 }: ContentCardProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setPlaylist } = useAudio();
   const [isBookmarked, setIsBookmarked] = React.useState(
     item.bookmarked || false
   );
@@ -103,6 +105,11 @@ export function ContentCard({
     }
 
     setIsNavigating(true);
+
+    // Clear playlist when playing a single item (not from collection)
+    if (item.type === "audiobook" || item.type === "podcast") {
+      setPlaylist([]);
+    }
 
     let targetUrl = "";
     switch (item.type) {
