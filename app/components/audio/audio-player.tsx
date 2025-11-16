@@ -199,12 +199,17 @@ export function AudioPlayer({
         }
 
         if (settings.autoplay || settings.repeat === "all") {
+          // Keep playing state true for autoplay
           setCurrentChapter(nextChapterIndex);
+          // Ensure isPlaying stays true so the next chapter autoplays
+          setContextIsPlaying(true);
         } else {
           setContextIsPlaying(false);
         }
       } else if (settings.repeat === "all" && currentAudio?.chapters) {
         setCurrentChapter(0);
+        // Keep playing for repeat all
+        setContextIsPlaying(true);
       } else {
         setContextIsPlaying(false);
       }

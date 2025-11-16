@@ -1,8 +1,15 @@
-import React, { useEffect } from 'react';
-import { useAudio } from '@/lib/audio-context';
+import React, { useEffect } from "react";
+import { useAudio } from "@/lib/audio-context";
 
 export function GlobalAudioPlayer() {
-  const { audioRef, currentAudio, currentChapter, isPlaying, setIsPlaying, updateCurrentTime } = useAudio();
+  const {
+    audioRef,
+    currentAudio,
+    currentChapter,
+    isPlaying,
+    setIsPlaying,
+    updateCurrentTime,
+  } = useAudio();
 
   useEffect(() => {
     if (!currentAudio || !audioRef.current) return;
@@ -21,13 +28,17 @@ export function GlobalAudioPlayer() {
       }
     };
 
-    const currentSrc = audio.src ? normalizeUrl(audio.src) : '';
+    const currentSrc = audio.src ? normalizeUrl(audio.src) : "";
     const newSrc = normalizeUrl(source);
     const isSameSource = currentSrc === newSrc;
 
     if (isSameSource) {
       // Restore playback position if needed
-      if (currentAudio.currentTime && currentAudio.currentTime > 0 && Math.abs(audio.currentTime - currentAudio.currentTime) > 2) {
+      if (
+        currentAudio.currentTime &&
+        currentAudio.currentTime > 0 &&
+        Math.abs(audio.currentTime - currentAudio.currentTime) > 2
+      ) {
         audio.currentTime = currentAudio.currentTime;
       }
 
@@ -49,17 +60,25 @@ export function GlobalAudioPlayer() {
         audio.currentTime = currentAudio.currentTime;
       }
 
+      // Always try to play when chapter changes if isPlaying is true
       if (isPlaying) {
-        audio.play().catch(console.error);
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error("Autoplay failed:", error);
+            // If autoplay fails, set isPlaying to false
+            setIsPlaying(false);
+          });
+        }
       }
     };
 
-    audio.addEventListener('canplay', handleCanPlay, { once: true });
+    audio.addEventListener("canplay", handleCanPlay, { once: true });
 
     return () => {
-      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener("canplay", handleCanPlay);
     };
-  }, [currentAudio, currentChapter, audioRef, isPlaying]);
+  }, [currentAudio, currentChapter, audioRef, isPlaying, setIsPlaying]);
 
   // Sync isPlaying state with actual audio state
   useEffect(() => {
@@ -69,12 +88,12 @@ export function GlobalAudioPlayer() {
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
 
     return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
     };
   }, [audioRef, setIsPlaying]);
 
@@ -87,20 +106,22 @@ export function GlobalAudioPlayer() {
       updateCurrentTime(audio.currentTime);
 
       try {
-        const savedState = JSON.parse(localStorage.getItem('audioState') || '{}');
+        const savedState = JSON.parse(
+          localStorage.getItem("audioState") || "{}"
+        );
         if (savedState.currentAudio) {
           savedState.currentAudio.currentTime = audio.currentTime;
-          localStorage.setItem('audioState', JSON.stringify(savedState));
+          localStorage.setItem("audioState", JSON.stringify(savedState));
         }
       } catch (e) {
-        console.error('Error saving playback position:', e);
+        console.error("Error saving playback position:", e);
       }
     };
 
-    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
 
     return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
   }, [audioRef, updateCurrentTime]);
 
