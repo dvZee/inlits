@@ -2,16 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { ContentLayout } from "@/components/content/content-layout";
-import { HeroBanner } from "@/components/content/hero-banner";
 import { ContinueContent } from "@/components/content/continue-content";
 import { ContentCarousel } from "@/components/content/content-carousel";
 import { ContentCard } from "@/components/content/content-card";
 import { SmartRecommendations } from "@/components/content/smart-recommendations";
 import { CinematicCollections } from "@/components/content/cinematic-collections";
-import {
-  HeroBannerSkeleton,
-  ContentRowSkeleton,
-} from "@/components/content/skeleton-loader";
+import { ContentRowSkeleton } from "@/components/content/skeleton-loader";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { AddToShelfBanner } from "@/components/library/add-to-shelf-banner";
@@ -760,7 +756,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
   if (loading && !initialLoadComplete) {
     return (
       <div className="space-y-8">
-        <HeroBannerSkeleton />
+        <ContentRowSkeleton />
         <ContentRowSkeleton />
         <ContentRowSkeleton />
         <ContentRowSkeleton />
@@ -940,8 +936,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
         />
       )}
       <div className="space-y-10 animate-fadeInUp">
-        <HeroBanner items={allContentItems} />
-
         <ContinueContent />
 
         <ContentCarousel

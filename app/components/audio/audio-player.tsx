@@ -1154,142 +1154,76 @@ export function AudioPlayer({
                     >
                       <List className="w-4 h-4" />
                     </button>
-                    {showPlaylist &&
-                      (currentAudio?.chapters || playlist.length > 1) && (
-                        <div className="absolute bottom-full right-0 mb-2 w-80 bg-popover border rounded-lg shadow-xl max-h-96 overflow-hidden flex flex-col">
-                          <div className="p-3 border-b">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-medium text-sm">
-                                {playlist.length > 1 ? "Queue" : "Chapters"}
-                              </h3>
-                              <button
-                                onClick={() => setShowPlaylist(false)}
-                                className="p-1 hover:bg-accent rounded transition-colors"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
+                    {showPlaylist && currentAudio?.chapters && (
+                      <div className="absolute bottom-full right-0 mb-2 w-80 bg-popover border rounded-lg shadow-xl max-h-96 overflow-hidden flex flex-col">
+                        <div className="p-3 border-b">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-medium text-sm">Chapters</h3>
+                            <button
+                              onClick={() => setShowPlaylist(false)}
+                              className="p-1 hover:bg-accent rounded transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Chapters only - no queue in bottom player */}
+                        {currentAudio.chapters.length > 1 && (
+                          <div className="overflow-y-auto flex-1">
+                            <div className="p-2 space-y-1">
+                              <div className="text-xs font-medium text-muted-foreground px-2 py-1">
+                                Chapters ({currentAudio.chapters.length})
+                              </div>
+                              {currentAudio.chapters.map((chapter, index) => {
+                                const isLocked = !user && index > 0;
+                                const isCurrent = currentChapter === index;
+
+                                return (
+                                  <button
+                                    key={chapter.id}
+                                    onClick={() => {
+                                      if (!isLocked) {
+                                        setCurrentChapter(index);
+                                        setShowPlaylist(false);
+                                      }
+                                    }}
+                                    className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
+                                      isLocked
+                                        ? "bg-muted/30 cursor-not-allowed opacity-60"
+                                        : isCurrent
+                                        ? "bg-primary text-primary-foreground"
+                                        : "hover:bg-accent"
+                                    }`}
+                                    disabled={isLoading || isLocked}
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      <div className="flex-shrink-0">
+                                        {isLocked ? (
+                                          <Lock className="w-3 h-3" />
+                                        ) : isLoading && isCurrent ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : isCurrent && contextIsPlaying ? (
+                                          <Pause className="w-3 h-3" />
+                                        ) : (
+                                          <Play className="w-3 h-3" />
+                                        )}
+                                      </div>
+                                      <div className="font-medium line-clamp-1 text-left">
+                                        {chapter.title}
+                                      </div>
+                                    </div>
+                                    <div className="text-xs opacity-80 ml-2 flex-shrink-0">
+                                      {chapter.duration}
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
-
-                          {/* Playlist Tracks */}
-                          {playlist.length > 1 && (
-                            <div className="overflow-y-auto flex-1">
-                              <div className="p-2 space-y-1">
-                                <div className="text-xs font-medium text-muted-foreground px-2 py-1">
-                                  Tracks ({playlist.length})
-                                </div>
-                                {playlist.map((track, index) => {
-                                  const isCurrent = currentTrackIndex === index;
-                                  return (
-                                    <button
-                                      key={`${track.type}-${track.id}`}
-                                      onClick={() => {
-                                        setCurrentTrackIndex(index);
-                                        playAudio(track);
-                                        setShowPlaylist(false);
-                                      }}
-                                      className={`w-full flex items-center gap-2 p-2 rounded text-sm transition-all ${
-                                        isCurrent
-                                          ? "bg-primary text-primary-foreground"
-                                          : "hover:bg-accent"
-                                      }`}
-                                    >
-                                      <div className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-muted">
-                                        <img
-                                          src={track.thumbnail}
-                                          alt={track.title}
-                                          className="w-full h-full object-cover"
-                                          onError={(e) => {
-                                            e.currentTarget.src =
-                                              "https://placehold.co/40x40?text=Track";
-                                          }}
-                                        />
-                                      </div>
-                                      <div className="flex-1 min-w-0 text-left">
-                                        <div className="font-medium line-clamp-1">
-                                          {track.title}
-                                        </div>
-                                        <div className="text-xs opacity-70 line-clamp-1">
-                                          {track.author}
-                                        </div>
-                                      </div>
-                                      {isCurrent && (
-                                        <div className="flex-shrink-0">
-                                          {contextIsPlaying ? (
-                                            <Pause className="w-4 h-4" />
-                                          ) : (
-                                            <Play className="w-4 h-4" />
-                                          )}
-                                        </div>
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Chapters (if current track has chapters) */}
-                          {currentAudio?.chapters &&
-                            currentAudio.chapters.length > 1 && (
-                              <div className="overflow-y-auto flex-1 border-t">
-                                <div className="p-2 space-y-1">
-                                  <div className="text-xs font-medium text-muted-foreground px-2 py-1">
-                                    Chapters ({currentAudio.chapters.length})
-                                  </div>
-                                  {currentAudio.chapters.map(
-                                    (chapter, index) => {
-                                      const isLocked = !user && index > 0;
-                                      const isCurrent =
-                                        currentChapter === index;
-
-                                      return (
-                                        <button
-                                          key={chapter.id}
-                                          onClick={() => {
-                                            if (!isLocked) {
-                                              setCurrentChapter(index);
-                                              setShowPlaylist(false);
-                                            }
-                                          }}
-                                          className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                                            isLocked
-                                              ? "bg-muted/30 cursor-not-allowed opacity-60"
-                                              : isCurrent
-                                              ? "bg-primary text-primary-foreground"
-                                              : "hover:bg-accent"
-                                          }`}
-                                          disabled={isLoading || isLocked}
-                                        >
-                                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                                            <div className="flex-shrink-0">
-                                              {isLocked ? (
-                                                <Lock className="w-3 h-3" />
-                                              ) : isLoading && isCurrent ? (
-                                                <Loader2 className="w-3 h-3 animate-spin" />
-                                              ) : isCurrent &&
-                                                contextIsPlaying ? (
-                                                <Pause className="w-3 h-3" />
-                                              ) : (
-                                                <Play className="w-3 h-3" />
-                                              )}
-                                            </div>
-                                            <div className="font-medium line-clamp-1 text-left">
-                                              {chapter.title}
-                                            </div>
-                                          </div>
-                                          <div className="text-xs opacity-80 ml-2 flex-shrink-0">
-                                            {chapter.duration}
-                                          </div>
-                                        </button>
-                                      );
-                                    }
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                        </div>
-                      )}
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 {!isMainPlayerPage && (
@@ -1442,138 +1376,76 @@ export function AudioPlayer({
         </div>
       )}
 
-      {isMobileView &&
-        showPlaylist &&
-        (currentAudio?.chapters || playlist.length > 1) && (
-          <div className="absolute bottom-full left-0 right-0 mb-2 mx-3 bg-popover border rounded-lg shadow-xl max-h-96 overflow-hidden flex flex-col">
-            <div className="p-3 border-b">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-sm">
-                  {playlist.length > 1 ? "Queue" : "Chapters"}
-                </h3>
-                <button
-                  onClick={() => setShowPlaylist(false)}
-                  className="p-1 hover:bg-accent rounded transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+      {isMobileView && showPlaylist && currentAudio?.chapters && (
+        <div className="absolute bottom-full left-0 right-0 mb-2 mx-3 bg-popover border rounded-lg shadow-xl max-h-96 overflow-hidden flex flex-col">
+          <div className="p-3 border-b">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium text-sm">Chapters</h3>
+              <button
+                onClick={() => setShowPlaylist(false)}
+                className="p-1 hover:bg-accent rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Chapters only - no queue in bottom player */}
+          {currentAudio.chapters.length > 1 && (
+            <div className="overflow-y-auto flex-1">
+              <div className="p-2 space-y-1">
+                <div className="text-xs font-medium text-muted-foreground px-2 py-1">
+                  Chapters ({currentAudio.chapters.length})
+                </div>
+                {currentAudio.chapters.map((chapter, index) => {
+                  const isLocked = !user && index > 0;
+                  const isCurrent = currentChapter === index;
+
+                  return (
+                    <button
+                      key={chapter.id}
+                      onClick={() => {
+                        if (!isLocked) {
+                          setCurrentChapter(index);
+                          setShowPlaylist(false);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
+                        isLocked
+                          ? "bg-muted/30 cursor-not-allowed opacity-60"
+                          : isCurrent
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent"
+                      }`}
+                      disabled={isLoading || isLocked}
+                    >
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="flex-shrink-0">
+                          {isLocked ? (
+                            <Lock className="w-3 h-3" />
+                          ) : isLoading && isCurrent ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : isCurrent && contextIsPlaying ? (
+                            <Pause className="w-3 h-3" />
+                          ) : (
+                            <Play className="w-3 h-3" />
+                          )}
+                        </div>
+                        <div className="font-medium line-clamp-1 text-left">
+                          {chapter.title}
+                        </div>
+                      </div>
+                      <div className="text-xs opacity-80 ml-2 flex-shrink-0">
+                        {chapter.duration}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-
-            {/* Playlist Tracks */}
-            {playlist.length > 1 && (
-              <div className="overflow-y-auto flex-1">
-                <div className="p-2 space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground px-2 py-1">
-                    Tracks ({playlist.length})
-                  </div>
-                  {playlist.map((track, index) => {
-                    const isCurrent = currentTrackIndex === index;
-                    return (
-                      <button
-                        key={`${track.type}-${track.id}`}
-                        onClick={() => {
-                          setCurrentTrackIndex(index);
-                          playAudio(track);
-                          setShowPlaylist(false);
-                        }}
-                        className={`w-full flex items-center gap-2 p-2 rounded text-sm transition-all ${
-                          isCurrent
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent"
-                        }`}
-                      >
-                        <div className="flex-shrink-0 w-10 h-10 rounded overflow-hidden bg-muted">
-                          <img
-                            src={track.thumbnail}
-                            alt={track.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                "https://placehold.co/40x40?text=Track";
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <div className="font-medium line-clamp-1">
-                            {track.title}
-                          </div>
-                          <div className="text-xs opacity-70 line-clamp-1">
-                            {track.author}
-                          </div>
-                        </div>
-                        {isCurrent && (
-                          <div className="flex-shrink-0">
-                            {contextIsPlaying ? (
-                              <Pause className="w-4 h-4" />
-                            ) : (
-                              <Play className="w-4 h-4" />
-                            )}
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Chapters */}
-            {currentAudio?.chapters && currentAudio.chapters.length > 1 && (
-              <div className="overflow-y-auto flex-1 border-t">
-                <div className="p-2 space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground px-2 py-1">
-                    Chapters ({currentAudio.chapters.length})
-                  </div>
-                  {currentAudio.chapters.map((chapter, index) => {
-                    const isLocked = !user && index > 0;
-                    const isCurrent = currentChapter === index;
-
-                    return (
-                      <button
-                        key={chapter.id}
-                        onClick={() => {
-                          if (!isLocked) {
-                            setCurrentChapter(index);
-                            setShowPlaylist(false);
-                          }
-                        }}
-                        className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                          isLocked
-                            ? "bg-muted/30 cursor-not-allowed opacity-60"
-                            : isCurrent
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent"
-                        }`}
-                        disabled={isLoading || isLocked}
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <div className="flex-shrink-0">
-                            {isLocked ? (
-                              <Lock className="w-3 h-3" />
-                            ) : isLoading && isCurrent ? (
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : isCurrent && contextIsPlaying ? (
-                              <Pause className="w-3 h-3" />
-                            ) : (
-                              <Play className="w-3 h-3" />
-                            )}
-                          </div>
-                          <div className="font-medium line-clamp-1 text-left">
-                            {chapter.title}
-                          </div>
-                        </div>
-                        <div className="text-xs opacity-80 ml-2 flex-shrink-0">
-                          {chapter.duration}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="mt-2 px-3 py-1.5 bg-destructive/10 text-destructive rounded text-xs flex items-center gap-2">
