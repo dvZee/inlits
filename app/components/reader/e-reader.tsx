@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   BookOpen,
   Settings,
@@ -20,18 +20,19 @@ import {
   Menu,
   ArrowLeft,
   ExternalLink,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/components/theme-provider';
-import { PDFViewer } from './pdf-viewer';
-import { detectUrduText, getTextLanguageClass } from '@/lib/utils';
+  AlertCircle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/components/theme-provider";
+import { PDFViewer } from "./pdf-viewer-new";
+import { detectUrduText, getTextLanguageClass } from "@/lib/utils";
 
 interface ReaderSettings {
   fontSize: number;
   lineHeight: number;
-  theme: 'light' | 'sepia' | 'dark';
+  theme: "light" | "sepia" | "dark";
   fontFamily: string;
-  textAlign: 'left' | 'justify';
+  textAlign: "left" | "justify";
 }
 
 interface Highlight {
@@ -74,9 +75,9 @@ export function EReader({ book }: { book: BookProps }) {
   const [settings, setSettings] = useState<ReaderSettings>({
     fontSize: 18,
     lineHeight: 1.6,
-    theme: systemTheme === 'dark' ? 'dark' : 'light',
-    fontFamily: 'Georgia',
-    textAlign: 'left',
+    theme: systemTheme === "dark" ? "dark" : "light",
+    fontFamily: "Georgia",
+    textAlign: "left",
   });
 
   const [showSettings, setShowSettings] = useState(false);
@@ -88,7 +89,7 @@ export function EReader({ book }: { book: BookProps }) {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [selectedText, setSelectedText] = useState('');
+  const [selectedText, setSelectedText] = useState("");
   const [showHighlightMenu, setShowHighlightMenu] = useState(false);
   const [highlightMenuPosition, setHighlightMenuPosition] = useState({
     x: 0,
@@ -103,32 +104,38 @@ export function EReader({ book }: { book: BookProps }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Check if the book has a file
-  const isPdf = book.file_url && book.file_type === 'application/pdf';
+  const isPdf = book.file_url && book.file_type === "application/pdf";
   const isHtml =
     book.file_url &&
-    (book.file_type === 'text/html' ||
-      book.file_url.endsWith('.html') ||
-      book.file_url.endsWith('.htm'));
+    (book.file_type === "text/html" ||
+      book.file_url.endsWith(".html") ||
+      book.file_url.endsWith(".htm"));
 
   // Get chapters from book or create a single chapter from content
   const chapters =
     book.chapters && book.chapters.length > 0
       ? book.chapters
-      : book.content
+      : book.content && book.content.trim() !== ""
       ? [
           {
-            id: 'main',
-            title: 'Full Content',
+            id: "main",
+            title: "Full Content",
             content: book.content,
           },
         ]
       : [];
 
+  // Check if we have any readable content
+  const hasReadableContent =
+    chapters.length > 0 &&
+    chapters.some((ch) => ch.content && ch.content.trim() !== "");
+  const hasFile = book.file_url && book.file_url.trim() !== "";
+
   // Calculate total pages based on content length
   useEffect(() => {
     if (chapters.length > 0 && !isPdf && !isHtml) {
       // Rough estimate: 2000 characters per page
-      const currentChapterContent = chapters[currentChapter]?.content || '';
+      const currentChapterContent = chapters[currentChapter]?.content || "";
       const estimatedPages = Math.max(
         1,
         Math.ceil(currentChapterContent.length / 2000)
@@ -149,7 +156,7 @@ export function EReader({ book }: { book: BookProps }) {
           const html = await response.text();
           setHtmlContent(html);
         } catch (error) {
-          console.error('Error loading HTML content:', error);
+          console.error("Error loading HTML content:", error);
         }
       };
 
@@ -169,13 +176,13 @@ export function EReader({ book }: { book: BookProps }) {
         const iframeDoc = iframeRef.current.contentDocument;
 
         // Remove existing style if present
-        const existingStyle = iframeDoc.getElementById('reader-styles');
+        const existingStyle = iframeDoc.getElementById("reader-styles");
         if (existingStyle) {
           existingStyle.remove();
         }
 
-        const style = iframeDoc.createElement('style');
-        style.id = 'reader-styles';
+        const style = iframeDoc.createElement("style");
+        style.id = "reader-styles";
 
         // Create CSS based on current settings
         style.textContent = `
@@ -185,18 +192,18 @@ export function EReader({ book }: { book: BookProps }) {
             line-height: ${settings.lineHeight} !important;
             text-align: ${settings.textAlign} !important;
             color: ${
-              settings.theme === 'dark'
-                ? '#e1e1e1'
-                : settings.theme === 'sepia'
-                ? '#5f4b32'
-                : '#333'
+              settings.theme === "dark"
+                ? "#e1e1e1"
+                : settings.theme === "sepia"
+                ? "#5f4b32"
+                : "#333"
             } !important;
             background-color: ${
-              settings.theme === 'dark'
-                ? '#171C26'
-                : settings.theme === 'sepia'
-                ? '#f4ecd8'
-                : '#fff'
+              settings.theme === "dark"
+                ? "#171C26"
+                : settings.theme === "sepia"
+                ? "#f4ecd8"
+                : "#fff"
             } !important;
             padding: 2rem !important;
             margin: 0 !important;
@@ -204,11 +211,11 @@ export function EReader({ book }: { book: BookProps }) {
           }
           a {
             color: ${
-              settings.theme === 'dark'
-                ? '#90caf9'
-                : settings.theme === 'sepia'
-                ? '#5f4b32'
-                : '#1f4ead'
+              settings.theme === "dark"
+                ? "#90caf9"
+                : settings.theme === "sepia"
+                ? "#5f4b32"
+                : "#1f4ead"
             } !important;
           }
           img {
@@ -223,7 +230,7 @@ export function EReader({ book }: { book: BookProps }) {
         // Add the style to the iframe document
         iframeDoc.head.appendChild(style);
       } catch (error) {
-        console.error('Error applying styles to iframe:', error);
+        console.error("Error applying styles to iframe:", error);
       }
     }
   }, [settings, isHtml, iframeLoaded]);
@@ -251,18 +258,22 @@ export function EReader({ book }: { book: BookProps }) {
       }
     };
 
-    document.addEventListener('mouseup', handleSelection);
-    return () => document.removeEventListener('mouseup', handleSelection);
+    document.addEventListener("mouseup", handleSelection);
+    return () => document.removeEventListener("mouseup", handleSelection);
   }, []);
 
   // Apply theme changes
   useEffect(() => {
     if (contentRef.current) {
-      const isUrduContent = detectUrduText(chapters[currentChapter]?.content || '');
-      const fontFamily = isUrduContent ? "'Noto Nastaliq Urdu', serif" : settings.fontFamily;
-      const textDirection = isUrduContent ? 'rtl' : 'ltr';
-      const textAlign = isUrduContent ? 'right' : settings.textAlign;
-      
+      const isUrduContent = detectUrduText(
+        chapters[currentChapter]?.content || ""
+      );
+      const fontFamily = isUrduContent
+        ? "'Noto Nastaliq Urdu', serif"
+        : settings.fontFamily;
+      const textDirection = isUrduContent ? "rtl" : "ltr";
+      const textAlign = isUrduContent ? "right" : settings.textAlign;
+
       contentRef.current.style.fontSize = `${settings.fontSize}px`;
       contentRef.current.style.lineHeight = settings.lineHeight.toString();
       contentRef.current.style.fontFamily = fontFamily;
@@ -273,10 +284,10 @@ export function EReader({ book }: { book: BookProps }) {
 
   // Sync reader theme with system theme
   useEffect(() => {
-    if (systemTheme === 'dark' && settings.theme === 'light') {
-      setSettings((prev) => ({ ...prev, theme: 'dark' }));
-    } else if (systemTheme === 'light' && settings.theme === 'dark') {
-      setSettings((prev) => ({ ...prev, theme: 'light' }));
+    if (systemTheme === "dark" && settings.theme === "light") {
+      setSettings((prev) => ({ ...prev, theme: "dark" }));
+    } else if (systemTheme === "light" && settings.theme === "dark") {
+      setSettings((prev) => ({ ...prev, theme: "light" }));
     }
   }, [systemTheme]);
 
@@ -299,7 +310,7 @@ export function EReader({ book }: { book: BookProps }) {
       id: Date.now().toString(),
       position: currentPage,
       text: `Page ${currentPage} in ${
-        chapters[currentChapter]?.title || 'Chapter ' + (currentChapter + 1)
+        chapters[currentChapter]?.title || "Chapter " + (currentChapter + 1)
       }`,
       createdAt: new Date().toISOString(),
     };
@@ -350,30 +361,30 @@ export function EReader({ book }: { book: BookProps }) {
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        alert("Link copied to clipboard!");
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error("Error sharing:", error);
     }
   };
 
   const handleDownload = () => {
     // If there's a file URL, open it in a new tab
     if (book.file_url) {
-      window.open(book.file_url, '_blank');
+      window.open(book.file_url, "_blank");
     } else {
-      alert('No downloadable file available for this book.');
+      alert("No downloadable file available for this book.");
     }
   };
 
   const getThemeClass = () => {
     switch (settings.theme) {
-      case 'dark':
-        return 'bg-gray-900 text-gray-100';
-      case 'sepia':
-        return 'bg-[#f4ecd8] text-gray-900';
+      case "dark":
+        return "bg-gray-900 text-gray-100";
+      case "sepia":
+        return "bg-[#f4ecd8] text-gray-900";
       default:
-        return 'bg-white text-gray-900';
+        return "bg-white text-gray-900";
     }
   };
 
@@ -383,9 +394,11 @@ export function EReader({ book }: { book: BookProps }) {
 
     // Detect if content is in Urdu
     const isUrduContent = detectUrduText(htmlContent);
-    const fontFamily = isUrduContent ? "'Noto Nastaliq Urdu', serif" : `${settings.fontFamily}, serif`;
-    const textDirection = isUrduContent ? 'rtl' : 'ltr';
-    const textAlign = isUrduContent ? 'right' : settings.textAlign;
+    const fontFamily = isUrduContent
+      ? "'Noto Nastaliq Urdu', serif"
+      : `${settings.fontFamily}, serif`;
+    const textDirection = isUrduContent ? "rtl" : "ltr";
+    const textAlign = isUrduContent ? "right" : settings.textAlign;
 
     // Add base styles to the HTML content
     const baseStyles = `
@@ -397,18 +410,18 @@ export function EReader({ book }: { book: BookProps }) {
           text-align: ${textAlign};
           direction: ${textDirection};
           color: ${
-            settings.theme === 'dark'
-              ? '#e1e1e1'
-              : settings.theme === 'sepia'
-              ? '#5f4b32'
-              : '#333'
+            settings.theme === "dark"
+              ? "#e1e1e1"
+              : settings.theme === "sepia"
+              ? "#5f4b32"
+              : "#333"
           };
           background-color: ${
-            settings.theme === 'dark'
-              ? '#171C26'
-              : settings.theme === 'sepia'
-              ? '#f4ecd8'
-              : '#fff'
+            settings.theme === "dark"
+              ? "#171C26"
+              : settings.theme === "sepia"
+              ? "#f4ecd8"
+              : "#fff"
           };
           padding: 2rem;
           margin: 0;
@@ -424,16 +437,20 @@ export function EReader({ book }: { book: BookProps }) {
           direction: ${textDirection};
         }
         blockquote {
-          ${isUrduContent ? 'border-right: 4px solid #1f4ead; border-left: none; padding-right: 1.5em; padding-left: 0;' : ''}
+          ${
+            isUrduContent
+              ? "border-right: 4px solid #1f4ead; border-left: none; padding-right: 1.5em; padding-left: 0;"
+              : ""
+          }
           text-align: ${textAlign};
           direction: ${textDirection};
         }
         a { color: ${
-          settings.theme === 'dark'
-            ? '#90caf9'
-            : settings.theme === 'sepia'
-            ? '#5f4b32'
-            : '#1f4ead'
+          settings.theme === "dark"
+            ? "#90caf9"
+            : settings.theme === "sepia"
+            ? "#5f4b32"
+            : "#1f4ead"
         }; }
         img { max-width: 100%; height: auto; }
         * { max-width: 100%; }
@@ -442,11 +459,11 @@ export function EReader({ book }: { book: BookProps }) {
 
     // Insert base styles into the HTML content
     let processedHtml = htmlContent;
-    if (processedHtml.includes('<head>')) {
-      processedHtml = processedHtml.replace('<head>', `<head>${baseStyles}`);
-    } else if (processedHtml.includes('<html>')) {
+    if (processedHtml.includes("<head>")) {
+      processedHtml = processedHtml.replace("<head>", `<head>${baseStyles}`);
+    } else if (processedHtml.includes("<html>")) {
       processedHtml = processedHtml.replace(
-        '<html>',
+        "<html>",
         `<html><head>${baseStyles}</head>`
       );
     } else {
@@ -463,11 +480,11 @@ export function EReader({ book }: { book: BookProps }) {
       {/* Top Bar */}
       <div
         className={`fixed top-0 left-0 right-0 h-14 border-b ${
-          settings.theme === 'dark'
-            ? 'bg-gray-900/95 backdrop-blur border-gray-800'
-            : settings.theme === 'sepia'
-            ? 'bg-[#f4ecd8]/95 backdrop-blur border-amber-200'
-            : 'bg-white/95 backdrop-blur border-gray-200'
+          settings.theme === "dark"
+            ? "bg-gray-900/95 backdrop-blur border-gray-800"
+            : settings.theme === "sepia"
+            ? "bg-[#f4ecd8]/95 backdrop-blur border-amber-200"
+            : "bg-white/95 backdrop-blur border-gray-200"
         } z-50 flex items-center justify-between px-4`}
       >
         <div className="flex items-center gap-4">
@@ -493,7 +510,7 @@ export function EReader({ book }: { book: BookProps }) {
           <button
             onClick={() => setShowSettings(!showSettings)}
             className={`p-2 hover:bg-accent rounded-lg transition-colors ${
-              showSettings ? 'bg-accent' : ''
+              showSettings ? "bg-accent" : ""
             }`}
             aria-label="Settings"
           >
@@ -509,7 +526,7 @@ export function EReader({ book }: { book: BookProps }) {
           <button
             onClick={() => setShowChapters(!showChapters)}
             className={`p-2 hover:bg-accent rounded-lg transition-colors ${
-              showChapters ? 'bg-accent' : ''
+              showChapters ? "bg-accent" : ""
             }`}
             aria-label="Chapters"
           >
@@ -522,11 +539,11 @@ export function EReader({ book }: { book: BookProps }) {
       {showMobileMenu && (
         <div
           className={`fixed inset-0 z-50 ${
-            settings.theme === 'dark'
-              ? 'bg-gray-900'
-              : settings.theme === 'sepia'
-              ? 'bg-[#f4ecd8]'
-              : 'bg-white'
+            settings.theme === "dark"
+              ? "bg-gray-900"
+              : settings.theme === "sepia"
+              ? "bg-[#f4ecd8]"
+              : "bg-white"
           }`}
         >
           <div className="flex flex-col h-full">
@@ -553,8 +570,8 @@ export function EReader({ book }: { book: BookProps }) {
                         }}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                           currentChapter === index
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-accent'
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
                         }`}
                       >
                         {chapter.title || `Chapter ${index + 1}`}
@@ -625,11 +642,11 @@ export function EReader({ book }: { book: BookProps }) {
       {showSettings && (
         <div
           className={`fixed top-14 right-0 w-80 h-[calc(100vh-3.5rem)] border-l ${
-            settings.theme === 'dark'
-              ? 'bg-gray-900/95 backdrop-blur border-gray-800'
-              : settings.theme === 'sepia'
-              ? 'bg-[#f4ecd8]/95 backdrop-blur border-amber-200'
-              : 'bg-white/95 backdrop-blur border-gray-200'
+            settings.theme === "dark"
+              ? "bg-gray-900/95 backdrop-blur border-gray-800"
+              : settings.theme === "sepia"
+              ? "bg-[#f4ecd8]/95 backdrop-blur border-amber-200"
+              : "bg-white/95 backdrop-blur border-gray-200"
           } p-4 space-y-6 z-40 overflow-y-auto`}
         >
           <div className="flex items-center justify-between">
@@ -708,36 +725,36 @@ export function EReader({ book }: { book: BookProps }) {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() =>
-                  setSettings((prev) => ({ ...prev, theme: 'light' }))
+                  setSettings((prev) => ({ ...prev, theme: "light" }))
                 }
                 className={`p-2 rounded-lg flex items-center justify-center ${
-                  settings.theme === 'light'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                  settings.theme === "light"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 <Sun className="w-4 h-4" />
               </button>
               <button
                 onClick={() =>
-                  setSettings((prev) => ({ ...prev, theme: 'sepia' }))
+                  setSettings((prev) => ({ ...prev, theme: "sepia" }))
                 }
                 className={`p-2 rounded-lg flex items-center justify-center ${
-                  settings.theme === 'sepia'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                  settings.theme === "sepia"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
               </button>
               <button
                 onClick={() =>
-                  setSettings((prev) => ({ ...prev, theme: 'dark' }))
+                  setSettings((prev) => ({ ...prev, theme: "dark" }))
                 }
                 className={`p-2 rounded-lg flex items-center justify-center ${
-                  settings.theme === 'dark'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                  settings.theme === "dark"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 <Moon className="w-4 h-4" />
@@ -754,11 +771,11 @@ export function EReader({ book }: { book: BookProps }) {
                 setSettings((prev) => ({ ...prev, fontFamily: e.target.value }))
               }
               className={`w-full h-10 rounded-md border px-3 text-sm ${
-                settings.theme === 'dark'
-                  ? 'bg-gray-800 border-gray-700'
-                  : settings.theme === 'sepia'
-                  ? 'bg-[#f4ecd8] border-amber-200'
-                  : 'bg-white border-gray-200'
+                settings.theme === "dark"
+                  ? "bg-gray-800 border-gray-700"
+                  : settings.theme === "sepia"
+                  ? "bg-[#f4ecd8] border-amber-200"
+                  : "bg-white border-gray-200"
               }`}
             >
               <option value="Georgia">Georgia</option>
@@ -775,24 +792,24 @@ export function EReader({ book }: { book: BookProps }) {
             <div className="flex gap-2">
               <button
                 onClick={() =>
-                  setSettings((prev) => ({ ...prev, textAlign: 'left' }))
+                  setSettings((prev) => ({ ...prev, textAlign: "left" }))
                 }
                 className={`flex-1 p-2 rounded-lg flex items-center justify-center ${
-                  settings.textAlign === 'left'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                  settings.textAlign === "left"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 <AlignLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() =>
-                  setSettings((prev) => ({ ...prev, textAlign: 'justify' }))
+                  setSettings((prev) => ({ ...prev, textAlign: "justify" }))
                 }
                 className={`flex-1 p-2 rounded-lg flex items-center justify-center ${
-                  settings.textAlign === 'justify'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                  settings.textAlign === "justify"
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 <Type className="w-4 h-4" />
@@ -823,11 +840,11 @@ export function EReader({ book }: { book: BookProps }) {
       {showChapters && (
         <div
           className={`fixed top-14 left-0 w-80 h-[calc(100vh-3.5rem)] border-r ${
-            settings.theme === 'dark'
-              ? 'bg-gray-900/95 backdrop-blur border-gray-800'
-              : settings.theme === 'sepia'
-              ? 'bg-[#f4ecd8]/95 backdrop-blur border-amber-200'
-              : 'bg-white/95 backdrop-blur border-gray-200'
+            settings.theme === "dark"
+              ? "bg-gray-900/95 backdrop-blur border-gray-800"
+              : settings.theme === "sepia"
+              ? "bg-[#f4ecd8]/95 backdrop-blur border-amber-200"
+              : "bg-white/95 backdrop-blur border-gray-200"
           } p-4 space-y-4 z-40 overflow-y-auto`}
           ref={chaptersRef}
         >
@@ -848,8 +865,8 @@ export function EReader({ book }: { book: BookProps }) {
                 onClick={() => handleChapterChange(index)}
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                   currentChapter === index
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent'
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent"
                 }`}
               >
                 {chapter.title || `Chapter ${index + 1}`}
@@ -904,7 +921,7 @@ export function EReader({ book }: { book: BookProps }) {
       <div
         ref={contentRef}
         className={`pt-20 pb-20 px-4 md:px-8 max-w-3xl mx-auto min-h-screen ${
-          settings.theme === 'dark' ? 'prose-invert' : ''
+          settings.theme === "dark" ? "prose-invert" : ""
         } prose prose-lg`}
         style={{
           fontSize: `${settings.fontSize}px`,
@@ -916,7 +933,7 @@ export function EReader({ book }: { book: BookProps }) {
         {/* Render PDF viewer if it's a PDF file */}
         {isPdf ? (
           <div className="w-full">
-            <PDFViewer fileUrl={book.file_url || ''} />
+            <PDFViewer fileUrl={book.file_url || ""} />
           </div>
         ) : isHtml ? (
           <div className="w-full">
@@ -948,84 +965,100 @@ export function EReader({ book }: { book: BookProps }) {
           /* Render chapter content with proper HTML */
           <div>
             <h1 className="text-3xl font-bold mb-6">
-              {chapters[currentChapter]?.title || `Chapter ${currentChapter + 1}`}
+              {chapters[currentChapter]?.title ||
+                `Chapter ${currentChapter + 1}`}
             </h1>
-            <div 
-              className={getTextLanguageClass(chapters[currentChapter]?.content || '')}
+            <div
+              className={getTextLanguageClass(
+                chapters[currentChapter]?.content || ""
+              )}
               dangerouslySetInnerHTML={{
-                __html: chapters[currentChapter]?.content || '',
+                __html: chapters[currentChapter]?.content || "",
               }}
             />
           </div>
         )}
 
-        {/* If no content is available but there's a file URL, show a download prompt */}
-        {(!chapters[currentChapter]?.content ||
-          chapters[currentChapter]?.content.trim() === '') &&
-          book.file_url &&
-          !isPdf &&
-          !isHtml && (
-            <div className="my-8 p-6 border rounded-lg text-center">
-              <h3 className="text-xl font-semibold mb-4">Document Available</h3>
-              <p className="mb-4">
-                This book is available as a downloadable file. You can view it
-                by opening or downloading the file.
-              </p>
-              <div className="flex justify-center gap-4">
-                <a
-                  href={book.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Open File</span>
-                </a>
-                <a
-                  href={book.file_url}
-                  download
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-accent transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download</span>
-                </a>
-              </div>
-            </div>
-          )}
+        {/* If no content is available, show appropriate message */}
+        {!hasReadableContent && !isPdf && !isHtml && (
+          <div className="my-8 p-6 border rounded-lg text-center">
+            {hasFile ? (
+              <>
+                <h3 className="text-xl font-semibold mb-4">
+                  Document Available
+                </h3>
+                <p className="mb-4">
+                  This book is available as a downloadable file. You can view it
+                  by opening or downloading the file.
+                </p>
+                <div className="flex justify-center gap-4">
+                  <a
+                    href={book.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Open File</span>
+                  </a>
+                  <a
+                    href={book.file_url}
+                    download
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border hover:bg-accent transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download</span>
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-4">
+                  No Content Available
+                </h3>
+                <p className="text-muted-foreground">
+                  This book doesn't have any readable content yet. Please check
+                  back later or contact the author.
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Highlight Menu */}
       {showHighlightMenu && (
         <div
           className={`fixed z-50 p-1 flex items-center gap-1 rounded-lg shadow-lg ${
-            settings.theme === 'dark'
-              ? 'bg-gray-800 border-gray-700'
-              : settings.theme === 'sepia'
-              ? 'bg-amber-50 border-amber-200'
-              : 'bg-white border-gray-200'
+            settings.theme === "dark"
+              ? "bg-gray-800 border-gray-700"
+              : settings.theme === "sepia"
+              ? "bg-amber-50 border-amber-200"
+              : "bg-white border-gray-200"
           } border`}
           style={{
             left: `${highlightMenuPosition.x}px`,
             top: `${highlightMenuPosition.y}px`,
-            transform: 'translateX(-50%)',
+            transform: "translateX(-50%)",
           }}
         >
           <button
-            onClick={() => addHighlight('#ffd700')}
+            onClick={() => addHighlight("#ffd700")}
             className="p-1.5 hover:bg-accent rounded"
             title="Yellow"
           >
             <Highlighter className="w-4 h-4 text-yellow-500" />
           </button>
           <button
-            onClick={() => addHighlight('#90EE90')}
+            onClick={() => addHighlight("#90EE90")}
             className="p-1.5 hover:bg-accent rounded"
             title="Green"
           >
             <Highlighter className="w-4 h-4 text-green-500" />
           </button>
           <button
-            onClick={() => addHighlight('#FFB6C1')}
+            onClick={() => addHighlight("#FFB6C1")}
             className="p-1.5 hover:bg-accent rounded"
             title="Pink"
           >
@@ -1040,11 +1073,11 @@ export function EReader({ book }: { book: BookProps }) {
       {/* Bottom Bar */}
       <div
         className={`fixed bottom-0 left-0 right-0 h-14 border-t ${
-          settings.theme === 'dark'
-            ? 'bg-gray-900/95 backdrop-blur border-gray-800'
-            : settings.theme === 'sepia'
-            ? 'bg-[#f4ecd8]/95 backdrop-blur border-amber-200'
-            : 'bg-white/95 backdrop-blur border-gray-200'
+          settings.theme === "dark"
+            ? "bg-gray-900/95 backdrop-blur border-gray-800"
+            : settings.theme === "sepia"
+            ? "bg-[#f4ecd8]/95 backdrop-blur border-amber-200"
+            : "bg-white/95 backdrop-blur border-gray-200"
         } z-50 flex items-center justify-between px-4`}
       >
         <div className="text-sm">
@@ -1098,7 +1131,7 @@ export function EReader({ book }: { book: BookProps }) {
             className="p-2 hover:bg-accent rounded-lg transition-colors"
             disabled={!book.file_url}
             title={
-              book.file_url ? 'Download File' : 'No downloadable file available'
+              book.file_url ? "Download File" : "No downloadable file available"
             }
           >
             <Download className="w-5 h-5" />

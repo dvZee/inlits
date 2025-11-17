@@ -1,12 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Download, ExternalLink, AlertCircle, Maximize2, Minimize2, Loader2, RefreshCw, FileText } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Download,
+  ExternalLink,
+  AlertCircle,
+  Maximize2,
+  Minimize2,
+  Loader2,
+  RefreshCw,
+  FileText,
+} from "lucide-react";
 
 interface PDFViewerProps {
   fileUrl: string;
   className?: string;
 }
 
-export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
+export function PDFViewer({ fileUrl, className = "" }: PDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -19,31 +28,25 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
       setError(null);
 
       try {
-        // First, try to fetch the PDF as blob and convert to data URL
-        const response = await fetch(fileUrl);
+        // Try to use the URL directly first
+        setPdfData(fileUrl);
+
+        // Test if the URL is accessible
+        const response = await fetch(fileUrl, { method: "HEAD" });
         if (!response.ok) {
-          throw new Error(`Failed to fetch PDF: ${response.status}`);
+          throw new Error(`Failed to access PDF: ${response.status}`);
         }
 
-        const blob = await response.blob();
-        const dataUrl = URL.createObjectURL(blob);
-        setPdfData(dataUrl);
         setLoading(false);
       } catch (err) {
-        console.error('Error loading PDF:', err);
-        setError('Failed to load PDF');
+        // If direct access fails, still try to display it
+        // The iframe/embed will handle the error
+        setPdfData(fileUrl);
         setLoading(false);
       }
     };
 
     loadPDF();
-
-    // Cleanup blob URL on unmount
-    return () => {
-      if (pdfData) {
-        URL.revokeObjectURL(pdfData);
-      }
-    };
   }, [fileUrl]);
 
   const toggleFullscreen = () => {
@@ -57,33 +60,15 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
   };
 
   const handleRetry = () => {
-    if (pdfData) {
-      URL.revokeObjectURL(pdfData);
-    }
     setPdfData(null);
     setLoading(true);
     setError(null);
-    
+
     // Reload the PDF
-    const loadPDF = async () => {
-      try {
-        const response = await fetch(fileUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch PDF: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const dataUrl = URL.createObjectURL(blob);
-        setPdfData(dataUrl);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading PDF:', err);
-        setError('Failed to load PDF');
-        setLoading(false);
-      }
-    };
-
-    loadPDF();
+    setTimeout(() => {
+      setPdfData(fileUrl);
+      setLoading(false);
+    }, 100);
   };
 
   const handleIframeLoad = () => {
@@ -92,7 +77,7 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
   };
 
   const handleIframeError = () => {
-    setError('Failed to load PDF');
+    setError("Failed to load PDF");
   };
 
   // Handle fullscreen change
@@ -101,14 +86,17 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   return (
-    <div 
-      ref={containerRef} 
-      className={`pdf-viewer bg-background border rounded-lg overflow-hidden ${className} ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
+    <div
+      ref={containerRef}
+      className={`pdf-viewer bg-background border rounded-lg overflow-hidden ${className} ${
+        isFullscreen ? "fixed inset-0 z-50" : ""
+      }`}
     >
       {/* PDF Controls */}
       <div className="flex items-center justify-between p-4 bg-card border-b">
@@ -121,7 +109,7 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
             </span>
           )}
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           {error && (
@@ -165,7 +153,10 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
       </div>
 
       {/* PDF Display */}
-      <div className="relative" style={{ height: isFullscreen ? 'calc(100vh - 80px)' : '600px' }}>
+      <div
+        className="relative"
+        style={{ height: isFullscreen ? "calc(100vh - 80px)" : "600px" }}
+      >
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/20 z-10">
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
@@ -178,10 +169,10 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
             <AlertCircle className="w-12 h-12 text-destructive mb-4" />
             <h3 className="text-lg font-medium mb-2">Cannot Display PDF</h3>
             <p className="text-muted-foreground mb-6 text-center max-w-md">
-              Due to browser security restrictions, this PDF cannot be displayed inline. 
-              Please use one of the options below to view it.
+              Due to browser security restrictions, this PDF cannot be displayed
+              inline. Please use one of the options below to view it.
             </p>
-            
+
             {/* Viewing options */}
             <div className="space-y-3 w-full max-w-md">
               <a
@@ -193,9 +184,11 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
                 <ExternalLink className="w-4 h-4" />
                 Open PDF in New Tab
               </a>
-              
+
               <a
-                href={`https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}`}
+                href={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                  fileUrl
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg border hover:bg-accent transition-colors"
@@ -203,7 +196,7 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
                 <ExternalLink className="w-4 h-4" />
                 View with Google Docs
               </a>
-              
+
               <a
                 href={fileUrl}
                 download
@@ -213,7 +206,7 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
                 Download PDF
               </a>
             </div>
-            
+
             <button
               onClick={handleRetry}
               className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm"
@@ -223,23 +216,31 @@ export function PDFViewer({ fileUrl, className = '' }: PDFViewerProps) {
             </button>
           </div>
         ) : pdfData ? (
-          <iframe
-            src={pdfData}
-            className="w-full h-full border-0"
-            title="PDF Document"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-          />
+          <>
+            <embed
+              src={`${pdfData}#toolbar=1&navpanes=1&scrollbar=1`}
+              type="application/pdf"
+              className="w-full h-full"
+              title="PDF Document"
+            />
+            {/* Fallback iframe if embed doesn't work */}
+            <iframe
+              src={`${pdfData}#toolbar=1&navpanes=1&scrollbar=1`}
+              className="w-full h-full border-0 hidden"
+              title="PDF Document Fallback"
+              onLoad={handleIframeLoad}
+              onError={handleIframeError}
+            />
+          </>
         ) : null}
       </div>
 
       {/* Instructions */}
       <div className="px-4 py-2 bg-muted/30 border-t">
         <p className="text-xs text-muted-foreground text-center">
-          {error 
+          {error
             ? 'Click "Open PDF in New Tab" to view the document'
-            : 'PDF loaded successfully. Use browser controls for navigation.'
-          }
+            : "PDF loaded successfully. Use browser controls for navigation."}
         </p>
       </div>
     </div>

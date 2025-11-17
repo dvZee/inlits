@@ -36,7 +36,7 @@
     "immer": ">=9.0.6",
     "isbot": "^5.1.0",
     "lucide-react": "^0.344.0",
-    "pdfjs-dist": "^4.0.379",
+    "pdfjs-dist": "^4.10.38",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-transition-group": "^4.4.5",
