@@ -154,13 +154,13 @@ export function ContentCard({
       case "audiobook":
         // Check is_full_book to determine if it's a summary or full audiobook
         if (item.is_full_book === false) {
-          return { icon: BookOpen, label: "Summary" };
+          return { icon: Headphones, label: "Summary" }; // Audio summary with headphones icon
         }
-        return { icon: Headphones, label: "Full Audiobook" };
+        return { icon: Headphones, label: "Full Book" }; // Icon already shows it's audio
       case "ebook":
         // Check is_full_book to determine if it's a summary or full book
         if (item.is_full_book === false) {
-          return { icon: BookOpen, label: "Summary" };
+          return { icon: BookOpen, label: "Summary" }; // Book summary with book icon
         }
         return { icon: BookOpen, label: "Full Book" };
       case "podcast":
