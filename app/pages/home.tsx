@@ -217,6 +217,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
                 featured,
                 category,
                 categories,
+                is_full_book,
                 author:profiles!audiobooks_author_id_fkey (
                   id,
                   name,
@@ -240,6 +241,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
                 created_at,
                 featured,
                 category,
+                is_full_book,
                 author:profiles!books_author_id_fkey (
                   id,
                   name,
@@ -402,6 +404,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           rating: 4.5,
           bookmarked: isBookmarked(item.id, "audiobook"),
           likes_count: getLikeCount(item.id, "audiobook"),
+          is_full_book: item.is_full_book ?? true,
         }));
 
         const books = booksData.map((item: any) => ({
@@ -424,6 +427,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           rating: 4.5,
           bookmarked: isBookmarked(item.id, "book"),
           likes_count: getLikeCount(item.id, "book"),
+          is_full_book: item.is_full_book ?? true,
         }));
 
         const podcasts = podcastsData.map((item: any) => ({

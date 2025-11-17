@@ -152,8 +152,16 @@ export function ContentCard({
   const getContentLabel = () => {
     switch (item.type) {
       case "audiobook":
+        // Check is_full_book to determine if it's a summary or full audiobook
+        if (item.is_full_book === false) {
+          return { icon: BookOpen, label: "Summary" };
+        }
         return { icon: Headphones, label: "Full Audiobook" };
       case "ebook":
+        // Check is_full_book to determine if it's a summary or full book
+        if (item.is_full_book === false) {
+          return { icon: BookOpen, label: "Summary" };
+        }
         return { icon: BookOpen, label: "Full Book" };
       case "podcast":
         return { icon: Headphones, label: "Podcast" };

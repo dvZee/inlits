@@ -1,15 +1,21 @@
 // Update SearchSuggestion type
 export type SearchSuggestion = {
   text: string;
-  type: 'trending' | 'recent' | 'suggestion' | 'creator';
+  type: "trending" | "recent" | "suggestion" | "creator";
   category?: string;
   count?: number;
   username?: string; // For creator suggestions
 };
 
-export type ContentType = 'article' | 'ebook' | 'book' | 'audiobook' | 'podcast' | 'summary';
+export type ContentType =
+  | "article"
+  | "ebook"
+  | "book"
+  | "audiobook"
+  | "podcast"
+  | "summary";
 
-export type UserRole = 'user' | 'creator' | 'consumer';
+export type UserRole = "user" | "creator" | "consumer";
 
 export interface Profile {
   id: string;
@@ -56,6 +62,7 @@ export interface ContentItem {
   likes_count?: number;
   comments_count?: number;
   progress?: number;
+  is_full_book?: boolean;
 }
 
 export interface SponsoredContent {

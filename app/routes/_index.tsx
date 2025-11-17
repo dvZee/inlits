@@ -43,6 +43,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           featured,
           category,
           categories,
+          is_full_book,
           author:profiles!audiobooks_author_id_fkey (
             id,
             name,
@@ -66,6 +67,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           created_at,
           featured,
           category,
+          is_full_book,
           author:profiles!books_author_id_fkey (
             id,
             name,
