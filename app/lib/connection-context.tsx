@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { checkConnection, reconnect, startConnectionCheck } from './supabase';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import { supabase } from './supabase';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { checkConnection, reconnect, startConnectionCheck } from "./supabase";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { supabase } from "./supabase";
 
 interface ConnectionContextType {
   isConnected: boolean;
@@ -12,10 +12,14 @@ interface ConnectionContextType {
 const ConnectionContext = createContext<ConnectionContextType>({
   isConnected: true,
   retryConnection: async () => {},
-  connectionError: null
+  connectionError: null,
 });
 
-export function ConnectionProvider({ children }: { children: React.ReactNode }) {
+export function ConnectionProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [isConnected, setIsConnected] = useState(true);
   const [showBanner, setShowBanner] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -25,27 +29,25 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
   // Function to retry connection
   const retryConnection = async () => {
     if (isRetrying) return;
-    
+
     try {
       setIsRetrying(true);
       setConnectionError(null);
-      
-      console.log('Manually retrying connection...');
+
       const success = await reconnect();
-      
+
       if (success) {
-        console.log('Manual reconnection successful');
         setIsConnected(true);
         setShowBanner(false);
         setRetryCount(0);
       } else {
-        console.log('Manual reconnection failed');
-        setRetryCount(prev => prev + 1);
-        setConnectionError('Could not connect to the server. Please try again later.');
+        setRetryCount((prev) => prev + 1);
+        setConnectionError(
+          "Could not connect to the server. Please try again later."
+        );
       }
     } catch (error) {
-      console.error('Error during manual reconnection:', error);
-      setConnectionError('An error occurred while trying to reconnect.');
+      setConnectionError("An error occurred while trying to reconnect.");
     } finally {
       setIsRetrying(false);
     }
@@ -56,34 +58,41 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
   // Listen for online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      console.log('Network online event detected');
       retryConnection();
     };
-    
+
     const handleOffline = () => {
-      console.log('Network offline event detected');
       setIsConnected(false);
       setShowBanner(true);
-      setConnectionError('Your device appears to be offline. Please check your internet connection.');
+      setConnectionError(
+        "Your device appears to be offline. Please check your internet connection."
+      );
     };
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
     // Listen for connection failed event
     const handleConnectionFailed = () => {
-      console.log('Connection failed event received');
       setIsConnected(false);
       setShowBanner(true);
-      setConnectionError('Connection to the server failed after multiple attempts.');
+      setConnectionError(
+        "Connection to the server failed after multiple attempts."
+      );
     };
-    
-    window.addEventListener('supabase:connection-failed', handleConnectionFailed);
-    
+
+    window.addEventListener(
+      "supabase:connection-failed",
+      handleConnectionFailed
+    );
+
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('supabase:connection-failed', handleConnectionFailed);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener(
+        "supabase:connection-failed",
+        handleConnectionFailed
+      );
     };
   }, []);
 
@@ -94,20 +103,23 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
         setShowBanner(false);
         setConnectionError(null);
       }, 2000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isConnected, showBanner]);
 
   return (
-    <ConnectionContext.Provider value={{ isConnected, retryConnection, connectionError }}>
+    <ConnectionContext.Provider
+      value={{ isConnected, retryConnection, connectionError }}
+    >
       {showBanner && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-destructive/10 text-destructive px-4 py-3 flex items-center justify-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span className="text-sm">
-            {connectionError || (isConnected 
-              ? 'Connection restored!' 
-              : 'Connection lost. Attempting to reconnect...')}
+            {connectionError ||
+              (isConnected
+                ? "Connection restored!"
+                : "Connection lost. Attempting to reconnect...")}
           </span>
           {!isConnected && (
             <button

@@ -42,16 +42,6 @@ export function ContentCard({
   const thumbnailLowQuality = getLowQualityUrl(item.thumbnail);
   const creatorLowQuality = getLowQualityUrl(item.creator?.avatar, 20);
 
-  // Debug: Log item data
-  React.useEffect(() => {
-    console.log("ContentCard rendered:", {
-      title: item.title,
-      thumbnail: item.thumbnail,
-      type: item.type,
-      id: item.id,
-    });
-  }, [item]);
-
   const { mutate: toggleBookmark } = useOptimisticMutation({
     mutationFn: async () => {
       if (!user) {
@@ -81,7 +71,6 @@ export function ContentCard({
           return true;
         }
       } catch (error) {
-        console.error("Bookmark operation failed:", error);
         throw error;
       }
     },
@@ -97,10 +86,7 @@ export function ContentCard({
   const [isNavigating, setIsNavigating] = React.useState(false);
 
   const handleClick = () => {
-    console.log("Card clicked:", item.title, item.type, item.id);
-
     if (isNavigating) {
-      console.log("Already navigating, ignoring click");
       return;
     }
 
@@ -125,7 +111,6 @@ export function ContentCard({
         break;
     }
 
-    console.log("Navigating to:", targetUrl);
     navigate(targetUrl);
   };
 
@@ -142,7 +127,7 @@ export function ContentCard({
     try {
       await toggleBookmark();
     } catch (error) {
-      console.error("Error toggling bookmark:", error);
+      // Silently fail - user will see the bookmark state revert
     }
   };
 
@@ -187,7 +172,7 @@ export function ContentCard({
   return (
     <div
       onClick={handleClick}
-      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-2xl hover:ring-2 hover:ring-primary/20 transition-all duration-300 cursor-pointer hover:scale-[1.02] active:scale-[0.98] hover:z-10 flex flex-col h-full"
+      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 hover:z-10 flex flex-col h-full"
     >
       {/* Thumbnail with fixed aspect ratio */}
       <div
@@ -197,10 +182,9 @@ export function ContentCard({
         <img
           src={item.thumbnail}
           alt={item.title}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
           onError={(e) => {
-            console.error("✗ Image failed:", item.title, item.thumbnail);
             const target = e.currentTarget;
             target.src =
               "https://placehold.co/600x900/1f4ead/ffffff?text=" +
@@ -208,15 +192,18 @@ export function ContentCard({
           }}
         />
 
+        {/* Shadow overlay - matches popular collections exactly */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-transparent group-hover:to-black/20 transition-all duration-300" />
+
         {/* Content type badge */}
-        <div className="absolute top-2 left-2 px-2.5 py-1.5 rounded-full bg-black/80 backdrop-blur-sm text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg border border-white/10">
+        <div className="absolute top-2 left-2 px-2.5 py-1.5 rounded-full bg-black/80 backdrop-blur-sm text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg border border-white/10 z-10">
           <ContentIcon className="w-3.5 h-3.5" />
           <span>{contentLabel.label}</span>
         </div>
 
-        {/* Play button for audio content */}
+        {/* Play button for audio content - NO dark overlay, just the button */}
         {(item.type === "audiobook" || item.type === "podcast") && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/50 transition-all duration-300">
+          <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 shadow-lg">
               <Play className="w-7 h-7 text-black ml-1 fill-current" />
             </div>
@@ -278,7 +265,7 @@ export function ContentCard({
       {/* Bookmark Button */}
       <button
         onClick={handleBookmarkClick}
-        className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-primary hover:text-primary-foreground hover:scale-110"
+        className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-full bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-primary hover:text-primary-foreground hover:scale-110 z-10"
       >
         <Bookmark
           className={`w-4 h-4 ${

@@ -119,7 +119,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       likes: likesData.data || [],
     });
   } catch (error) {
-    console.error("Server-side data fetch error:", error);
     return json({
       audiobooks: [],
       books: [],

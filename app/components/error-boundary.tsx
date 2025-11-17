@@ -1,6 +1,6 @@
-import React from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import { forceReconnect } from '@/lib/supabase';
+import React from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { forceReconnect } from "@/lib/supabase";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -14,15 +14,18 @@ interface ErrorBoundaryState {
   isRetrying: boolean;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { 
-      hasError: false, 
+    this.state = {
+      hasError: false,
       error: null,
       errorInfo: null,
       connectionFailed: false,
-      isRetrying: false
+      isRetrying: false,
     };
   }
 
@@ -34,67 +37,64 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // We don't store the full error details in state to avoid exposing sensitive information
-    this.setState({ 
+    this.setState({
       errorInfo: {
-        componentStack: this.sanitizeComponentStack(errorInfo.componentStack)
-      } as React.ErrorInfo
+        componentStack: this.sanitizeComponentStack(errorInfo.componentStack),
+      } as React.ErrorInfo,
     });
-    
+
     // Log the error to the console for debugging
-    console.error('Error caught by ErrorBoundary:', error);
-    
+    console.error("Error caught by ErrorBoundary:", error);
+
     // In production, you might want to send this to a logging service
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       // Send to logging service
       // logErrorToService(error, errorInfo);
     }
   }
-  
+
   // Sanitize component stack to remove file paths and line numbers
   sanitizeComponentStack(stack?: string | null): string {
     if (!stack) {
-      return '';
+      return "";
     }
 
     return stack
-      .split('\n')
-      .map(line => {
+      .split("\n")
+      .map((line) => {
         // Extract just the component name
         const match = line.match(/\s+at\s+([A-Za-z0-9_]+)/);
         return match ? `    at ${match[1]}` : line;
       })
-      .join('\n');
+      .join("\n");
   }
 
   handleRetry = async () => {
     this.setState({ isRetrying: true });
-    
+
     try {
       if (this.state.connectionFailed) {
-        console.log('Attempting to force reconnect...');
         const success = await forceReconnect();
         if (success) {
-          console.log('Reconnection successful');
-          this.setState({ 
+          this.setState({
             connectionFailed: false,
             hasError: false,
             error: null,
-            errorInfo: null
+            errorInfo: null,
           });
         } else {
-          console.log('Reconnection failed');
           // Reload the page as a last resort
           window.location.reload();
         }
       } else {
-        this.setState({ 
-          hasError: false, 
+        this.setState({
+          hasError: false,
           error: null,
-          errorInfo: null
+          errorInfo: null,
         });
       }
     } catch (error) {
-      console.error('Error during retry:', error);
+      // Error during retry, will show error state
     } finally {
       this.setState({ isRetrying: false });
     }
@@ -102,21 +102,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError || this.state.connectionFailed) {
+      const isNetworkError =
+        this.state.error?.message?.toLowerCase().includes("network") ||
+        this.state.error?.message?.toLowerCase().includes("fetch") ||
+        this.state.connectionFailed;
+
       return (
         <div className="min-h-[400px] flex items-center justify-center p-4">
           <div className="text-center space-y-4 max-w-md">
             <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
             <h3 className="text-lg font-medium">
-              {this.state.connectionFailed 
-                ? 'Connection lost'
-                : 'Something went wrong'
-              }
+              {isNetworkError ? "Connection Issue" : "Something Went Wrong"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {this.state.connectionFailed
-                ? 'Unable to connect to the server. Please check your internet connection and try again.'
-                : 'An unexpected error occurred. Please try again.'
-              }
+              {isNetworkError
+                ? "We're having trouble connecting to the server. Please check your internet connection and try again."
+                : "An unexpected error occurred while loading this page. Don't worry, your data is safe. Please try refreshing the page."}
             </p>
             <button
               onClick={this.handleRetry}
@@ -135,9 +136,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 </>
               )}
             </button>
-            {process.env.NODE_ENV !== 'production' && this.state.errorInfo && (
+            {process.env.NODE_ENV !== "production" && this.state.errorInfo && (
               <details className="mt-4 text-left">
-                <summary className="text-sm text-primary cursor-pointer">View technical details</summary>
+                <summary className="text-sm text-primary cursor-pointer">
+                  View technical details
+                </summary>
                 <pre className="mt-2 p-4 bg-muted rounded-lg text-xs overflow-auto max-h-[200px]">
                   {this.state.error?.toString()}
                 </pre>

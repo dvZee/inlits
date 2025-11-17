@@ -1,39 +1,61 @@
-import type { LinksFunction, MetaFunction } from '@remix-run/node';
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
   Meta,
- Outlet,
+  Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation
-} from '@remix-run/react';
-import { Suspense } from 'react';
-import styles from './index.css?url';
-import { ThemeProvider } from '@/components/theme-provider';
-import { ConnectionProvider } from '@/lib/connection-context';
-import { AudioProvider } from '@/lib/audio-context';
-import { ErrorBoundary as NetworkErrorBoundary } from '@/components/error-boundary';
-import { AudioPlayer } from '@/components/audio/audio-player';
-import { GlobalAudioPlayer } from '@/components/audio/global-audio-player';
-import { useAudio } from '@/lib/audio-context';
-import { Loader2 } from 'lucide-react';
+  useLocation,
+} from "@remix-run/react";
+import { Suspense } from "react";
+import styles from "./index.css?url";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ConnectionProvider } from "@/lib/connection-context";
+import { AudioProvider } from "@/lib/audio-context";
+import { ErrorBoundary as NetworkErrorBoundary } from "@/components/error-boundary";
+import { AudioPlayer } from "@/components/audio/audio-player";
+import { GlobalAudioPlayer } from "@/components/audio/global-audio-player";
+import { useAudio } from "@/lib/audio-context";
+import { Loader2, AlertCircle } from "lucide-react";
 
 export const meta: MetaFunction = () => [
-  { charSet: 'utf-8' },
-  { title: 'Inlits' },
-  { name: 'viewport', content: 'width=device-width,initial-scale=1' }
+  { charSet: "utf-8" },
+  { title: "Inlits" },
+  { name: "viewport", content: "width=device-width,initial-scale=1" },
 ];
 
 export const links: LinksFunction = () => [
-  { rel: 'stylesheet', href: styles },
-  { rel: 'preconnect', href: 'https://placehold.co' },
-  { rel: 'dns-prefetch', href: 'https://placehold.co' }
+  { rel: "stylesheet", href: styles },
+  { rel: "icon", type: "image/svg+xml", href: "/book-open.svg", sizes: "any" },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    href: "/Black & Blue Minimalist Modern Initial Font Logo.png",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "16x16",
+    href: "/Black & Blue Minimalist Modern Initial Font Logo.png",
+  },
+  {
+    rel: "apple-touch-icon",
+    sizes: "180x180",
+    href: "/Black & Blue Minimalist Modern Initial Font Logo.png",
+  },
+  {
+    rel: "shortcut icon",
+    href: "/book-open.svg",
+  },
+  { rel: "preconnect", href: "https://placehold.co" },
+  { rel: "dns-prefetch", href: "https://placehold.co" },
 ];
 
 function Document({
   children,
-  title
+  title,
 }: {
   children: React.ReactNode;
   title?: string;
@@ -60,7 +82,7 @@ function Document({
                   document.documentElement.classList.add(isDark ? 'dark' : 'light');
                 }
               } catch (e) {}
-            `
+            `,
           }}
         />
       </head>
@@ -132,18 +154,35 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: { error: unknown }) {
-  console.error(error);
+  const isNetworkError =
+    error instanceof Error &&
+    (error.message?.toLowerCase().includes("network") ||
+      error.message?.toLowerCase().includes("fetch") ||
+      error.message?.toLowerCase().includes("connection"));
+
   return (
-    <Document title="Application error">
+    <Document title="Application Error">
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-        <h1 className="text-2xl font-semibold">Something went wrong</h1>
+        <AlertCircle className="w-16 h-16 text-destructive" />
+        <h1 className="text-2xl font-semibold">
+          {isNetworkError ? "Connection Issue" : "Something Went Wrong"}
+        </h1>
         <p className="max-w-md text-muted-foreground">
-          We encountered an unexpected error while loading this page. Please try
-          refreshing, or come back later if the issue persists.
+          {isNetworkError
+            ? "We're having trouble connecting to the server. Please check your internet connection and try again."
+            : "We encountered an unexpected error while loading this page. Please try refreshing, or come back later if the issue persists."}
         </p>
-        <code className="max-w-md overflow-x-auto rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : String(error)}
-        </code>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Refresh Page
+        </button>
+        {process.env.NODE_ENV !== "production" && error instanceof Error && (
+          <code className="max-w-md overflow-x-auto rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground">
+            {error.message}
+          </code>
+        )}
       </div>
     </Document>
   );

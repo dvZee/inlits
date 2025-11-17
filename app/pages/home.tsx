@@ -129,13 +129,12 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           timestamp: parsed.timestamp,
         });
         if (!isFresh) {
-          console.info("Home content cache is stale; refreshing data...");
           // Force reload if stale
           setInitialLoadComplete(false);
         }
       }
     } catch (error) {
-      console.warn("Failed to restore home content cache:", error);
+      // Cache restore failed, will fetch fresh data
     }
   }, []);
 
@@ -166,7 +165,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
             setShelfName(data.name);
           }
         } catch (err) {
-          console.error("Error fetching shelf name:", err);
           setShelfName("Custom Shelf");
         }
       };
@@ -198,7 +196,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           podcastsData = initialData.podcasts;
           viewsDataRaw = initialData.views || [];
           likesDataRaw = initialData.likes || [];
-          console.log("✅ Using SSR data - instant load!");
         } else {
           // Fallback to client-side fetch
           const [
@@ -288,16 +285,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           ]);
 
           // Check for errors
-          if (audiobooksResult.error) {
-            console.error("Audiobooks error:", audiobooksResult.error);
-          }
-          if (booksResult.error) {
-            console.error("Books error:", booksResult.error);
-          }
-          if (podcastsResult.error) {
-            console.error("Podcasts error:", podcastsResult.error);
-          }
-
           if (
             audiobooksResult.error &&
             booksResult.error &&
@@ -313,15 +300,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           podcastsData = podcastsResult.data || [];
           viewsDataRaw = viewsData.data || [];
           likesDataRaw = likesData.data || [];
-        }
-
-        // Minimal logging for performance
-        if (process.env.NODE_ENV === "development") {
-          console.log("Raw data loaded:", {
-            audiobooks: audiobooksData.length,
-            books: booksData.length,
-            podcasts: podcastsData.length,
-          });
         }
 
         // Get user bookmarks in parallel (non-blocking)
@@ -522,11 +500,10 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
               JSON.stringify({ data: contentData, timestamp: Date.now() })
             );
           } catch (storageError) {
-            console.warn("Failed to persist home content cache:", storageError);
+            // Cache persistence failed, continue without caching
           }
         }, 0);
       } catch (err) {
-        console.error("Error loading content:", err);
         if (isMounted) {
           setError(
             err instanceof Error ? err.message : "Failed to load content"
@@ -594,21 +571,9 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
     };
 
     const targetCategoryName = getCategoryNameFromSlug(selectedCategory);
-    console.log(
-      "Filtering for category:",
-      selectedCategory,
-      "-> target name:",
-      targetCategoryName
-    );
 
     const filterByCategory = (items: ContentItem[]) => {
       return items.filter((item) => {
-        console.log(`Checking item "${item.title}":`, {
-          category: item.category,
-          categories: item.categories,
-          targetCategory: targetCategoryName,
-        });
-
         // First check the categories array (multi-category support)
         if (
           item.categories &&
@@ -620,9 +585,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
 
             // Exact match (case-insensitive)
             if (cat.toLowerCase() === targetCategoryName.toLowerCase()) {
-              console.log(
-                `✓ Exact match found in categories array: "${cat}" matches "${targetCategoryName}"`
-              );
               return true;
             }
 
@@ -644,9 +606,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           });
 
           if (hasExactMatch) {
-            console.log(
-              `✓ Item "${item.title}" matches category "${targetCategoryName}"`
-            );
             return true;
           }
         }
@@ -657,9 +616,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           if (
             item.category.toLowerCase() === targetCategoryName.toLowerCase()
           ) {
-            console.log(
-              `✓ Exact match found in category field: "${item.category}" matches "${targetCategoryName}"`
-            );
             return true;
           }
 
@@ -677,9 +633,6 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
           }
         }
 
-        console.log(
-          `✗ Item "${item.title}" does not match category "${targetCategoryName}"`
-        );
         return false;
       });
     };
@@ -748,7 +701,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
         ),
       }));
     } catch (error) {
-      console.error("Error adding to shelf:", error);
+      // Silently fail - user can try again
     }
   };
 
