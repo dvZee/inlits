@@ -25,6 +25,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/components/theme-provider";
 import { PDFViewer } from "./pdf-viewer-new";
+import { EpubReader } from "./epub-reader";
 import { detectUrduText, getTextLanguageClass } from "@/lib/utils";
 
 interface ReaderSettings {
@@ -105,11 +106,20 @@ export function EReader({ book }: { book: BookProps }) {
 
   // Check if the book has a file
   const isPdf = book.file_url && book.file_type === "application/pdf";
+  const isEpub =
+    book.file_url &&
+    (book.file_type === "application/epub+zip" ||
+      book.file_url.endsWith(".epub"));
   const isHtml =
     book.file_url &&
     (book.file_type === "text/html" ||
       book.file_url.endsWith(".html") ||
       book.file_url.endsWith(".htm"));
+
+  // If it's an EPUB file, use the EPUB reader
+  if (isEpub) {
+    return <EpubReader fileUrl={book.file_url!} title={book.title} />;
+  }
 
   // Get chapters from book or create a single chapter from content
   const chapters =
