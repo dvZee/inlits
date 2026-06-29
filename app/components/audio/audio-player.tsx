@@ -29,6 +29,7 @@ import {
   RotateCw,
   Zap,
   Headphones,
+  Check,
 } from "lucide-react";
 import { useAudio } from "@/lib/audio-context";
 import { ImageLoader } from "@/components/image-loader";
@@ -64,7 +65,7 @@ export function AudioPlayer({
   authorId,
   authorUsername,
 }: AudioPlayerProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const {
     setPlayerVisible,
     isMainPlayerPage,
@@ -78,6 +79,8 @@ export function AudioPlayer({
     audioRef,
     isPlaying: contextIsPlaying,
     setIsPlaying: setContextIsPlaying,
+    showUpgradeModal,
+    setShowUpgradeModal,
   } = useAudio();
   // Detect mobile automatically
   const [isMobileDetected, setIsMobileDetected] = React.useState(() => {
@@ -133,8 +136,20 @@ export function AudioPlayer({
 
   const hasInitialized = React.useRef(false);
 
+  const isPremium = profile?.subscription_status === "active" || profile?.role === "creator";
+  const isLocked = currentAudio?.type === "audiobook" && currentChapter > 0 && !isPremium;
+
   React.useEffect(() => {
     if (!currentAudio) return;
+
+    if (isLocked) {
+      setError("Premium Content: Please upgrade your plan to listen.");
+      setContextIsPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      return;
+    }
 
     const isChapterLocked =
       !user &&
@@ -150,7 +165,7 @@ export function AudioPlayer({
       }
       return;
     }
-  }, [currentAudio, currentChapter, user, audioRef, setContextIsPlaying]);
+  }, [currentAudio, currentChapter, user, audioRef, setContextIsPlaying, isLocked]);
 
   React.useEffect(() => {
     const audio = audioRef.current;
@@ -192,7 +207,8 @@ export function AudioPlayer({
         currentChapter < currentAudio.chapters.length - 1
       ) {
         const nextChapterIndex = currentChapter + 1;
-        const isNextChapterLocked = !user && nextChapterIndex > 0;
+        const isNextChapterPremium = profile?.subscription_status === 'active' || profile?.role === 'creator';
+        const isNextChapterLocked = (currentAudio.type === "audiobook" && !isNextChapterPremium) || (!user && nextChapterIndex > 0);
 
         if (isNextChapterLocked) {
           setContextIsPlaying(false);
@@ -289,6 +305,11 @@ export function AudioPlayer({
   const togglePlay = async () => {
     if (!audioRef.current || isLoading) return;
 
+    if (isLocked) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     try {
       if (contextIsPlaying) {
         audioRef.current.pause();
@@ -303,6 +324,11 @@ export function AudioPlayer({
 
   const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!progressRef.current || !audioRef.current || isLoading) return;
+
+    if (isLocked) {
+      setShowUpgradeModal(true);
+      return;
+    }
 
     setIsDragging(true);
     const rect = progressRef.current.getBoundingClientRect();
@@ -381,6 +407,10 @@ export function AudioPlayer({
   };
 
   const skipTime = (seconds: number) => {
+    if (isLocked) {
+      setShowUpgradeModal(true);
+      return;
+    }
     if (audioRef.current) {
       audioRef.current.currentTime = Math.max(
         0,
@@ -390,6 +420,10 @@ export function AudioPlayer({
   };
 
   const nextChapter = () => {
+    if (isLocked) {
+      setShowUpgradeModal(true);
+      return;
+    }
     if (
       currentAudio?.chapters &&
       currentChapter < currentAudio.chapters.length - 1
@@ -399,6 +433,10 @@ export function AudioPlayer({
   };
 
   const previousChapter = () => {
+    if (isLocked) {
+      setShowUpgradeModal(true);
+      return;
+    }
     if (currentAudio?.chapters && currentChapter > 0) {
       setCurrentChapter(currentChapter - 1);
     }
@@ -610,15 +648,17 @@ export function AudioPlayer({
               <button
                 onClick={togglePlay}
                 disabled={
-                  isLoading ||
+                  !isLocked && (isLoading ||
                   (!currentAudio?.audioUrl &&
                     !(
                       currentAudio?.chapters && currentAudio.chapters.length > 0
-                    ))
+                    )))
                 }
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
               >
-                {isLoading ? (
+                {isLocked ? (
+                  <Lock className="w-5 h-5 text-amber-300" />
+                ) : isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : contextIsPlaying ? (
                   <Pause className="w-5 h-5" />
@@ -789,15 +829,17 @@ export function AudioPlayer({
               <button
                 onClick={togglePlay}
                 disabled={
-                  isLoading ||
+                  !isLocked && (isLoading ||
                   (!currentAudio?.audioUrl &&
                     !(
                       currentAudio?.chapters && currentAudio.chapters.length > 0
-                    ))
+                    )))
                 }
                 className="w-14 h-14 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
               >
-                {isLoading ? (
+                {isLocked ? (
+                  <Lock className="w-6 h-6 text-amber-300" />
+                ) : isLoading ? (
                   <Loader2 className="w-6 h-6 animate-spin" />
                 ) : contextIsPlaying ? (
                   <Pause className="w-6 h-6" />
@@ -1176,31 +1218,34 @@ export function AudioPlayer({
                                 Chapters ({currentAudio.chapters.length})
                               </div>
                               {currentAudio.chapters.map((chapter, index) => {
-                                const isLocked = !user && index > 0;
+                                const isPremium = profile?.subscription_status === 'active' || profile?.role === 'creator';
+                                const isChapterLocked = currentAudio.type === "audiobook" && index > 0 && !isPremium;
                                 const isCurrent = currentChapter === index;
 
                                 return (
                                   <button
                                     key={chapter.id}
                                     onClick={() => {
-                                      if (!isLocked) {
+                                      if (isChapterLocked) {
+                                        setShowUpgradeModal(true);
+                                      } else {
                                         setCurrentChapter(index);
                                         setShowPlaylist(false);
                                       }
                                     }}
                                     className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                                      isLocked
-                                        ? "bg-muted/30 cursor-not-allowed opacity-60"
+                                      isChapterLocked
+                                        ? "bg-muted/35 hover:bg-accent/10 cursor-pointer opacity-80"
                                         : isCurrent
                                         ? "bg-primary text-primary-foreground"
                                         : "hover:bg-accent"
                                     }`}
-                                    disabled={isLoading || isLocked}
+                                    disabled={isLoading}
                                   >
                                     <div className="flex items-center gap-2 min-w-0 flex-1">
                                       <div className="flex-shrink-0">
-                                        {isLocked ? (
-                                          <Lock className="w-3 h-3" />
+                                        {isChapterLocked ? (
+                                          <Lock className="w-3 h-3 text-amber-500" />
                                         ) : isLoading && isCurrent ? (
                                           <Loader2 className="w-3 h-3 animate-spin" />
                                         ) : isCurrent && contextIsPlaying ? (
@@ -1398,31 +1443,34 @@ export function AudioPlayer({
                   Chapters ({currentAudio.chapters.length})
                 </div>
                 {currentAudio.chapters.map((chapter, index) => {
-                  const isLocked = !user && index > 0;
+                  const isPremium = profile?.subscription_status === 'active' || profile?.role === 'creator';
+                  const isChapterLocked = currentAudio.type === "audiobook" && index > 0 && !isPremium;
                   const isCurrent = currentChapter === index;
 
                   return (
                     <button
                       key={chapter.id}
                       onClick={() => {
-                        if (!isLocked) {
+                        if (isChapterLocked) {
+                          setShowUpgradeModal(true);
+                        } else {
                           setCurrentChapter(index);
                           setShowPlaylist(false);
                         }
                       }}
                       className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all ${
-                        isLocked
-                          ? "bg-muted/30 cursor-not-allowed opacity-60"
+                        isChapterLocked
+                          ? "bg-muted/35 hover:bg-accent/10 cursor-pointer opacity-80"
                           : isCurrent
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-accent"
                       }`}
-                      disabled={isLoading || isLocked}
+                      disabled={isLoading}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <div className="flex-shrink-0">
-                          {isLocked ? (
-                            <Lock className="w-3 h-3" />
+                          {isChapterLocked ? (
+                            <Lock className="w-3 h-3 text-amber-500" />
                           ) : isLoading && isCurrent ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
                           ) : isCurrent && contextIsPlaying ? (

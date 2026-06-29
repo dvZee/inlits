@@ -61,6 +61,8 @@ interface AudioContextType {
     },
     immediate?: boolean
   ) => void;
+  showUpgradeModal: boolean;
+  setShowUpgradeModal: (show: boolean) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -81,6 +83,7 @@ export function AudioProvider({
   const [isPlaying, setIsPlaying] = useState(false);
   const [playlist, setPlaylist] = useState<AudioContextType["playlist"]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Check if current page is the main player page
@@ -219,6 +222,8 @@ export function AudioProvider({
         playNext,
         playPrevious,
         playAudio,
+        showUpgradeModal,
+        setShowUpgradeModal,
       }}
     >
       {children}

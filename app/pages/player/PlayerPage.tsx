@@ -70,7 +70,7 @@ interface Comment {
 
 export function PlayerPage() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const {
     setCurrentAudio,
@@ -80,6 +80,8 @@ export function PlayerPage() {
     currentTrackIndex,
     playNext,
     playPrevious,
+    currentChapter,
+    setCurrentChapter,
   } = useAudio();
   const [content, setContent] = useState<AudioContent | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -330,6 +332,9 @@ export function PlayerPage() {
         setIsBookmarked(processedContent.is_bookmarked);
         setLikeCount(likesCount);
 
+        const isPremium = profile?.subscription_status === 'active' || profile?.role === 'creator';
+        const isLockedAudiobook = contentType === "audiobook" && currentChapter > 0 && !isPremium;
+
         // Set up audio player
         setCurrentAudio({
           title: contentData.title,
@@ -345,8 +350,9 @@ export function PlayerPage() {
           audioUrl: contentData.chapters?.[0]?.audio_url,
           currentTime: 0,
         });
+        setCurrentChapter(0);
         setPlayerVisible(true);
-        setIsPlaying(true);
+        setIsPlaying(!isLockedAudiobook);
       } catch (err) {
         console.error("Error loading content:", err);
         setError(err instanceof Error ? err.message : "Failed to load content");
@@ -356,7 +362,7 @@ export function PlayerPage() {
     };
 
     loadContent();
-  }, [contentType, contentId, user, setCurrentAudio, setPlayerVisible]);
+  }, [contentType, contentId, user, profile, currentChapter, setCurrentAudio, setPlayerVisible, setIsPlaying, setCurrentChapter]);
 
   // Load comments with likes data
   useEffect(() => {
@@ -372,7 +378,13 @@ export function PlayerPage() {
             content,
             created_at,
             user_id,
-            parent_id
+            parent_id,
+            user:profiles!comments_user_id_fkey (
+              id,
+              name,
+              username,
+              avatar_url
+            )
           `
           )
           .eq("content_id", contentId)
@@ -382,32 +394,6 @@ export function PlayerPage() {
         if (commentsError) throw commentsError;
 
         if (commentsData && commentsData.length > 0) {
-          // Get unique user IDs
-          const userIds = [
-            ...new Set(commentsData.map((comment) => comment.user_id)),
-          ];
-
-          // Fetch user profiles separately
-          const { data: profilesData, error: profilesError } = await supabase
-            .from("profiles")
-            .select(
-              `
-              id,
-              name,
-              username,
-              avatar_url
-            `
-            )
-            .in("id", userIds);
-
-          if (profilesError) throw profilesError;
-
-          // Create a map of user profiles
-          const profilesMap = new Map();
-          profilesData?.forEach((profile) => {
-            profilesMap.set(profile.id, profile);
-          });
-
           // Load comment likes from localStorage with content-specific keys
           if (user) {
             try {
@@ -437,11 +423,11 @@ export function PlayerPage() {
           const formattedComments: Comment[] = commentsData
             .filter((comment) => !comment.parent_id) // Only top-level comments
             .map((comment) => {
-              const profile = profilesMap.get(comment.user_id);
+              const profile = comment.user;
               const replies = commentsData
                 .filter((reply) => reply.parent_id === comment.id)
                 .map((reply) => {
-                  const replyProfile = profilesMap.get(reply.user_id);
+                  const replyProfile = reply.user;
                   return {
                     id: reply.id,
                     content: reply.content,
@@ -769,19 +755,21 @@ export function PlayerPage() {
       setUserCommentLikes(updatedUserLikes);
       setCommentLikes(updatedCommentLikes);
 
-      // Persist to localStorage with content-specific keys
-      try {
-        localStorage.setItem(
-          `comment_likes_${user.id}_${contentId}`,
-          JSON.stringify(updatedUserLikes)
-        );
-        localStorage.setItem(
-          `comment_like_counts_${contentId}`,
-          JSON.stringify(updatedCommentLikes)
-        );
-      } catch (error) {
-        console.error("Error saving to localStorage:", error);
-      }
+      // Persist to localStorage with content-specific keys (non-blocking)
+      setTimeout(() => {
+        try {
+          localStorage.setItem(
+            `comment_likes_${user.id}_${contentId}`,
+            JSON.stringify(updatedUserLikes)
+          );
+          localStorage.setItem(
+            `comment_like_counts_${contentId}`,
+            JSON.stringify(updatedCommentLikes)
+          );
+        } catch (error) {
+          console.error("Error saving to localStorage:", error);
+        }
+      }, 0);
 
       // TODO: When comment_likes table is implemented, save to database here
       console.log(`${newLikedState ? "Liked" : "Unliked"} comment:`, commentId);

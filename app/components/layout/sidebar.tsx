@@ -24,6 +24,8 @@ import {
   Trophy,
   MoreHorizontal,
   X,
+  PlusCircle,
+  Lock,
 } from 'lucide-react';
 
 interface SidebarItemProps {
@@ -37,6 +39,7 @@ interface SidebarItemProps {
   isFooterLink?: boolean;
   highlight?: boolean;
   isMobile?: boolean;
+  lockIcon?: boolean;
 }
 
 function SidebarItem({ 
@@ -49,7 +52,8 @@ function SidebarItem({
   requiresAuth, 
   isFooterLink,
   highlight,
-  isMobile = false
+  isMobile = false,
+  lockIcon
 }: SidebarItemProps) {
   const { user } = useAuth();
   const showAuthMessage = requiresAuth && !user;
@@ -70,7 +74,7 @@ function SidebarItem({
     return (
       <Link
         to={showAuthMessage ? '/signin' : to}
-        className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors ${
+        className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative ${
           active
             ? 'text-primary'
             : highlight
@@ -79,7 +83,12 @@ function SidebarItem({
         }`}
         onClick={onClick}
       >
-        {Icon && <Icon className="w-5 h-5" />}
+        <div className="relative">
+          {Icon && <Icon className="w-5 h-5" />}
+          {lockIcon && (
+            <Lock className="w-2.5 h-2.5 text-amber-500 absolute -top-1 -right-1 fill-current bg-background rounded-full" />
+          )}
+        </div>
         <span className="text-xs font-medium leading-none">{label}</span>
       </Link>
     );
@@ -87,7 +96,7 @@ function SidebarItem({
   return (
     <Link
       to={showAuthMessage ? '/signin' : to}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative group ${
+      className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors relative group ${
         active
           ? 'bg-primary/10 text-primary'
           : highlight
@@ -96,11 +105,17 @@ function SidebarItem({
       }`}
       onClick={onClick}
     >
-      {Icon && <div className={collapsed ? 'mx-auto' : ''}><Icon className="w-5 h-5" /></div>}
-      {!collapsed && <span className="text-sm font-medium leading-none">{label}</span>}
+      <div className="flex items-center gap-3 min-w-0">
+        {Icon && <div className={collapsed ? 'mx-auto' : ''}><Icon className="w-5 h-5" /></div>}
+        {!collapsed && <span className="text-sm font-medium leading-none truncate">{label}</span>}
+      </div>
+      {lockIcon && !collapsed && (
+        <Lock className="w-3.5 h-3.5 text-amber-500 fill-current flex-shrink-0" />
+      )}
       {collapsed && Icon && (
-        <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground rounded-md opacity-0 group-hover:opacity-100 whitespace-nowrap z-50 shadow-md border">
+        <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground rounded-md opacity-0 group-hover:opacity-100 whitespace-nowrap z-50 shadow-md border flex items-center gap-1.5">
           {label}
+          {lockIcon && <Lock className="w-3 h-3 text-amber-500 fill-current" />}
         </div>
       )}
     </Link>
@@ -116,6 +131,7 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
+  const isPremium = profile?.subscription_status === 'active' || profile?.role === 'creator';
   const resolvedUsername = profile?.username || user?.user_metadata?.username || (user?.email ? user.email.split('@')[0] : undefined);
   const profilePath = user ? (resolvedUsername ? `/user/${resolvedUsername}` : '/profile') : '/signin';
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
@@ -170,6 +186,7 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
     { id: 'profile', label: 'Profile', icon: User, path: profilePath },
     { id: "goals", label: "Learning Goals", icon: Target, path: user ? '/library?tab=goals' : '/signin' },
     { id: "history", label: "History", icon: History, path: user ? '/history' : '/signin' },
+    { id: "request-book", label: "Request a Book", icon: PlusCircle, path: '/request-book' },
     ...(user && resolvedUsername ? [
       { id: "dashboard", label: "Dashboard", icon: CreditCard, path: `/dashboard/${resolvedUsername}` }
     ] : []),
@@ -246,11 +263,16 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
                   <Link
                     key={item.id}
                     to={item.path}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-accent"
+                    className="flex items-center justify-between px-4 py-3 rounded-lg transition-colors hover:bg-accent"
                     onClick={() => setShowMobileMore(false)}
                   >
-                    <item.icon className="w-5 h-5 text-muted-foreground" />
-                    <span className="font-medium">{item.label}</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <item.icon className="w-5 h-5 text-muted-foreground" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                    {item.id === 'request-book' && !isPremium && (
+                      <Lock className="w-4 h-4 text-amber-500 fill-current" />
+                    )}
                   </Link>
                 ))}
               </div>
@@ -324,6 +346,14 @@ export function Sidebar({ onCollapse, defaultCollapsed = false }: SidebarProps) 
                 to={user ? '/history' : '/signin'}
                 active={isActive('/history')}
                 collapsed={collapsed}
+              />
+              <SidebarItem
+                icon={PlusCircle}
+                label="Request a Book"
+                to="/request-book"
+                active={isActive('/request-book')}
+                collapsed={collapsed}
+                lockIcon={!isPremium}
               />
             </div>
 

@@ -832,6 +832,13 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
   if (selectedCategory !== "all") {
     return (
       <>
+        <h1 className="sr-only">
+          {selectedCategory
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")}{" "}
+          Urdu Summaries & E-Books - Inlits
+        </h1>
         {activeShelf && (
           <AddToShelfBanner
             shelfName={shelfName}
@@ -877,6 +884,7 @@ export function Home({ selectedCategory = "all", initialData }: HomeProps) {
 
   return (
     <>
+      <h1 className="sr-only">Inlits - Professional Urdu Audiobook Summaries & E-Books</h1>
       {activeShelf && (
         <AddToShelfBanner
           shelfName={shelfName}

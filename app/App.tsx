@@ -192,6 +192,11 @@ const CollectionPlayerPage = React.lazy(() =>
     default: module.CollectionPlayerPage,
   }))
 );
+const RequestBookPage = React.lazy(() =>
+  import("./pages/request-book").then((module) => ({
+    default: module.RequestBookPage,
+  }))
+);
 
 function LoadingFallback() {
   return (
@@ -393,6 +398,16 @@ function App() {
             element={
               <MainLayout>
                 <ReaderPage />
+              </MainLayout>
+            }
+          />
+
+          {/* Request Book Route */}
+          <Route
+            path="/request-book"
+            element={
+              <MainLayout>
+                <RequestBookPage />
               </MainLayout>
             }
           />
