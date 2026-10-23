@@ -327,7 +327,7 @@ export function PlayerPage() {
         };
 
         setContent(processedContent);
-        setUserRating(processedContent.user_rating);
+        setUserRating(processedContent.user_rating ?? 0);
         setIsLiked(processedContent.is_liked);
         setIsBookmarked(processedContent.is_bookmarked);
         setLikeCount(likesCount);
@@ -423,11 +423,11 @@ export function PlayerPage() {
           const formattedComments: Comment[] = commentsData
             .filter((comment) => !comment.parent_id) // Only top-level comments
             .map((comment) => {
-              const profile = comment.user;
+              const profile = Array.isArray(comment.user) ? comment.user[0] : comment.user;
               const replies = commentsData
                 .filter((reply) => reply.parent_id === comment.id)
                 .map((reply) => {
-                  const replyProfile = reply.user;
+                  const replyProfile = Array.isArray(reply.user) ? reply.user[0] : reply.user;
                   return {
                     id: reply.id,
                     content: reply.content,
@@ -486,8 +486,8 @@ export function PlayerPage() {
       return;
     }
 
+    const newLikedState = !isLiked;
     try {
-      const newLikedState = !isLiked;
 
       // Optimistic update
       setIsLiked(newLikedState);
@@ -550,8 +550,8 @@ export function PlayerPage() {
       return;
     }
 
+    const newBookmarkedState = !isBookmarked;
     try {
-      const newBookmarkedState = !isBookmarked;
 
       // Optimistic update
       setIsBookmarked(newBookmarkedState);
@@ -670,7 +670,7 @@ export function PlayerPage() {
       );
     } catch (error) {
       console.error("Error rating content:", error);
-      setUserRating(content.user_rating);
+      setUserRating(content.user_rating ?? 0);
     }
   };
 

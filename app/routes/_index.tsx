@@ -1,3 +1,4 @@
+import { getPublicSupabaseConfig } from "@/lib/supabase-public";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { createClient } from "@supabase/supabase-js";
@@ -9,10 +10,8 @@ import { CategoriesScroll } from "@/components/content/categories-scroll";
 import { Home } from "@/pages/home";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  // Use hardcoded credentials for server-side (same as in supabase.ts)
-  const supabaseUrl = "https://yvjrakgbqqazedjltflw.supabase.co";
-  const supabaseAnonKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2anJha2dicXFhemVkamx0Zmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMjIyNTIsImV4cCI6MjA1MjY5ODI1Mn0.tFpht9qLcCeilgnd9vmbF4abiJi96FvzmGZCOXL2DiU";
+  const { url: supabaseUrl, anonKey: supabaseAnonKey } =
+    getPublicSupabaseConfig(process.env);
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -117,8 +116,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
       books: booksResult.data || [],
       podcasts: podcastsResult.data || [],
       articles: [],
-      views: viewsData.data || [],
-      likes: likesData.data || [],
+      views: (viewsData.data || []).map((row) => ({
+        content_id: String(row.content_id),
+        content_type: String(row.content_type),
+      })),
+      likes: (likesData.data || []).map((row) => ({
+        content_id: String(row.content_id),
+        content_type: String(row.content_type),
+        rating: Number(row.rating),
+      })),
     });
   } catch (error) {
     return json({

@@ -1,13 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { getPublicSupabaseConfig, assertPublicKey } from "./supabase-public";
+import { createClient } from "@supabase/supabase-js";
 
-const isBrowser = typeof window !== 'undefined';
+const isBrowser = typeof window !== "undefined";
 
-// Hardcode credentials directly to ensure they're available
-const supabaseUrl = 'https://yvjrakgbqqazedjltflw.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2anJha2dicXFhemVkamx0Zmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMjIyNTIsImV4cCI6MjA1MjY5ODI1Mn0.tFpht9qLcCeilgnd9vmbF4abiJi96FvzmGZCOXL2DiU';
-
-const url = supabaseUrl;
-const key = supabaseAnonKey;
+const publicConfig =
+  isBrowser && window.__INLITS_PUBLIC_CONFIG__
+    ? window.__INLITS_PUBLIC_CONFIG__
+    : getPublicSupabaseConfig(
+        typeof process === "undefined" ? {} : process.env
+      );
+assertPublicKey(publicConfig.anonKey);
+const url = publicConfig.url;
+const key = publicConfig.anonKey;
 
 // Create Supabase client
 export const supabase = createClient(url, key, {
@@ -15,25 +19,25 @@ export const supabase = createClient(url, key, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: "pkce",
   },
   realtime: {
     params: {
-      eventsPerSecond: 2
-    }
+      eventsPerSecond: 2,
+    },
   },
   global: {
-    headers: { 
-      'x-client-info': 'inlits',
-      'Cache-Control': 'max-age=300' // 5 minutes cache for static content
-    }
+    headers: {
+      "x-client-info": "inlits",
+      "Cache-Control": "max-age=300", // 5 minutes cache for static content
+    },
   },
   db: {
-    schema: 'public'
-  }
+    schema: "public",
+  },
 });
 
-const hasDocument = typeof document !== 'undefined';
+const hasDocument = typeof document !== "undefined";
 
 // Connection state management
 let isConnected = true;
@@ -49,29 +53,31 @@ const RECONNECT_BACKOFF_FACTOR = 1.5;
 
 // Retry helper functions
 export const isRetryableError = (error: any) => {
-  return error.code === 'PGRST116' || // Timeout
-         error.code === '503' ||      // Service unavailable
-         error.code === '504' ||      // Gateway timeout
-         error.code === '429' ||      // Too many requests
-         error.code === 'ECONNRESET' || // Connection reset
-         error.message?.includes('network') || // Network errors
-         error.message?.includes('timeout') || // Timeout errors
-         error.message?.includes('connection'); // Connection errors
+  return (
+    error.code === "PGRST116" || // Timeout
+    error.code === "503" || // Service unavailable
+    error.code === "504" || // Gateway timeout
+    error.code === "429" || // Too many requests
+    error.code === "ECONNRESET" || // Connection reset
+    error.message?.includes("network") || // Network errors
+    error.message?.includes("timeout") || // Timeout errors
+    error.message?.includes("connection")
+  ); // Connection errors
 };
 
 // Improved retry helper with exponential backoff
-export const withRetry = async <T,>(
+export const withRetry = async <T>(
   operation: () => Promise<T>,
   maxRetries = MAX_RETRIES,
   initialDelay = INITIAL_RETRY_DELAY,
   timeout = 10000
 ): Promise<T> => {
   let lastError;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timed out')), timeout);
+        setTimeout(() => reject(new Error("Operation timed out")), timeout);
       });
 
       const result = await Promise.race([operation(), timeoutPromise]);
@@ -90,28 +96,32 @@ export const withRetry = async <T,>(
           MAX_RETRY_DELAY
         );
         const jitter = Math.random() * 1000; // Add up to 1s of random jitter
-        await new Promise(resolve => setTimeout(resolve, backoffDelay + jitter));
+        await new Promise((resolve) =>
+          setTimeout(resolve, backoffDelay + jitter)
+        );
       }
     }
   }
-  
+
   throw lastError;
 };
 
 // Improved reconnection helper
 export const reconnect = async () => {
   const now = Date.now();
-  
+
   // Prevent reconnection attempts too close together
   if (now - lastReconnectAttempt < INITIAL_RETRY_DELAY) {
     return false;
   }
-  
+
   if (connectionAttempts >= MAX_RETRIES) {
-    console.error('Max reconnection attempts reached, waiting for manual refresh');
+    console.error(
+      "Max reconnection attempts reached, waiting for manual refresh"
+    );
     // Emit an event that UI can listen to for showing a refresh button
     if (isBrowser) {
-      window.dispatchEvent(new CustomEvent('supabase:connection-failed'));
+      window.dispatchEvent(new CustomEvent("supabase:connection-failed"));
     }
     return false;
   }
@@ -119,31 +129,32 @@ export const reconnect = async () => {
   try {
     lastReconnectAttempt = now;
     connectionAttempts++;
-    
+
     // Calculate backoff delay
     const backoffDelay = Math.min(
-      INITIAL_RETRY_DELAY * Math.pow(RECONNECT_BACKOFF_FACTOR, connectionAttempts - 1),
+      INITIAL_RETRY_DELAY *
+        Math.pow(RECONNECT_BACKOFF_FACTOR, connectionAttempts - 1),
       MAX_RETRY_DELAY
     );
-    
+
     // Add jitter to prevent thundering herd
     const jitter = Math.random() * 1000;
-    await new Promise(resolve => setTimeout(resolve, backoffDelay + jitter));
-    
+    await new Promise((resolve) => setTimeout(resolve, backoffDelay + jitter));
+
     // Test connection with a simple query
-    const { error } = await supabase.from('profiles').select('id').limit(1);
-    
+    const { error } = await supabase.from("profiles").select("id").limit(1);
+
     if (error) {
-      console.error('Connection test failed:', error);
+      console.error("Connection test failed:", error);
       return false;
     }
-    
+
     // Reset connection state on successful reconnect
     isConnected = true;
     connectionAttempts = 0;
     return true;
   } catch (error) {
-    console.error('Reconnection failed:', error);
+    console.error("Reconnection failed:", error);
     return false;
   }
 };
@@ -188,16 +199,16 @@ export const startConnectionCheck = (interval = 60000) => {
 
 if (isBrowser) {
   // Add online/offline handlers
-  window.addEventListener('online', () => {
-    console.log('Network online, attempting reconnect');
+  window.addEventListener("online", () => {
+    console.log("Network online, attempting reconnect");
     if (!isConnected) {
       connectionAttempts = 0;
       reconnect();
     }
   });
 
-  window.addEventListener('offline', () => {
-    console.log('Network offline, marking as disconnected');
+  window.addEventListener("offline", () => {
+    console.log("Network offline, marking as disconnected");
     isConnected = false;
   });
 }

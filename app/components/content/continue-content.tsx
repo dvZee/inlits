@@ -103,7 +103,7 @@ export function ContinueContent() {
               thumbnail:
                 content.cover_url ||
                 "https://placehold.co/600x800?text=Content",
-              duration: type === "podcast" ? content.duration : "2 hours",
+              duration: "duration" in content ? String(content.duration ?? "") : "",
               views: 0,
               createdAt: item.last_accessed || new Date().toISOString(),
               creator: author

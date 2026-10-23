@@ -107,9 +107,9 @@ export function AudioProvider({
     if (playlist.length === 0) return;
     const nextIndex = (currentTrackIndex + 1) % playlist.length;
     const nextTrack = playlist[nextIndex];
-    if (nextTrack) {
+    if (nextTrack && nextTrack.type !== "ebook") {
       setCurrentTrackIndex(nextIndex);
-      playAudio(nextTrack);
+      playAudio({ ...nextTrack, type: nextTrack.type });
     }
   };
 
@@ -119,9 +119,9 @@ export function AudioProvider({
     const prevIndex =
       (currentTrackIndex - 1 + playlist.length) % playlist.length;
     const prevTrack = playlist[prevIndex];
-    if (prevTrack) {
+    if (prevTrack && prevTrack.type !== "ebook") {
       setCurrentTrackIndex(prevIndex);
-      playAudio(prevTrack);
+      playAudio({ ...prevTrack, type: prevTrack.type });
     }
   };
 

@@ -1,3 +1,5 @@
+import { json } from "@remix-run/node";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
@@ -7,6 +9,7 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useRouteLoaderData,
 } from "@remix-run/react";
 import { Suspense, useEffect } from "react";
 import styles from "./index.css?url";
@@ -18,6 +21,13 @@ import { AudioPlayer } from "@/components/audio/audio-player";
 import { GlobalAudioPlayer } from "@/components/audio/global-audio-player";
 import { useAudio } from "@/lib/audio-context";
 import { Loader2, AlertCircle } from "lucide-react";
+
+export async function loader() {
+  return json(
+    { publicConfig: getPublicSupabaseConfig(process.env) },
+    { headers: { "Cache-Control": "no-store" } }
+  );
+}
 
 export const meta: MetaFunction = () => [
   { charSet: "utf-8" },
@@ -61,11 +71,16 @@ function Document({
   title?: string;
 }) {
   const location = useLocation();
-  const canonicalUrl = `https://inlits.com${location.pathname}${location.search ? location.search : ""}`;
+  const rootData = useRouteLoaderData<typeof loader>("root");
+  const canonicalUrl = `https://inlits.com${location.pathname}${
+    location.search ? location.search : ""
+  }`;
 
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         {title ? <title>{title}</title> : null}
         <Meta />
         <Links />
@@ -92,6 +107,15 @@ function Document({
       </head>
       <body className="min-h-full bg-background text-foreground">
         {children}
+        {rootData && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.__INLITS_PUBLIC_CONFIG__=${JSON.stringify(
+                rootData.publicConfig
+              ).replace(/</g, "\\u003c")};`,
+            }}
+          />
+        )}
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -124,11 +148,17 @@ function useClientSEO() {
     const searchParams = new URLSearchParams(location.search);
 
     let title = "Inlits: Urdu Audiobooks, Book Summaries & Self Growth";
-    let description = "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
+    let description =
+      "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
 
-    if (pathname === "/") {
+    if (pathname === "/intelligence") {
+      title = "Inlits — Understand. Choose. Move forward.";
+      description =
+        "A calm space for your personal context, decisions and next steps.";
+    } else if (pathname === "/") {
       title = "Inlits: Urdu Audiobooks, Book Summaries & Self Growth";
-      description = "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
+      description =
+        "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
     } else if (pathname === "/search") {
       const query = searchParams.get("q");
       if (query) {
@@ -137,26 +167,33 @@ function useClientSEO() {
         description = `Access the complete Urdu audiobook summary and key takeaways of "${decodedQuery}" on Inlits. Start listening and investing in your growth today.`;
       } else {
         title = "Search Book Summaries & Audiobooks in Urdu - Inlits";
-        description = "Search and discover Urdu summaries, audiobooks, and e-books on business, self-help, psychology, and productivity on Inlits.";
+        description =
+          "Search and discover Urdu summaries, audiobooks, and e-books on business, self-help, psychology, and productivity on Inlits.";
       }
     } else if (pathname.startsWith("/player/")) {
       const parts = pathname.split("/");
       const idParam = parts[parts.length - 1];
       const isPodcast = idParam ? idParam.startsWith("podcast") : false;
-      
+
       let contentName = "";
       if (idParam) {
         const slugParts = idParam.split("-");
-        const cleanedParts = slugParts.filter(p => p !== "audiobook" && p !== "podcast" && isNaN(Number(p)));
-        contentName = cleanedParts.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+        const cleanedParts = slugParts.filter(
+          (p) => p !== "audiobook" && p !== "podcast" && isNaN(Number(p))
+        );
+        contentName = cleanedParts
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
       }
 
       if (contentName) {
         title = `Urdu Summary of "${contentName}" | Listen on Inlits`;
         description = `Listen to the comprehensive Urdu audiobook summary of "${contentName}" on Inlits. Access key insights and learn on the go.`;
       } else {
-        title = isPodcast ? "Listen to Premium Urdu Podcasts - Inlits" : "Listen to Premium Urdu Audiobook Summaries - Inlits";
-        description = isPodcast 
+        title = isPodcast
+          ? "Listen to Premium Urdu Podcasts - Inlits"
+          : "Listen to Premium Urdu Audiobook Summaries - Inlits";
+        description = isPodcast
           ? "Explore premium Urdu podcasts on business, productivity, and mindset on Inlits."
           : "Listen to high-quality Urdu audiobook summaries of bestselling books on Inlits.";
       }
@@ -166,8 +203,12 @@ function useClientSEO() {
       let contentName = "";
       if (idParam) {
         const slugParts = idParam.split("-");
-        const cleanedParts = slugParts.filter(p => p !== "ebook" && p !== "book" && isNaN(Number(p)));
-        contentName = cleanedParts.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+        const cleanedParts = slugParts.filter(
+          (p) => p !== "ebook" && p !== "book" && isNaN(Number(p))
+        );
+        contentName = cleanedParts
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
       }
 
       if (contentName) {
@@ -175,32 +216,41 @@ function useClientSEO() {
         description = `Read key takeaways, notes, and structured summaries of "${contentName}" in Urdu on Inlits. Expand your knowledge anywhere.`;
       } else {
         title = "Read Premium Urdu Summaries & E-Books - Inlits";
-        description = "Read high-quality structured Urdu summaries and e-books on business, self-help, and productivity on Inlits.";
+        description =
+          "Read high-quality structured Urdu summaries and e-books on business, self-help, and productivity on Inlits.";
       }
     } else if (pathname === "/library") {
       title = "My Library | Personal Growth & Learning Goals - Inlits";
-      description = "Track your learning goals, saved summaries, premium audiobooks, and history in your personal Inlits library.";
+      description =
+        "Track your learning goals, saved summaries, premium audiobooks, and history in your personal Inlits library.";
     } else if (pathname === "/community") {
       title = "Inlits Community | Book Clubs, Discussions & Study Groups";
-      description = "Join Urdu book clubs, start discussions, form study groups, and take learning challenges with the Inlits community.";
+      description =
+        "Join Urdu book clubs, start discussions, form study groups, and take learning challenges with the Inlits community.";
     } else if (pathname === "/request-book") {
       title = "Request a Book Summary - Inlits Premium";
-      description = "Request any book summary you want, and the Inlits team will research, write, and record it in Urdu in under 72 hours.";
+      description =
+        "Request any book summary you want, and the Inlits team will research, write, and record it in Urdu in under 72 hours.";
     } else if (pathname === "/subscription") {
       title = "Inlits Premium Plans | Invest in Your Personal Growth";
-      description = "Unlock unlimited Urdu audiobook summaries, e-books, high-quality ad-free audio, and custom book requests with Inlits Premium.";
+      description =
+        "Unlock unlimited Urdu audiobook summaries, e-books, high-quality ad-free audio, and custom book requests with Inlits Premium.";
     } else if (pathname === "/about") {
       title = "About Inlits | Urdu Audiobooks & Summaries Platform";
-      description = "Discover the mission of Inlits. We make world-class books and summaries accessible in Urdu to empower learners across the globe.";
+      description =
+        "Discover the mission of Inlits. We make world-class books and summaries accessible in Urdu to empower learners across the globe.";
     } else if (pathname === "/contact") {
       title = "Contact Inlits Support | We are Here to Help";
-      description = "Have questions or feedback? Get in touch with the Inlits support team for help with your account, billing, or suggestions.";
+      description =
+        "Have questions or feedback? Get in touch with the Inlits support team for help with your account, billing, or suggestions.";
     } else if (pathname === "/privacy") {
       title = "Privacy Policy - Inlits";
-      description = "Read the Inlits privacy policy to understand how we collect, use, and protect your personal information.";
+      description =
+        "Read the Inlits privacy policy to understand how we collect, use, and protect your personal information.";
     } else if (pathname === "/terms") {
       title = "Terms of Service - Inlits";
-      description = "Read the Inlits terms of service and conditions for using our platform, audiobooks, and subscriptions.";
+      description =
+        "Read the Inlits terms of service and conditions for using our platform, audiobooks, and subscriptions.";
     }
 
     // Update document title
@@ -209,21 +259,21 @@ function useClientSEO() {
     // Update description meta tag
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
+      metaDesc = document.createElement("meta");
+      metaDesc.setAttribute("name", "description");
       document.head.appendChild(metaDesc);
     }
-    metaDesc.setAttribute('content', description);
+    metaDesc.setAttribute("content", description);
 
     // Update Open Graph and Twitter tags
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', title);
+    if (ogTitle) ogTitle.setAttribute("content", title);
     const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', description);
+    if (ogDesc) ogDesc.setAttribute("content", description);
     const twTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twTitle) twTitle.setAttribute('content', title);
+    if (twTitle) twTitle.setAttribute("content", title);
     const twDesc = document.querySelector('meta[name="twitter:description"]');
-    if (twDesc) twDesc.setAttribute('content', description);
+    if (twDesc) twDesc.setAttribute("content", description);
   }, [location]);
 }
 

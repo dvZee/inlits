@@ -440,7 +440,7 @@ export function HistoryPage() {
                                 <span className="capitalize">{item.type}</span>
                               </div>
                               <span>•</span>
-                              <span>{item.creator.name}</span>
+                              <span>{item.creator?.name || 'Unknown author'}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">

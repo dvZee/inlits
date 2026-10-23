@@ -465,7 +465,7 @@ export function LibraryPage() {
     if (searchQuery) {
       filtered = filtered.filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.creator.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.creator?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -748,7 +748,7 @@ export function LibraryPage() {
                       {item.title}
                     </h3>
                     <p className="text-xs text-muted-foreground line-clamp-1">
-                      {item.creator.name}
+                      {item.creator?.name || 'Unknown author'}
                     </p>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">

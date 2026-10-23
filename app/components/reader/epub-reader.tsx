@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
-import { ReactReader } from "react-reader";
+import { ReactReader, ReactReaderStyle as DefaultReaderStyle } from "react-reader";
 import {
   BookOpen,
   Settings,
@@ -391,6 +391,7 @@ export function EpubReader({ fileUrl, title }: EpubReaderProps) {
 }
 
 const ReactReaderStyle = {
+  ...DefaultReaderStyle,
   container: {
     overflow: "hidden",
     position: "relative" as const,
