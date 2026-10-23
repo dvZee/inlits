@@ -73,7 +73,7 @@ Users can export all their intelligence records through an authenticated downloa
 
 ## Validation evidence
 
-`npm run test:intelligence` runs PostgreSQL/RLS tests using PGlite plus explicitly test-only provider transports. `npm run typecheck` and `npm run build` are also required. The current local suite has 12 passing tests. Full command output is in `docs/verification/`. The first GitHub Actions run for the earlier commit reported failure; its step list was empty and its log download returned 404, so remote CI is not asserted to pass. Check the latest commit's run before merging.
+`npm run test:intelligence` runs PostgreSQL/RLS tests using PGlite plus explicitly test-only provider transports. `npm run typecheck` and `npm run build` are also required. The current local suite has 12 passing tests. Full command output is in `docs/verification/`. GitHub Actions runs 1 and 2 failed before starting. The run-summary annotation states: "The job was not started because your account is locked due to a billing issue." The account owner must resolve GitHub billing before remote checks can run. This is not evidence that the code failed a test; it also is not a remote CI pass. Latest inspected run: https://github.com/dvZee/inlits/actions/runs/39959241322.
 
 Observed in the actual browser: signed-out app loads, navigation changes the active view, and WORK remains behind authentication. UTF-8 and hydration issues were corrected. No real account credentials were entered. Authenticated E2E, mobile viewports, live sending, OpenAI calls, Hermes execution and browser-independent worker execution remain unverified.
 
