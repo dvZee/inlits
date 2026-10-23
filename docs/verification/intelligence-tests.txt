@@ -1,17 +1,25 @@
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
 > inlits@1.0.4 test:intelligence
-> node --import tsx --test tests/intelligence.test.ts
+> node --import tsx --test tests/intelligence.test.ts tests/execution.test.ts
 
-✔ six transparent reflective instruments reject invalid responses and score repeatably (2.23502ms)
-✔ commands enforce explicit consent, input boundaries and reject ownership injection (3.197552ms)
-✔ migration applies; real Postgres RLS separates users; goal handoff is idempotent (2700.369494ms)
-✔ API fails closed for unauthenticated, cross-origin and unsupported requests (105.249814ms)
-ℹ tests 4
+✔ persistent queue enforces quotas, idempotency, cancellation, leases and private context boundaries (3112.628202ms)
+✔ outreach separates review and permission, freezes revisions, suppresses recipients, and prevents duplicate dispatch (1942.837906ms)
+✔ AI adapters handle refusals, incomplete and invalid output, and block fabricated evidence (10.415223ms)
+✔ Hermes is disabled without operator-verified isolation, and rejects unfinished plans (1.880409ms)
+✔ mail webhook checks signature and freshness (2.015354ms)
+✔ privacy export is complete and owner-scoped; deletion preserves other accounts (1897.226365ms)
+✔ sending uses the immutable approved preview, records acceptance only, and quarantines ambiguous outcomes (4.620987ms)
+✔ staging public configuration cannot expose service-role credentials (4.513126ms)
+✔ six transparent reflective instruments reject invalid responses and score repeatably (2.095631ms)
+✔ commands enforce explicit consent, input boundaries and reject ownership injection (4.953369ms)
+✔ migration applies; real Postgres RLS separates users; goal handoff is idempotent (3225.272857ms)
+✔ API fails closed for unauthenticated, cross-origin and unsupported requests (111.179781ms)
+ℹ tests 12
 ℹ suites 0
-ℹ pass 4
+ℹ pass 12
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 3381.602013
+ℹ duration_ms 7543.181262

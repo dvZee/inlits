@@ -1,3 +1,4 @@
+import { readCommand } from "@/lib/intelligence/http.server";
 import {
   json,
   type ActionFunctionArgs,
@@ -39,28 +40,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 export async function action({ request }: ActionFunctionArgs) {
   try {
-    if (request.method !== "POST")
-      return json({ error: "Method not allowed." }, 405);
-    if (request.headers.get("Origin") !== new URL(request.url).origin)
-      return json({ error: "Unrecognized request origin." }, 403);
-    if (!request.headers.get("Content-Type")?.startsWith("application/json"))
-      return json({ error: "Use JSON." }, 415);
+    const input = await readCommand(request);
     const { db, user } = await authenticate(request);
-    const body = await request.text();
-    if (body.length > 24000)
-      return json({ error: "Request is too large." }, 413);
-    let input: unknown;
-    try {
-      input = JSON.parse(body);
-    } catch {
-      return json({ error: "Invalid JSON." }, 400);
-    }
     const parsed = commandSchema.safeParse(input);
     if (!parsed.success)
       return json({ error: "Please check the required fields." }, 400);
     const c = parsed.data;
     let result;
     switch (c.action) {
+      case "decision.accept":
+        result = await db.rpc("intelligence_accept_decision", {
+          job: c.job_id,
+          selected_option: c.selected,
+        });
+        break;
       case "fact.save": {
         const record = {
           label: c.label,

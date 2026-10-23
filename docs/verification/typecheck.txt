@@ -2,4 +2,3 @@ npm warn Unknown env config "http-proxy". This will stop working in the next maj
 
 > inlits@1.0.4 typecheck
 > tsc --project tsconfig.json
-

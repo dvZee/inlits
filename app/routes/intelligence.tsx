@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@remix-run/react";
+import { useTheme } from "@/components/theme-provider";
 import { supabase } from "@/lib/supabase";
 import {
   assessmentDefinitions,
   assessmentDisclaimer,
 } from "@/lib/intelligence/assessments";
 import type { MetaFunction } from "@remix-run/node";
+import { PrivacyControls } from "@/components/intelligence/privacy";
+import { Workflows } from "@/components/intelligence/workflows";
 import css from "@/intelligence.css?url";
 export const links = () => [{ rel: "stylesheet", href: css }];
 export const meta: MetaFunction = () => [
@@ -28,6 +31,8 @@ const empty: State = {
 };
 const tabs = ["Home", "ME", "CHOOSE", "WORK"] as const;
 export default function Intelligence() {
+  const { setTheme } = useTheme();
+  const [workflowVersion, setWorkflowVersion] = useState(0);
   const [tab, setTab] = useState<(typeof tabs)[number]>("Home");
   const [data, setData] = useState<State>(empty);
   const [signedIn, setSignedIn] = useState(false);
@@ -152,6 +157,18 @@ export default function Intelligence() {
             </button>
           ))}
         </nav>
+        <button
+          aria-label="Toggle light and dark appearance"
+          onClick={() =>
+            setTheme(
+              document.documentElement.classList.contains("dark")
+                ? "light"
+                : "dark"
+            )
+          }
+        >
+          Appearance
+        </button>
         <Link to="/library" className="ii-library">
           Your library ↗
         </Link>
@@ -211,6 +228,23 @@ export default function Intelligence() {
               <p role="status" className="ii-notice">
                 {notice}
               </p>
+            )}
+            {(tab === "Home" || tab === "CHOOSE" || tab === "WORK") && (
+              <Workflows
+                key={workflowVersion}
+                mode={
+                  tab === "Home" ? "home" : tab === "CHOOSE" ? "choose" : "work"
+                }
+                onOpenWork={() => setTab("WORK")}
+                businesses={data.business_workspaces}
+                onDecision={(result) => {
+                  void save({
+                    action: "decision.accept",
+                    job_id: result.job_id,
+                    selected: result.selected,
+                  });
+                }}
+              />
             )}
             {tab === "Home" && (
               <>
@@ -538,11 +572,11 @@ export default function Intelligence() {
             {tab === "CHOOSE" && (
               <>
                 <section className="ii-card">
-                  <h2>Your judgment, with room to think.</h2>
+                  <h2>Your decision memory.</h2>
                   <p>
                     This decision journal preserves your comparison and
-                    reasoning. Automated recommendations and current research
-                    are not available in this release.
+                    reasoning. Connected research appears below when a
+                    configured worker is available.
                   </p>
                 </section>
                 <form
@@ -655,6 +689,17 @@ export default function Intelligence() {
                             <p>Trade-off: {o.tradeoff}</p>
                           </div>
                         ))}
+                        {d.evidence?.map((s: Row) => (
+                          <p key={s.url}>
+                            <a
+                              href={s.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {s.title}
+                            </a>
+                          </p>
+                        ))}
                         {d.context_snapshot.map((f: Row) => (
                           <p key={f.id}>
                             {f.label}: {f.value} ({f.kind})
@@ -698,8 +743,8 @@ export default function Intelligence() {
                 <section className="ii-card">
                   <h2>A clear next step for your business.</h2>
                   <p>
-                    Goals are saved plans. Background execution, connected
-                    providers, and sending are not enabled here.
+                    Goals are saved plans. Connected jobs and provider outcomes
+                    appear separately, with their actual status.
                   </p>
                 </section>
                 <form
@@ -806,6 +851,18 @@ export default function Intelligence() {
               </>
             )}
           </>
+        )}
+        {signedIn && (
+          <PrivacyControls
+            onDelete={() => {
+              setWorkflowVersion(v=>v+1);
+              setData(empty);
+              setActive(null);
+              setEditing(null);
+              setTab("Home");
+              setNotice("Intelligence data deleted.");
+            }}
+          />
         )}
         <footer className="ii-footer">
           Less managing. More living.

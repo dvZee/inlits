@@ -1,3 +1,4 @@
+import { assertPublicKey } from "../supabase-public";
 import { createClient } from "@supabase/supabase-js";
 import { json } from "@remix-run/node";
 // User JWT, never a service role: Postgres RLS remains authoritative.
@@ -15,6 +16,7 @@ export async function authenticate(request: Request) {
       { error: "Personal intelligence is not configured on this environment." },
       { status: 503, headers: privateHeaders }
     );
+  assertPublicKey(key);
   const db = createClient(url, key, {
     global: { headers: { Authorization: authorization } },
     auth: { persistSession: false, autoRefreshToken: false },

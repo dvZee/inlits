@@ -10,7 +10,8 @@
     "preview": "remix vite:build && remix-serve ./build/server/index.js",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc --project tsconfig.json",
-    "test:intelligence": "node --import tsx --test tests/intelligence.test.ts"
+    "test:intelligence": "node --import tsx --test tests/intelligence.test.ts tests/execution.test.ts",
+    "worker": "node --import tsx scripts/worker/run.ts"
   },
   "dependencies": {
     "@netlify/remix-adapter": "^2.6.1",

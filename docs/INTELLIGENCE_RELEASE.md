@@ -1,94 +1,113 @@
-# Inlits intelligence implementation — 23 October 2026
+# Inlits implementation and release gates — 23 October 2026
 
-## Release status
+**Not deployed. Not launch-ready.** This branch contains implemented frontend, server routes, SQL migrations, provider adapters and a persistent-worker entry point. Live providers and hosted infrastructure have not been verified. Fixture-only provider tests must not be interpreted as real research, email delivery or Hermes execution.
 
-**Not launch-ready. Not deployed.** This branch adds a real database-backed foundation to the existing Remix application. It is not the full ME/CHOOSE/WORK mandate. The original audiobook application, existing authentication provider, and legacy data remain in place. The new route is `/intelligence`; it is intentionally not advertised in the production navigation yet.
+## Architecture actually implemented
 
-## Audit and architecture
+Preserves the existing `dvZee/inlits` Remix / React 18 / Supabase / Netlify application and audiobook routes. Starting production branch was `58f473c69086b550d92ef4bbf1d9ec1639cfebf9`. The September Product Bible was reviewed; the uploaded October mandate is the current product contract.
 
-Audited repository: `dvZee/inlits`, starting at `58f473c69086b550d92ef4bbf1d9ec1639cfebf9`. It is a Remix + React 18 application, not a blank Next.js project. It already uses Supabase authentication/Postgres and a Netlify adapter, with legacy books, audio, accounts and payment flows. `inlits/inlits` also exists but is not the writable repository selected for this change. No current production database inspection was performed.
+- `/intelligence`: calm Home, ME, CHOOSE and WORK surfaces with light/dark appearance control. Home reads saved artifacts, pending drafts and failures; it never invents completed operations.
+- `/api/intelligence`: verified Supabase JWT, strict input commands, same-origin mutations, bounded JSON bodies, private response caching, personal context and decision memory.
+- `/api/workflows`: owner-scoped jobs, current approved-message previews, exact campaign recipient counts and explicitly separate review/authorization/queue actions. Capabilities require a recent worker heartbeat. Provider configuration is not evidence of successful provider access.
+- Four additive migrations create personal facts and corrections, versioned reflection definitions, decision records, businesses, goals, durable jobs, leases, schedules, company leads, immutable outreach versions, outbox records, suppressions, audit events, usage allowances and privacy RPCs.
+- Existing browser and server Supabase clients can now use the same environment-selected project. Only public anonymous/publishable credentials enter the browser; service-role keys are rejected by the public-config validator. Legacy public configuration is retained when neither environment variable is supplied.
+- `scripts/worker/run.ts` runs independently of the web process. It ticks schedules, claims Postgres jobs with `SKIP LOCKED`, executes bounded handlers, verifies returned artifacts and publishes them only with a current lease. No in-memory queue is presented as durable infrastructure.
+- `deploy/worker.Dockerfile` packages that Node worker. The Docker image has not been built or deployed in this environment.
+- Server and worker secrets stay in runtime environment variables. Worker logging records job IDs, types and error codes rather than prompts, model responses or keys.
 
-Reviewed Product Bible v2.0 via the connected Drive. The uploaded master build mandate supersedes its older navigation and roadmap; keep subscription alignment, explainability, personal context and user agency.
+## Working product behavior in code
 
-Implemented architecture:
+### ME
 
-- Existing Remix route `/intelligence` provides Home, ME, CHOOSE and WORK views.
-- `/api/intelligence` authenticates every request against Supabase `getUser`, forwarding the user's JWT to database queries. It never uses a service role.
-- Strict Zod command validation rejects arbitrary properties, invalid IDs and missing consent. POSTs require same origin and JSON. Private API responses disable caching.
-- Additive migration creates owner-isolated personal facts, correction history, versioned assessment definitions/sessions, decision records, businesses and work goals.
-- Database triggers enforce assessment scoring and immutability even if clients bypass Remix. Facts retain correction history; deleting a fact deletes that fact's history. Decision snapshots remain historical records.
-- Decision-to-business handoff runs in one Postgres function and has a unique constraint for retry safety. It transfers title/next step only; personal context snapshots are not copied to the business.
-- Work goals have only `planned` and `cancelled` states. There is no worker or external-action capability in this branch, and no completed-work claim.
+Editable personal facts distinguish user facts, interpretations and uncertain hypotheses. Database-backed correction history is preserved; deleting a fact deletes that fact's correction history. Saved decision/job snapshots are separate historical records and are removed through intelligence-data deletion.
 
-## Product contract and verification matrix
+Six versioned, three-question self-reflections cover values, cognition, communication, career/enterprise, money habits and habits/energy. They save/resume, calculate repeatable results and can save insights with consent. Database triggers replace forged client scores and reject edits to completed sessions. They are explicitly **informal reflections**, not validated psychometric instruments, clinical screens or comprehensive financial assessments. No clinical instruments are exposed.
 
-| Feature | Implemented | Integrated | Tested | Deployed | Evidence / blocker |
+### CHOOSE
+
+Manual comparisons, reasons, context snapshots, next steps and outcomes persist. When an AI-enabled worker is configured, a decision becomes a persisted background research job. Research receives only the entered decision topic. Selected Personal Model context is supplied separately to a synthesis call without tools. A user should still avoid putting private information into a public research topic.
+
+The OpenAI Responses adapter uses strict structured output, `store:false`, explicit model selection, timeouts and bounded output/tool calls. Outputs are validated again on the server. Displayed source URLs must match URLs returned by the provider's research output; this verifies source provenance, not the truth of every claim. Recommended alternatives, tradeoffs, uncertainty and one next step are stored as an artifact. User acceptance copies the actual job result, original context snapshot and source evidence into decision memory.
+
+### WORK
+
+Business creation and decision-to-goal handoff persist; goals remain labelled plans. Implemented handlers include:
+
+- Company research: public evidence → validated company records → domain deduplication → transactional persistence. No guessed email addresses. Company websites must have appeared among retrieved source domains. Qualification describes fit, not purchase intent.
+- Daily brief: deterministic summary of saved workspace goals and job statuses. It does not invent revenue, orders or external provider activity. A schedule runs every 24 hours after enablement; pending briefs do not accumulate indefinitely.
+- Hermes plan: private HTTP API adapter, disabled unless isolation is explicitly verified. It checks `/v1/toolsets` and refuses enabled or unknown tools before requesting a text plan. Session keys are ephemeral. Operator-side memory disablement and sandbox isolation remain required. This is a proposed-plan artifact, not full business automation.
+
+### Outreach
+
+Draft preparation stores immutable version snapshots, including the exact unsubscribe footer shown in the review preview. Recipient/body/subject edits increment the version, reset approval, revoke campaign sending permission and cancel queued versions. Per-message and transactional bulk review are available. The user separately grants a revision-bound, expiring recipient limit, then explicitly queues approved versions.
+
+Delivery uses a configured Resend sender, a server-side account allowlist and provider idempotency keys. There is a 50-recipient campaign maximum and 50 attempted sends per account per database day. The worker rechecks current approval, campaign permission and suppression before dispatch. Cancellation/revocation stops queued work; requests already in flight cannot be recalled.
+
+Provider acceptance is stored as `accepted`, not `delivered`. Delivery/bounce/complaint updates require signed, fresh webhook requests and deduplicated provider events. Reordered events cannot turn a known bounce into delivery. An ambiguous timeout or interrupted dispatch becomes `unknown` and is **not automatically resent**. These cases require provider reconciliation.
+
+Resend is a disabled-by-default, operator-configured delivery adapter for an allowlisted launch account. It is not a completed multi-tenant OAuth connector marketplace or permission to send a real campaign.
+
+### Privacy
+
+Users can export all their intelligence records through an authenticated download and explicitly delete intelligence records/workspaces. Existing audiobook accounts and libraries are preserved. Deletion is blocked while provider dispatch is in flight. This does not implement full deletion of the legacy Inlits account, backups or provider-held copies; that broader privacy lifecycle remains a launch gate.
+
+## Verification matrix
+
+| Feature | Implemented | Integrated | Tested | Deployed | Evidence / remaining blocker |
 | --- | --- | --- | --- | --- | --- |
-| Existing-account authentication gate | Yes | Existing client + verified server JWT | Browser signed-out gate; API rejects unauthenticated requests | No | Live authenticated journey needs staging test account |
-| Personal facts, corrections, deletion | Yes | API + migration + UI | DB correction history and RLS | No | Migration not applied to hosted Supabase |
-| Six reflective assessments | Yes | Versioned question bank + sessions + deterministic scoring | Repeatability, invalid answers, scoring tamper rejection, completion immutability, resume | No | These are brief informal reflections, not validated instruments or comprehensive psychometrics |
-| Decision memory and outcomes | Yes | UI + API + DB | Input validation; owner isolation | No | Manual decision journal, not AI recommendations |
-| Decision → business goal | Yes | UI + transactional RPC | Ownership and retry idempotency | No | Plans only; no execution worker |
-| Home / ME / CHOOSE / WORK navigation | Yes | Existing Remix shell | Browser checked signed-out navigation | No | Signed-in desktop/mobile journeys still required |
-| AI decision/research engine | No | No | No | No | Implementation + secure OpenAI configuration + usage budget required |
-| Hermes execution | No | No | No | No | Runtime integration, sandbox, worker host, pinned version and security review required |
-| Durable queue, scheduler, daily brief | No | No | No | No | Worker implementation and independently verified hosting required |
-| Lead research and outreach | No | No | No | No | Lead/source pipeline, draft versions, approvals, provider, suppression and delivery verification required |
-| Ecommerce operations | No | No | No | No | Provider choice, OAuth/data contracts and workflow implementation required |
-| Billing | Legacy only | Not reverified | No live billing test | No new changes | Legal entity/provider eligibility and live payment verification required |
-| Data export and full account deletion | No new flow | No | No | No | Full privacy lifecycle remains a release gate |
-| Monitoring, backups, incident recovery | Not configured | No | No | No | Hosting/database access and operational verification required |
+| Personal Model and corrections | Yes | UI/API/SQL | Actual PostgreSQL RLS/history | No | Hosted migration and authenticated journeys |
+| Reflections and resume | Yes | UI/API/versioned SQL | Validation, repeatability, tamper rejection, immutability | No | Full signed-in browser journey |
+| Decision memory/handoff | Yes | UI/API/RPC | Ownership, validation, retry safety | No | Hosted data and browser verification |
+| OpenAI research/synthesis | Adapter + worker | No live connection | Test-only provider fixtures, refusal/incomplete/source checks | No | Secret configuration, model and spend allowance, live acceptance test |
+| Durable jobs/schedules | Yes | SQL + independent worker entry | SQL claims, quotas, leases, cancellation, schedule deduplication | No | Persistent host and real process/browser-close test |
+| Lead research | Yes | Provider pipeline + artifact/lead persistence | Output validation/domain deduplication fixtures | No | Live research and hosted records |
+| Daily business brief | Yes | Saved workspace data + scheduler | Queue/schedule tests; no external analytics | No | Independently running worker |
+| Hermes | HTTP plan adapter only | No live runtime | Isolation gating, enabled-tool refusal boundary, incomplete results | No | Pinned runtime, separate sandbox, memory isolation, keys and live verification |
+| Outreach review and permissions | Yes | UI/API/transactional RPCs | Immutable versions, reapproval, owner isolation, deduplication | No | Full authenticated review journey |
+| Email delivery/webhooks | Disabled adapter | No live provider | Test-only HTTP fixtures + SQL event transitions/signatures | No | Verified sender, webhook, allowlist and authorized test recipient |
+| Intelligence export/delete | Yes | UI/API/RPCs | Complete owner-scoped export/deletion tests | No | Hosted verification; broader account/provider deletion remains |
+| Themes/navigation | Yes | Existing theme provider | Signed-out desktop navigation; no authenticated/mobile audit | No | Full browser/accessibility matrix |
+| Ecommerce order workflow | No | No | No | No | Provider access and implementation remain |
+| Subscription entitlements/payments | Legacy only | Not reverified | No live billing test | No new release | Legal/provider eligibility, entitlements and billing verification remain |
+| Monitoring/backups/recovery | Basic health/logging only | No production services | No operational drill | No | Hosting configuration, backups and restore/rollback drill |
 
-## Validation
+## Validation evidence
 
-Commands:
+`npm run test:intelligence` runs PostgreSQL/RLS tests using PGlite plus explicitly test-only provider transports. `npm run typecheck` and `npm run build` are also required. The current local suite has 12 passing tests. Full command output is in `docs/verification/`. The first GitHub Actions run for the earlier commit reported failure; its step list was empty and its log download returned 404, so remote CI is not asserted to pass. Check the latest commit's run before merging.
 
-```bash
-npm ci --ignore-scripts
-npm run test:intelligence
-npm run typecheck
-npm run build
-```
-
-`test:intelligence` runs Node tests with a real WASM PostgreSQL engine (PGlite), creating Supabase-style `auth.uid()` and roles. This tests actual SQL/RLS rather than matching SQL strings. It does not connect to production Supabase and does not replace a hosted migration rehearsal.
-
-Browser QA used the actual Remix development route, with no mocked production records. Signed-out gate and ME/CHOOSE navigation were observed. Initial UTF-8 and React hydration failures were fixed with explicit document metadata and React deduplication. Signed-in E2E, mobile viewport, dark mode and accessibility audit are not verified.
-
-The original typecheck exposed legacy errors. Fixes include missing optional profile/creator fields, nullable rating defaults, Supabase relation normalization, optimistic-update variable scope, valid CSS values, reader default styles and filtering ebook items out of audio playback. A passing build alone does not establish playback, billing or authorization correctness for the legacy application.
+Observed in the actual browser: signed-out app loads, navigation changes the active view, and WORK remains behind authentication. UTF-8 and hydration issues were corrected. No real account credentials were entered. Authenticated E2E, mobile viewports, live sending, OpenAI calls, Hermes execution and browser-independent worker execution remain unverified.
 
 ## Configure and stage
 
-1. Rehearse the additive migration against a non-production Supabase project with test users. Run multi-account RLS tests there, including direct REST calls.
-2. Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` on the Remix server. These must identify the same project used by the existing browser client. Do not use a service-role key for these routes. The legacy browser currently has a hardcoded public anon configuration; staging must align it before testing.
-3. Use the existing Netlify/Remix deployment pipeline to deploy the branch to an isolated preview. Do not change production DNS or merge to main merely to obtain a preview.
-4. Test signup, existing-account login, signout, resumed sessions, fact corrections, assessment interruption/resume, decision snapshots/outcomes and workspace handoff with two test users.
-5. Check missing config, revoked/expired JWT, migration missing, cross-origin mutation and network failure behavior. Add edge/provider rate limits before public exposure.
-6. Verify HTTPS, persistence after closing/reopening, sensitive-response caching and no service-worker caching of private API records.
+1. Use a non-production Supabase project/branch; rehearse the four new migrations in timestamp order. Existing migration history must match the existing app: do not blindly replay all legacy migrations onto a live project.
+2. Configure `SUPABASE_URL` and `SUPABASE_ANON_KEY` for the Remix host. The root loader distributes only the public configuration to the browser. Keep `SUPABASE_SERVICE_ROLE_KEY` server/worker-only for delivery webhooks and worker operations.
+3. Set `INLITS_PUBLIC_ORIGIN` to the exact HTTPS origin before preparing outreach. The final unsubscribe URL is frozen into the reviewed version. Changing the public origin requires new message preparation/approval.
+4. Deploy the web branch to an isolated Netlify preview. `netlify.toml` uses Node 22. Do not merge or change production DNS solely to obtain a preview.
+5. Deploy the independent worker with `.env.example` as the configuration-name reference. `INLITS_WORKER_ENABLED=true` starts the runner; no browser or web request keeps it alive.
+6. Enable AI only with a configured project key, supported `OPENAI_MODEL` and provider-side spending controls. There are 10 user-created jobs/account/day, 20 paid job attempts/project/day, up to three attempts/job, 3 search calls/research request and 3,500 output tokens/request. These are technical limits, not a guaranteed dollar ceiling. Project billing limits are still required.
+7. Keep Hermes disabled until its pinned deployment has no tools, no shared memory, no app database/mail credentials, restricted egress and resource limits. Configure API key/HTTPS endpoint and verify isolation before setting its enable flags.
+8. Keep delivery disabled until a sender domain and signed webhook at `/api/mail-webhook` are verified. Configure an explicit `INLITS_SEND_ALLOWED_USER_IDS` list. Use only an explicitly authorized test recipient for first delivery verification.
+9. Verify two-account isolation through real REST requests and every signed-in browser journey. Close the browser and independently observe worker execution, then reopen and verify saved provider/artifact evidence.
+10. Reconcile ambiguous sends manually at the provider; never reset their state merely to force a resend.
 
-No paid infrastructure was provisioned. No live API calls, campaigns, billing changes, DNS changes, production deployment or production database writes were performed.
+## Operations / rollback / remaining work
 
-## Remaining access and owner decisions
+`/api/health` reports web availability and whether public DB configuration exists; it does not claim a successful DB connection. Authenticated workflow capabilities use a recent worker heartbeat, which should be monitored independently. No uptime monitor, alert destination or backup service has been provisioned.
 
-- Access to a staging Supabase project and existing hosting deployment configuration, plus a safe test account. Enter secrets only through the host's secret manager or a supported secure credential flow.
-- OpenAI project configuration, model selection and explicit spend allowance.
-- Persistent worker hosting and isolated Hermes runtime boundary; serverless web hosting alone is not evidence of independent background execution.
-- Email/ecommerce provider choice and OAuth permissions. No real campaign sending is authorized by this implementation.
-- Payment-provider eligibility for the business's actual legal entity and geography.
+Before authorized production changes, preserve the previous hosting version and take/verify a database backup. These migrations are additive. Rollback the application first and retain new tables to avoid destroying user data. Destructive schema rollback is not automatic.
 
-These access items do **not** imply the remaining engineering is already complete. The unimplemented rows above need code, integration and tests as well as credentials.
+Still needed: hosted Supabase access through usable project tools, existing web hosting/project access, an independently running worker host, secure OpenAI/Resend/Hermes configuration, explicit spending limits and live provider tests. Supabase installation was confirmed in this session, but its database/project operations were not exposed in the available execution tools, so no hosted project was inspected or migrated.
 
-## Operations and rollback
+Independent engineering still remains: ecommerce integration, comprehensive domain assessments, subscription/entitlement lifecycle, legacy account deletion, updated legal/privacy disclosures, monitoring/backups, wider abuse controls, complete accessibility/mobile QA, and the final production security/release audit. Credentials alone do not finish those items.
 
-Preserve the current production commit and take a database backup before any authorized production migration. Deploy staging first. For this additive slice, rollback the application to the previous hosting version and leave new tables in place to preserve user data. Do not drop tables as an automatic rollback. No automated backup/restore or incident drill has been verified yet.
+No paid infrastructure was provisioned. No real campaign, live payment, production migration, production deployment, DNS change or real provider inference was performed. Recurring costs cannot be represented as verified until the selected hosts, models, provider plans and measured workload are known.
 
-## Cost status
+## Primary references checked
 
-Additional infrastructure provisioned: none. Existing hosting/database plan and capacity were not read. OpenAI, worker, Hermes sandbox, mail and monitoring recurring costs are not established; obtain current provider pricing and calculate against measured workload before authorizing spend. Do not interpret the absence of new spend as a zero-cost production architecture.
-
-## Implementation log
-
-- Audited existing repository and Product Bible; retained Remix/Supabase and audiobook routes.
-- Added connected personal-context, reflection, decision-memory and goal-planning foundation.
-- Added SQL/RLS tests and fail-closed API tests.
-- Fixed observed UTF-8/hydration failures and existing TypeScript errors.
-- Prepared code and handover for review; full launch mandate remains incomplete.
+- https://developers.openai.com/api/docs/guides/structured-outputs
+- https://developers.openai.com/api/docs/guides/tools-web-search
+- https://hermes-agent.nousresearch.com/docs/developer-guide/programmatic-integration
+- https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server
+- https://resend.com/docs/api-reference/emails/send-email
+- https://resend.com/docs/webhooks/verify-webhooks-requests
+- https://resend.com/changelog/idempotency-keys

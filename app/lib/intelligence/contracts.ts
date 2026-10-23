@@ -4,6 +4,13 @@ const id = z.string().uuid();
 export const commandSchema = z.discriminatedUnion("action", [
   z
     .object({
+      action: z.literal("decision.accept"),
+      job_id: id,
+      selected: z.number().int().min(0).max(2),
+    })
+    .strict(),
+  z
+    .object({
       action: z.literal("fact.save"),
       id: id.optional(),
       label: text.max(100),
