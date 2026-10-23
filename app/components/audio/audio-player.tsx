@@ -913,7 +913,7 @@ export function AudioPlayer({
                         onChange={handleVolumeChange}
                         className="h-24 w-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-runnable-track]:rounded-lg"
                         style={{
-                          writingMode: "bt-lr",
+                          writingMode: "vertical-lr",
                           WebkitAppearance: "slider-vertical",
                         }}
                       />

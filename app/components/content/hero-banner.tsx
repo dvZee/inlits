@@ -86,7 +86,7 @@ export function HeroBanner({ items }: HeroBannerProps) {
             alt={currentItem.title}
             className="w-full h-full object-cover object-center"
             loading="eager"
-            style={{ imageRendering: "high-quality" }}
+            style={{ imageRendering: "auto" }}
             onError={(e) => {
               const target = e.currentTarget;
               target.style.display = "none";

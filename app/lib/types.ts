@@ -24,6 +24,7 @@ export interface Profile {
   avatar_url?: string;
   bio?: string;
   role: UserRole;
+  subscription_status?: string | null;
   expertise?: string[];
   reading_preferences?: string[];
   cover_url?: string;
@@ -47,7 +48,7 @@ export interface ContentItem {
   duration: string;
   views: number;
   createdAt: string;
-  creator: {
+  creator?: {
     id: string;
     name: string;
     avatar: string;

@@ -1,0 +1,17 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> inlits@1.0.4 test:intelligence
+> node --import tsx --test tests/intelligence.test.ts
+
+✔ six transparent reflective instruments reject invalid responses and score repeatably (2.23502ms)
+✔ commands enforce explicit consent, input boundaries and reject ownership injection (3.197552ms)
+✔ migration applies; real Postgres RLS separates users; goal handoff is idempotent (2700.369494ms)
+✔ API fails closed for unauthenticated, cross-origin and unsupported requests (105.249814ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3381.602013

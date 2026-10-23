@@ -1,0 +1,202 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> inlits@1.0.4 build
+> remix vite:build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vitejs.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+[warn] Fetcher persistence behavior is changing in React Router v7
+┃ You can use the `v3_fetcherPersist` future flag to opt-in early.
+┃ -> https://remix.run/docs/en/2.13.1/start/future-flags#v3_fetcherPersist
+┗
+[warn] Route discovery/manifest behavior is changing in React Router v7
+┃ You can use the `v3_lazyRouteDiscovery` future flag to opt-in early.
+┃ -> https://remix.run/docs/en/2.13.1/start/future-flags#v3_lazyRouteDiscovery
+┗
+[warn] Relative routing behavior for splat routes is changing in React Router v7
+┃ You can use the `v3_relativeSplatPath` future flag to opt-in early.
+┃ -> https://remix.run/docs/en/2.13.1/start/future-flags#v3_relativeSplatPath
+┗
+[warn] Data fetching is changing to a single fetch in React Router v7
+┃ You can use the `v3_singleFetch` future flag to opt-in early.
+┃ -> https://remix.run/docs/en/2.13.1/start/future-flags#v3_singleFetch
+┗
+[warn] The format of errors thrown on aborted requests is changing in React Router v7
+┃ You can use the `v3_throwAbortReason` future flag to opt-in early.
+┃ -> https://remix.run/docs/en/2.13.1/start/future-flags#v3_throwAbortReason
+┗
+vite v5.4.8 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 13 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 1988 modules transformed.
+Generated an empty chunk: "api.intelligence".
+rendering chunks...
+
+PWA v0.19.8
+WARNING: "theme_color" is missing from the web manifest, your application will not be able to be installed
+computing gzip size...
+build/client/manifest.webmanifest                       0.13 kB
+build/client/registerSW.js                              0.13 kB
+build/client/.vite/manifest.json                       27.50 kB │ gzip:   3.22 kB
+build/client/assets/intelligence-BBJzBmFN.css           4.17 kB │ gzip:   1.36 kB
+build/client/assets/index-TdebrmSL.css                 87.19 kB │ gzip:  14.37 kB
+build/client/assets/api.intelligence-l0sNRNKZ.js        0.00 kB │ gzip:   0.02 kB
+build/client/assets/check-D7T-_Jct.js                   0.29 kB │ gzip:   0.24 kB
+build/client/assets/chevron-up-czZCpm1D.js              0.30 kB │ gzip:   0.25 kB
+build/client/assets/browser-D2gD7eZ5.js                 0.30 kB │ gzip:   0.25 kB
+build/client/assets/message-circle-CZDPp2Ew.js          0.32 kB │ gzip:   0.26 kB
+build/client/assets/zap-Cx_IkbSy.js                     0.32 kB │ gzip:   0.26 kB
+build/client/assets/plus-nFhU399u.js                    0.32 kB │ gzip:   0.25 kB
+build/client/assets/filter-CxK96rA-.js                  0.33 kB │ gzip:   0.26 kB
+build/client/assets/arrow-right-CJ7jDZTL.js             0.33 kB │ gzip:   0.26 kB
+build/client/assets/arrow-left-Br37MHH8.js              0.33 kB │ gzip:   0.27 kB
+build/client/assets/send-CzqKASL_.js                    0.34 kB │ gzip:   0.27 kB
+build/client/assets/clock-Dbd5hSiC.js                   0.35 kB │ gzip:   0.27 kB
+build/client/assets/reply-BN6T5PYC.js                   0.35 kB │ gzip:   0.29 kB
+build/client/assets/check-circle-BvqsTnV6.js            0.36 kB │ gzip:   0.28 kB
+build/client/assets/eye-BQqIaOLD.js                     0.36 kB │ gzip:   0.28 kB
+build/client/assets/pause-4XsaCMUE.js                   0.37 kB │ gzip:   0.26 kB
+build/client/assets/dollar-sign-CKCyqcsG.js             0.39 kB │ gzip:   0.30 kB
+build/client/assets/categories-4byS42TM.js              0.39 kB │ gzip:   0.30 kB
+build/client/assets/copy-kT_f6wVy.js                    0.40 kB │ gzip:   0.31 kB
+build/client/assets/bar-chart-3-TEH3B113.js             0.40 kB │ gzip:   0.29 kB
+build/client/assets/heart-D9eM-0SA.js                   0.41 kB │ gzip:   0.31 kB
+build/client/assets/external-link-C-g_pmAe.js           0.42 kB │ gzip:   0.30 kB
+build/client/assets/square-pen-DuucmZ7K.js              0.42 kB │ gzip:   0.31 kB
+build/client/assets/calendar-8ngIwhpJ.js                0.43 kB │ gzip:   0.30 kB
+build/client/assets/upload-XScwGd2R.js                  0.43 kB │ gzip:   0.32 kB
+build/client/assets/download-D6Mo5bNv.js                0.43 kB │ gzip:   0.32 kB
+build/client/assets/image-D2eA5oIb.js                   0.44 kB │ gzip:   0.33 kB
+build/client/assets/shield-DlElKMTB.js                  0.44 kB │ gzip:   0.33 kB
+build/client/assets/thumbs-up-C8oFBtl3.js               0.47 kB │ gzip:   0.34 kB
+build/client/assets/users-CNFP-an4.js                   0.47 kB │ gzip:   0.33 kB
+build/client/assets/share-2-BeoWjTqP.js                 0.52 kB │ gzip:   0.34 kB
+build/client/assets/trash-2-B4l2R5KJ.js                 0.53 kB │ gzip:   0.35 kB
+build/client/assets/eye-off-CDLy-cZm.js                 0.57 kB │ gzip:   0.38 kB
+build/client/assets/list-nGzvlBwD.js                    0.58 kB │ gzip:   0.31 kB
+build/client/assets/input-CCOj5sYL.js                   0.58 kB │ gzip:   0.37 kB
+build/client/assets/rotate-cw-DxGAGlmR.js               0.81 kB │ gzip:   0.38 kB
+build/client/assets/query-cache-C18JZZse.js             1.29 kB │ gzip:   0.59 kB
+build/client/assets/_index-DRQyYOun.js                  1.60 kB │ gzip:   0.75 kB
+build/client/assets/verify-email-BqF7AJAC.js            2.38 kB │ gzip:   1.13 kB
+build/client/assets/label-YWl5a_EJ.js                   2.43 kB │ gzip:   1.18 kB
+build/client/assets/forgot-password-Ccf_luUJ.js         2.51 kB │ gzip:   1.12 kB
+build/client/assets/reset-password-CiVuJfyf.js          3.31 kB │ gzip:   1.34 kB
+build/client/assets/sign-in-DHhRlTne.js                 3.34 kB │ gzip:   1.40 kB
+build/client/assets/sign-up-C0LRUUYb.js                 3.54 kB │ gzip:   1.50 kB
+build/client/assets/callback-DMOdAboI.js                3.60 kB │ gzip:   1.50 kB
+build/client/assets/verify-sd60h_NG.js                  4.40 kB │ gzip:   1.54 kB
+build/client/assets/index-D-_cGFMl.js                   4.87 kB │ gzip:   1.22 kB
+build/client/assets/refund-policy-BaPSeFER.js           5.20 kB │ gzip:   1.82 kB
+build/client/assets/quick-bites-CZYjzYNq.js             5.47 kB │ gzip:   2.25 kB
+build/client/assets/index-ChdcpWvW.js                   5.65 kB │ gzip:   1.53 kB
+build/client/assets/followed-BXnrfJLP.js                5.80 kB │ gzip:   1.91 kB
+build/client/assets/terms-wJHFoE_q.js                   5.85 kB │ gzip:   2.25 kB
+build/client/assets/index-kDQ1V_Y4.js                   5.90 kB │ gzip:   1.79 kB
+build/client/assets/entry.client-B8SUb2PJ.js            6.24 kB │ gzip:   2.42 kB
+build/client/assets/confirm-CXELL8dx.js                 6.95 kB │ gzip:   2.04 kB
+build/client/assets/index-B7Kvkt0c.js                   7.53 kB │ gzip:   1.91 kB
+build/client/assets/podcast-nKhMe8fp.js                 7.66 kB │ gzip:   2.79 kB
+build/client/assets/CollectionPlayerPage-DUWZrSVd.js    8.11 kB │ gzip:   2.51 kB
+build/client/assets/copyright-BWLSCoiS.js               8.72 kB │ gzip:   2.68 kB
+build/client/assets/privacy-qOzy-7fQ.js                 8.76 kB │ gzip:   2.95 kB
+build/client/assets/contact-B7nCIGdq.js                 9.41 kB │ gzip:   2.72 kB
+build/client/assets/search-DhHC1h5Y.js                  9.84 kB │ gzip:   3.01 kB
+build/client/assets/index-9aVTuFcB.js                   9.85 kB │ gzip:   2.76 kB
+build/client/assets/index-D_AxGh4W.js                  10.00 kB │ gzip:   2.45 kB
+build/client/assets/history-D-Ho4WyV.js                11.07 kB │ gzip:   3.48 kB
+build/client/assets/become-creator-tW_Pg9-V.js         11.10 kB │ gzip:   3.26 kB
+build/client/assets/overview-CBd0IU5G.js               11.46 kB │ gzip:   3.06 kB
+build/client/assets/index-DfkXykvc.js                  12.40 kB │ gzip:   3.70 kB
+build/client/assets/onboarding-quiz-BeX-vs9P.js        12.71 kB │ gzip:   3.65 kB
+build/client/assets/payment-BmfE8_3T.js                13.09 kB │ gzip:   3.97 kB
+build/client/assets/request-book-B2hdKDG6.js           13.09 kB │ gzip:   3.72 kB
+build/client/assets/book-CNeonXtU.js                   15.64 kB │ gzip:   4.46 kB
+build/client/assets/intelligence-C0HQzA7Y.js           18.07 kB │ gzip:   5.84 kB
+build/client/assets/audiobook-BdG4X3oH.js              18.64 kB │ gzip:   5.17 kB
+build/client/assets/auth-DwV_Zn_f.js                   19.39 kB │ gzip:   6.15 kB
+build/client/assets/about-BjstZpPd.js                  21.10 kB │ gzip:   5.76 kB
+build/client/assets/_-YSjJBN61.js                      22.55 kB │ gzip:   6.51 kB
+build/client/assets/community-CsWJLD5l.js              25.64 kB │ gzip:   4.47 kB
+build/client/assets/PlayerPage-_DMsJIEN.js             26.41 kB │ gzip:   6.70 kB
+build/client/assets/library-Cx_W8jDT.js                27.16 kB │ gzip:   6.33 kB
+build/client/assets/components-BKwzfc6O.js             40.16 kB │ gzip:  13.31 kB
+build/client/assets/root-Bi7kpMR6.js                   51.25 kB │ gzip:  12.87 kB
+build/client/assets/CreatorProfilePage-B11Mdik7.js     83.80 kB │ gzip:  16.54 kB
+build/client/assets/home-7wbmHaCK.js                   94.25 kB │ gzip:  25.82 kB
+build/client/assets/supabase-ZS3KJFlj.js              326.32 kB │ gzip:  99.86 kB
+build/client/assets/article-DgxRTmKd.js               343.99 kB │ gzip: 108.45 kB
+build/client/assets/ReaderPage-W1KQ_dmW.js            795.03 kB │ gzip: 234.38 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 8.68s
+
+PWA v0.19.8
+mode      generateSW
+precache  95 entries (2237.53 KiB)
+files generated
+  build/client/sw.js
+  build/client/workbox-7075b8c2.js
+vite v5.4.8 building SSR bundle for production...
+transforming...
+✓ 129 modules transformed.
+rendering chunks...
+
+PWA v0.19.8
+WARNING: "theme_color" is missing from the web manifest, your application will not be able to be installed
+build/server/manifest.webmanifest                       0.13 kB
+build/server/registerSW.js                              0.13 kB
+build/server/.vite/manifest.json                       13.18 kB
+build/server/assets/intelligence-BBJzBmFN.css           4.17 kB
+build/server/assets/index-TdebrmSL.css                 87.19 kB
+build/server/assets/label-Dyf8A47h.js                   0.55 kB
+build/server/index.js                                   0.56 kB
+build/server/assets/categories-Cr-YSiwM.js              0.59 kB
+build/server/server.js                                  0.60 kB
+build/server/assets/input-Ck01Hmyv.js                   0.79 kB
+build/server/assets/verify-email-WHSVTw8_.js            3.45 kB
+build/server/assets/forgot-password-fqykDbpv.js         4.09 kB
+build/server/assets/sign-in-Cw4NlcA0.js                 5.79 kB
+build/server/assets/reset-password-DPNIjhGv.js          5.83 kB
+build/server/assets/sign-up-0bPPgR-e.js                 6.42 kB
+build/server/assets/callback-Cn_qwcfh.js                6.68 kB
+build/server/assets/refund-policy-BquxwcYo.js           6.84 kB
+build/server/assets/terms-DtEPoQZF.js                   6.99 kB
+build/server/assets/verify-D9VvSVmc.js                  7.18 kB
+build/server/assets/index-B2uK0tSv.js                   7.37 kB
+build/server/assets/quick-bites-C4fHCVBz.js             8.64 kB
+build/server/assets/index-upq1jXxW.js                   8.69 kB
+build/server/assets/followed-BZXPgtVH.js                9.09 kB
+build/server/assets/index-BRxTW8CU.js                   9.53 kB
+build/server/assets/confirm-9v7FE3Z6.js                11.05 kB
+build/server/assets/privacy-C0qK7-f2.js                11.21 kB
+build/server/assets/CollectionPlayerPage-DhohCXyf.js   12.43 kB
+build/server/assets/copyright-CHwWfBvt.js              12.78 kB
+build/server/assets/index-DgZtNNTf.js                  13.15 kB
+build/server/assets/contact-D_EcOkD7.js                13.75 kB
+build/server/assets/podcast-Dlrgv51q.js                14.49 kB
+build/server/assets/index-CTyHfM6W.js                  15.44 kB
+build/server/assets/index-DEYHCZBv.js                  15.50 kB
+build/server/assets/onboarding-quiz-CYdnPZpL.js        17.31 kB
+build/server/assets/search-xnN51Gsi.js                 17.75 kB
+build/server/assets/overview-C09XN8Sx.js               18.71 kB
+build/server/assets/request-book-Co32LMTI.js           18.80 kB
+build/server/assets/become-creator-DRGmmOP6.js         19.35 kB
+build/server/assets/payment-ByBcAGwB.js                20.60 kB
+build/server/assets/history-BXI1kx5k.js                20.76 kB
+build/server/assets/index-8KQABOVm.js                  21.46 kB
+build/server/assets/about-I3zznZ8g.js                  29.68 kB
+build/server/assets/article-BWpfdVjm.js                30.79 kB
+build/server/assets/book-BcOwKhua.js                   31.03 kB
+build/server/assets/audiobook-BQ8qedk4.js              37.26 kB
+build/server/assets/community-CRz8tlkA.js              42.20 kB
+build/server/assets/library-B9QbC7BH.js                48.86 kB
+build/server/assets/PlayerPage-_YJfymzm.js             53.06 kB
+build/server/assets/ReaderPage-DEGLrUgx.js            126.68 kB
+build/server/assets/CreatorProfilePage-0bCASnx0.js    148.93 kB
+build/server/assets/server-build-BP0AGjKF.js          324.18 kB
+✓ built in 1.17s

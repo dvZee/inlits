@@ -66,6 +66,8 @@ function Document({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         {title ? <title>{title}</title> : null}
         <Meta />
         <Links />
@@ -126,7 +128,10 @@ function useClientSEO() {
     let title = "Inlits: Urdu Audiobooks, Book Summaries & Self Growth";
     let description = "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
 
-    if (pathname === "/") {
+    if (pathname === "/intelligence") {
+      title = "Inlits — Understand. Choose. Move forward.";
+      description = "A calm space for your personal context, decisions and next steps.";
+    } else if (pathname === "/") {
       title = "Inlits: Urdu Audiobooks, Book Summaries & Self Growth";
       description = "Read and listen to thousands of premium book summaries, audiobooks, and e-books in Urdu. Expand your mind and invest in your personal growth with Inlits.";
     } else if (pathname === "/search") {

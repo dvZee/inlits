@@ -51,6 +51,7 @@ export default defineConfig({
     exclude: ['lucide-react']
   },
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': path.resolve(__dirname, './app')
     }

@@ -117,8 +117,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
       books: booksResult.data || [],
       podcasts: podcastsResult.data || [],
       articles: [],
-      views: viewsData.data || [],
-      likes: likesData.data || [],
+      views: (viewsData.data || []).map(row => ({content_id: String(row.content_id), content_type: String(row.content_type)})),
+      likes: (likesData.data || []).map(row => ({content_id: String(row.content_id), content_type: String(row.content_type), rating: Number(row.rating)})),
     });
   } catch (error) {
     return json({
